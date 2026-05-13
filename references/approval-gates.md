@@ -29,7 +29,30 @@ O KSDD é construído sobre **checkpoints obrigatórios**. Não há atalho. Cada
 **Pré-condição pra `/ksdd:design`:** Se `architecture.md` existe, deve estar aprovado também. Senão, ignora.
 
 ### Gate 4 — Após `/ksdd:design`
-**Fim do fluxo padrão.** Não há próximo comando KSDD. O usuário leva os 4 arquivos pra implementação.
+**Fim do fluxo padrão de projeto.** O usuário leva os 4 arquivos pra implementação. A partir daqui, pode usar `/ksdd:new:feature` pra especificar features individuais.
+
+### Gate 5 — Após `/ksdd:new:feature`
+
+O `/ksdd:new:feature` tem **dois checkpoints internos**:
+
+1. **Checkpoint do FEATURE spec:** Após gerar `FEATURE-[slug].md`, antes de quebrar em tasks. O usuário aprova escopo, impacto e critérios de aceite.
+2. **Checkpoint das tasks:** Após gerar `docs/tasks/feature-[slug]/`, com resumo de tasks por prioridade e estimativa total.
+
+**Pré-condição:** `SPEC.md` deve existir (obrigatório). `architecture.md` e `DESIGN.md` são opcionais mas enriquecem a análise de impacto e a granularidade das tasks.
+
+### Gate 6 — Durante `/ksdd:build:feature`
+
+O build tem **checkpoints por task**:
+
+1. **Pre-flight:** Git limpo, dependências disponíveis. Falhou? STOP imediato.
+2. **Antes de cada task:** Mostra qual task será implementada, confirma com o usuário.
+3. **Quality gates por task:** Build, testes, lint, type-check, E2E (se UI), code review, security audit (se auth/PII). Tudo verde antes do PR.
+4. **Validação de critérios:** Cada critério de aceitação da task demonstrado com evidência.
+5. **PR aberto:** Não faz merge — aguarda review humano.
+
+**Pré-condição:** `FEATURE-[slug].md` deve existir e estar aprovado. Tasks em `docs/tasks/feature-[slug]/` devem existir. `SPEC.md` obrigatório. Dependencies (`depends_on`) da task devem ter `status: concluída`.
+
+**O build NUNCA modifica artefatos KSDD** (SPEC.md, architecture.md, DESIGN.md, FEATURE-[slug].md). Se durante a implementação ficar claro que algo está errado ou incompleto, sinalize ao usuário — não corrija automaticamente. A única exceção: status das tasks e o README de tasks podem ser atualizados.
 
 ## Como fazer o checkpoint
 

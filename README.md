@@ -3,10 +3,12 @@
 Um sistema de slash commands para o Claude Code que guia produtos do **brainstorm bruto até um design system implementável**, em quatro etapas com aprovação humana entre cada uma.
 
 ```
-/ksdd:start    →  brainstorm.md     (ideia → conceito refinado)
-/ksdd:spec     →  SPEC.md           (conceito → especificação produto+design)
-/ksdd:tech     →  architecture.md   (especificação → arquitetura técnica)
-/ksdd:design   →  DESIGN.md         (especificação → design system Stitch-compatible)
+/ksdd:start        →  brainstorm.md         (ideia → conceito refinado)
+/ksdd:spec         →  SPEC.md               (conceito → especificação produto+design)
+/ksdd:tech         →  architecture.md       (especificação → arquitetura técnica)
+/ksdd:design       →  DESIGN.md             (especificação → design system Stitch-compatible)
+/ksdd:new:feature    →  FEATURE-[slug].md     (nova feature → spec com impacto nos artefatos existentes)
+/ksdd:build:feature  →  BUILD-[slug].md       (feature spec → implementação fase a fase com checkpoints)
 ```
 
 ## Filosofia
@@ -49,6 +51,28 @@ Você   : /ksdd:design
 Claude : [lê SPEC.md (+ architecture.md se existir)]
          [gera DESIGN.md no formato Google Stitch — YAML tokens + 8 seções]
          [PARA]
+
+Você   : /ksdd:new:feature notificações push
+Claude : [lê SPEC.md, architecture.md, DESIGN.md]
+         [faz perguntas sobre escopo, personas impactadas, prioridade]
+         [gera FEATURE-push-notifications.md com impacto em telas, dados, API e design]
+         [PARA]
+
+Você   : /ksdd:build:feature push-notifications
+Claude : [lê FEATURE-push-notifications.md + todos os artefatos]
+         [analisa codebase existente]
+         [gera BUILD-push-notifications.md com plano de implementação]
+         [PARA — pede aprovação do plano]
+
+Você   : "aprovado, pode começar"
+Claude : [implementa Fase 1 — modelo de dados + API]
+         [PARA — checkpoint da fase]
+
+Você   : "ok, próxima fase"
+Claude : [implementa Fase 2 — componentes + UI]
+         [PARA — checkpoint da fase]
+         [valida critérios de aceite]
+         [PARA — build completo]
 ```
 
 ## Estrutura do sistema
@@ -60,12 +84,16 @@ ksdd/
 │   ├── start.md                       ← /ksdd:start
 │   ├── spec.md                        ← /ksdd:spec
 │   ├── tech.md                        ← /ksdd:tech
-│   └── design.md                      ← /ksdd:design
+│   ├── design.md                      ← /ksdd:design
+│   ├── new:feature.md                 ← /ksdd:new:feature
+│   └── build:feature.md               ← /ksdd:build:feature
 ├── references/
 │   ├── brainstorm-template.md         ← template do brainstorm.md
 │   ├── spec-template.md               ← template do SPEC.md
 │   ├── architecture-template.md       ← template do architecture.md
-│   ├── design-md-spec.md              ← especificação Google Stitch DESIGN.md
+│   ├── feature-template.md            ← template do FEATURE-[slug].md
+│   ├── build-plan-template.md         ← template do BUILD-[slug].md
+│   ├── design-md-spec.md             ← especificação Google Stitch DESIGN.md
 │   ├── personas-guide.md              ← como construir personas úteis
 │   └── approval-gates.md              ← regras dos checkpoints
 └── agents/
@@ -98,14 +126,22 @@ Os commands aproveitam tools nativos do Claude Code e podem invocar skills auxil
 
 ## Output esperado
 
-Após o fluxo completo, o usuário tem 4 arquivos no diretório do projeto:
+Após o fluxo completo, o usuário tem 4+ arquivos no diretório do projeto:
 
 ```
 projeto/
-├── brainstorm.md         (~500-1500 palavras)
-├── SPEC.md               (~3000-8000 palavras)
-├── architecture.md       (~2000-5000 palavras, opcional)
-└── DESIGN.md             (YAML frontmatter + ~1500-3500 palavras)
+├── brainstorm.md              (~500-1500 palavras)
+├── SPEC.md                    (~3000-8000 palavras)
+├── architecture.md            (~2000-5000 palavras, opcional)
+├── DESIGN.md                  (YAML frontmatter + ~1500-3500 palavras)
+├── FEATURE-[slug].md          (~1500-4000 palavras, uma por feature)
+└── BUILD-[slug].md            (plano de build + tracking, um por feature)
 ```
 
 Pronto pra ser consumido por ferramentas de design (Stitch, v0, Lovable, Pencil) e agentes de código (Claude Code, Cursor) com contexto persistente.
+
+As feature specs (`FEATURE-*.md`) podem ser criadas a qualquer momento após o SPEC.md, e os builds (`BUILD-*.md`) executam a implementação fase a fase com checkpoints de aprovação.
+
+## Licença e contribuição
+
+Este projeto está sob [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). Para contribuir, veja [CONTRIBUTING.md](CONTRIBUTING.md).
