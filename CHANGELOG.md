@@ -21,6 +21,8 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 - **Checklist do critic para BUILD/tasks** — validação de tasks contra feature spec e padrões do codebase.
 - **Gate 5 no approval-gates** — checkpoint para `/ksdd:new:feature` (spec + tasks).
 - **Gate 6 no approval-gates** — checkpoints múltiplos para `/ksdd:build:feature` (pre-flight, por task, quality gates, PR).
+- **Comando `/ksdd:build:all`** — orquestra o build completo de um projeto KSDD a partir do SPEC.md. Decompõe as fases de entrega em features, quebra em tasks, gera `BUILD-PLAN.md` como mapa de execução, e implementa tudo task por task com checkpoints por feature e por fase. Suporta `--phase N` (build parcial), `--plan-only` (só planejamento) e `--resume` (retomada de build interrompido).
+- **Gate 7 no approval-gates** — checkpoints em cascata para `/ksdd:build:all` (plano mestre, por feature, por fase, validação final contra SPEC).
 
 ---
 

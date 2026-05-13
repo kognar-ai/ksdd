@@ -54,6 +54,20 @@ O build tem **checkpoints por task**:
 
 **O build NUNCA modifica artefatos KSDD** (SPEC.md, architecture.md, DESIGN.md, FEATURE-[slug].md). Se durante a implementação ficar claro que algo está errado ou incompleto, sinalize ao usuário — não corrija automaticamente. A única exceção: status das tasks e o README de tasks podem ser atualizados.
 
+### Gate 7 — Durante `/ksdd:build:all`
+
+O build completo tem **checkpoints em cascata**:
+
+1. **Checkpoint do plano mestre:** Após gerar `BUILD-PLAN.md` + todas as FEATURE specs + todas as tasks. O usuário aprova a decomposição, ordem de execução e estimativas. Se `--plan-only`, para aqui.
+2. **Checkpoint por feature:** Antes de iniciar cada feature, mostra tasks na fila e pede confirmação.
+3. **Checkpoints do `/ksdd:build:feature`:** Cada task segue o fluxo completo (pre-flight, issue, branch, context.md, quality gates, PR).
+4. **Checkpoint pós-fase:** Após todas as features de uma fase, resumo consolidado. Recomenda testar antes de avançar pra próxima fase.
+5. **Checkpoint final:** Validação contra critérios do SPEC, cobertura agregada, pendências.
+
+**Pré-condição:** `SPEC.md` deve existir e estar aprovado. `architecture.md` e `DESIGN.md` são recomendados. Se não existem, o build faz uma rodada de perguntas de stack antes de prosseguir.
+
+**`--resume`:** Detecta estado existente (features/tasks com status misto) e retoma da próxima task incompleta.
+
 ## Como fazer o checkpoint
 
 Após gerar o arquivo, **sempre** termine com uma versão deste prompt:
