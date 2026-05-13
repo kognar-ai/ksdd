@@ -41,6 +41,33 @@ Exceção: se houver issues estruturais que exigem decisão humana (ex: spec do 
 - [ ] Roadmap alinha com fases do SPEC?
 - [ ] Não over-engineering pra MVP?
 
+#### FEATURE-[slug].md
+- [ ] Motivação conecta com problema/personas do SPEC?
+- [ ] Escopo corta explicitamente v1 do "depois"?
+- [ ] User stories referenciam personas do SPEC?
+- [ ] Fluxos têm pré-condição, passos e estado final?
+- [ ] Impacto em telas cita seções do SPEC seção 7?
+- [ ] Impacto em dados referencia SPEC seção 4 (ou architecture seção 3)?
+- [ ] Impacto em API referencia architecture seção 4 (se existir)?
+- [ ] Impacto em design referencia DESIGN.md (se existir)?
+- [ ] Critérios de aceite são binários e verificáveis?
+- [ ] Fases de implementação são blocos coerentes?
+- [ ] Não inventa personas ou telas sem confirmar com o usuário?
+
+#### Tasks (docs/tasks/feature-[slug]/NNN-*.md)
+- [ ] Frontmatter completo (id, title, status, feature, area, priority, estimate, depends_on, refs)?
+- [ ] Status inicial é `para implementar`?
+- [ ] Granularidade 1-3 dias (S/M/L)?
+- [ ] Objetivo conecta com o FEATURE spec?
+- [ ] Escopo concreto e verificável?
+- [ ] "Fora de escopo" delimita scope creep?
+- [ ] Critérios de aceitação são binários e testáveis?
+- [ ] `depends_on` aponta só para IDs menores?
+- [ ] `feature_refs`/`spec_refs`/`arch_refs` apontam para seções reais?
+- [ ] Não inventa tecnologia fora do architecture.md?
+- [ ] Não duplica conteúdo dos artefatos (referencia em vez de copiar)?
+- [ ] README.md índice está completo e com contagens corretas?
+
 #### DESIGN.md (formato Google Stitch)
 - [ ] YAML frontmatter delimitado por `---`?
 - [ ] 8 seções na ordem canônica?

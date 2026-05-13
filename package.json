@@ -1,6 +1,6 @@
 {
   "name": "@kognar/ksdd",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "KSDD — Kognar Spec-Driven Design & Development. Slash commands para Claude Code que guiam do brainstorm bruto até design system implementável.",
   "keywords": [
     "claude-code",
@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/kognar-tools/ksdd.git"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "author": "Kognar LLC",
   "type": "commonjs",
   "bin": {
@@ -31,7 +31,9 @@
     "agents/",
     "references/",
     "README.md",
-    "INSTALL.md"
+    "INSTALL.md",
+    "LICENSE",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "postinstall": "node bin/ksdd.js install --postinstall",
@@ -39,5 +41,8 @@
   },
   "engines": {
     "node": ">=16"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

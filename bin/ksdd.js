@@ -11,7 +11,7 @@ const COMMANDS_DIR = path.join(CLAUDE_HOME, 'commands');
 const SKILLS_DIR = path.join(CLAUDE_HOME, 'skills', 'ksdd');
 const MANIFEST = path.join(SKILLS_DIR, '.ksdd-manifest.json');
 
-const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md'];
+const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md'];
 
 const COLORS = process.stdout.isTTY && !process.env.NO_COLOR;
 const c = (code, s) => (COLORS ? `\x1b[${code}m${s}\x1b[0m` : s);
