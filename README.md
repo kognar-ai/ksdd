@@ -7,8 +7,9 @@ Um sistema de slash commands para o Claude Code que guia produtos do **brainstor
 /ksdd:spec         →  SPEC.md               (conceito → especificação produto+design)
 /ksdd:tech         →  architecture.md       (especificação → arquitetura técnica)
 /ksdd:design       →  DESIGN.md             (especificação → design system Stitch-compatible)
-/ksdd:new:feature    →  FEATURE-[slug].md     (nova feature → spec com impacto nos artefatos existentes)
-/ksdd:build:feature  →  BUILD-[slug].md       (feature spec → implementação fase a fase com checkpoints)
+/ksdd:new:feature    →  FEATURE-[slug].md     (nova feature → spec + tasks implementáveis)
+/ksdd:build:feature  →  task por task          (feature → implementação com issue, branch, PR)
+/ksdd:build:all      →  BUILD-PLAN.md         (SPEC inteiro → features + tasks + implementação completa)
 ```
 
 ## Filosofia
@@ -59,20 +60,24 @@ Claude : [lê SPEC.md, architecture.md, DESIGN.md]
          [PARA]
 
 Você   : /ksdd:build:feature push-notifications
-Claude : [lê FEATURE-push-notifications.md + todos os artefatos]
-         [analisa codebase existente]
-         [gera BUILD-push-notifications.md com plano de implementação]
+Claude : [lê FEATURE + tasks + todos os artefatos]
+         [para cada task: issue → branch → context.md → implementa → quality gates → PR]
+         [PARA — checkpoint por feature]
+
+--- OU, para buildar o projeto inteiro: ---
+
+Você   : /ksdd:build:all
+Claude : [lê SPEC.md, architecture.md, DESIGN.md]
+         [decompõe fases de entrega em features]
+         [quebra cada feature em tasks implementáveis]
+         [gera BUILD-PLAN.md com plano completo]
          [PARA — pede aprovação do plano]
 
-Você   : "aprovado, pode começar"
-Claude : [implementa Fase 1 — modelo de dados + API]
-         [PARA — checkpoint da fase]
-
-Você   : "ok, próxima fase"
-Claude : [implementa Fase 2 — componentes + UI]
-         [PARA — checkpoint da fase]
-         [valida critérios de aceite]
-         [PARA — build completo]
+Você   : "aprovado"
+Claude : [implementa feature por feature, task por task]
+         [issue → branch → context.md → code → quality gates → PR]
+         [PARA — checkpoint por feature e por fase]
+         [valida critérios do SPEC ao final]
 ```
 
 ## Estrutura do sistema
@@ -86,7 +91,8 @@ ksdd/
 │   ├── tech.md                        ← /ksdd:tech
 │   ├── design.md                      ← /ksdd:design
 │   ├── new:feature.md                 ← /ksdd:new:feature
-│   └── build:feature.md               ← /ksdd:build:feature
+│   ├── build:feature.md               ← /ksdd:build:feature
+│   └── build:all.md                   ← /ksdd:build:all
 ├── references/
 │   ├── brainstorm-template.md         ← template do brainstorm.md
 │   ├── spec-template.md               ← template do SPEC.md
@@ -135,12 +141,18 @@ projeto/
 ├── architecture.md            (~2000-5000 palavras, opcional)
 ├── DESIGN.md                  (YAML frontmatter + ~1500-3500 palavras)
 ├── FEATURE-[slug].md          (~1500-4000 palavras, uma por feature)
-└── BUILD-[slug].md            (plano de build + tracking, um por feature)
+├── BUILD-PLAN.md              (plano mestre do build completo)
+└── docs/tasks/
+    └── feature-[slug]/
+        ├── README.md          (índice de tasks da feature)
+        ├── NNN-slug.md        (task individual com frontmatter)
+        └── .context/
+            └── NNN-context.md (contexto compilado para implementação)
 ```
 
 Pronto pra ser consumido por ferramentas de design (Stitch, v0, Lovable, Pencil) e agentes de código (Claude Code, Cursor) com contexto persistente.
 
-As feature specs (`FEATURE-*.md`) podem ser criadas a qualquer momento após o SPEC.md, e os builds (`BUILD-*.md`) executam a implementação fase a fase com checkpoints de aprovação.
+O fluxo completo: `/ksdd:build:all` decompõe o SPEC em features e tasks, gera o `BUILD-PLAN.md` como mapa de execução, e implementa task por task com issues, branches, quality gates e PRs. Para features individuais fora do fluxo completo, use `/ksdd:new:feature` + `/ksdd:build:feature`.
 
 ## Licença e contribuição
 
