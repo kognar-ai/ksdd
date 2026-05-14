@@ -6,6 +6,31 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ---
 
+## [0.5.0] - 2026-05-14
+
+### Adicionado
+
+- **Comando `/ksdd:setup`** — onboarding de projetos existentes para o fluxo KSDD por reverse-engineering. Analisa codebase, git history, manifests e estrutura para gerar automaticamente `brainstorm.md`, `SPEC.md`, `architecture.md` e `DESIGN.md` (se frontend detectado). Suporta `--artifacts [brainstorm,spec,arch,design]` para geração seletiva, `--depth shallow|deep` para controlar profundidade da análise, e `--skip-questions` para modo não-interativo.
+- **Agent `setup-analyst`** — agente especializado em análise de codebases, invocado em 4 variantes paralelas pelo `/ksdd:setup`: Analista de Produto (extrai propósito, problema, usuários), Analista de Stack (mapeia tecnologias a partir de manifests e configs), Analista de Código (extrai modelos de dados, endpoints, padrões de convenção) e Analista de Git (reconstrói história, fases e estado atual do projeto a partir do git history).
+
+---
+
+## [0.4.0] - 2026-05-13
+
+### Adicionado
+
+- **Integração OpenAI Codex** — `ksdd install --codex` copia os mesmos prompts de `commands/` para `~/.codex/prompts/` como `ksdd-start.md`, `ksdd-spec.md`, … (invocação `/prompts:ksdd-start`, etc., conforme [Custom Prompts](https://developers.openai.com/codex/custom-prompts)).
+- **Skill Codex** — `references/codex-SKILL.md` é instalado como `~/.agents/skills/ksdd/SKILL.md` com `references/` e `agents/` (escopo [USER skills](https://developers.openai.com/codex/skills)).
+- **Manifesto com alvos** — `.ksdd-manifest.json` passa a usar `targets.claude` e `targets.codex`; `ksdd install` sem `--codex` atualiza só Claude e preserva ficheiros Codex já instalados.
+- **Variável `KSDD_WITH_CODEX=1`** — no `npm install`, equivale a `install --codex` para quem quer Codex no postinstall.
+- **`CODEX_HOME`** — respeitado para localizar `prompts/` (default `~/.codex`).
+
+### Alterado
+
+- **CLI** — `ksdd help`, `ksdd status` e mensagens de `install` documentam Codex.
+
+---
+
 ## [0.2.0] - 2026-05-13
 
 ### Adicionado

@@ -10,12 +10,21 @@ npm install -g @kognar/ksdd
 
 O `postinstall` copia automaticamente os commands pra `~/.claude/commands/` (renomeados como `ksdd:start.md`, `ksdd:spec.md`, etc.) e os assets de skill pra `~/.claude/skills/ksdd/`.
 
+**Codex (OpenAI):** para instalar também [custom prompts](https://developers.openai.com/codex/custom-prompts) em `~/.codex/prompts/` (`/prompts:ksdd-start`, …) e a skill em `~/.agents/skills/ksdd/`:
+
+```bash
+ksdd install --codex
+```
+
+Ou numa instalação npm: `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd`
+
 Comandos do CLI:
 
 ```bash
-ksdd install     # reinstala / atualiza
-ksdd status      # mostra estado da instalação
-ksdd uninstall   # remove arquivos copiados
+ksdd install          # reinstala / atualiza (só Claude Code)
+ksdd install --codex  # Claude + Codex (prompts + skill)
+ksdd status           # mostra estado da instalação
+ksdd uninstall        # remove arquivos copiados
 ```
 
 Para desinstalar tudo:
