@@ -1,6 +1,6 @@
 {
   "name": "@kognar/ksdd",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "KSDD — Kognar Spec-Driven Design & Development. Slash commands para Claude Code e integração com OpenAI Codex (prompts + skill) que guiam do brainstorm bruto até design system implementável.",
   "keywords": [
     "claude-code",

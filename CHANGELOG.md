@@ -6,6 +6,18 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ---
 
+## [0.5.1] - 2026-05-14
+
+### Adicionado
+
+- **Documentação de arquitetura, brainstorm e SPEC do KSDD** — artefatos no repositório do próprio fluxo KSDD.
+- **`architecture.md`** — arquitetura do sistema e stack tecnológica do KSDD.
+- **`brainstorm.md`** — conceito, problemas, soluções propostas e público-alvo do projeto KSDD.
+- **`SPEC.md`** — visão de produto, personas e modelo de dados, com fluxo estruturado do brainstorm ao design system.
+- Rascunhos gerados por reverse-engineering, para revisão antes de uso como contratos.
+
+---
+
 ## [0.5.0] - 2026-05-14
 
 ### Adicionado
