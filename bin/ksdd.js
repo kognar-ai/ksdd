@@ -11,7 +11,11 @@ const COMMANDS_DIR = path.join(CLAUDE_HOME, 'commands');
 const SKILLS_DIR = path.join(CLAUDE_HOME, 'skills', 'ksdd');
 const MANIFEST = path.join(SKILLS_DIR, '.ksdd-manifest.json');
 
-const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md'];
+const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
+const CODEX_PROMPTS_DIR = path.join(CODEX_HOME, 'prompts');
+const AGENTS_SKILLS_KSDD = path.join(os.homedir(), '.agents', 'skills', 'ksdd');
+
+const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md'];
 
 const COLORS = process.stdout.isTTY && !process.env.NO_COLOR;
 const c = (code, s) => (COLORS ? `\x1b[${code}m${s}\x1b[0m` : s);
@@ -65,6 +69,27 @@ function loadManifest() {
   }
 }
 
+/** Normaliza manifest legado (array `files`) para `{ targets: { claude, codex } }`. */
+function normalizeManifest(manifest) {
+  if (!manifest) return null;
+  if (manifest.targets && Array.isArray(manifest.targets.claude)) {
+    return {
+      ...manifest,
+      targets: {
+        claude: manifest.targets.claude,
+        codex: Array.isArray(manifest.targets.codex) ? manifest.targets.codex : [],
+      },
+    };
+  }
+  if (Array.isArray(manifest.files)) {
+    return {
+      ...manifest,
+      targets: { claude: manifest.files, codex: [] },
+    };
+  }
+  return { ...manifest, targets: { claude: [], codex: [] } };
+}
+
 function saveManifest(manifest) {
   ensureDir(path.dirname(MANIFEST));
   fs.writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2));
@@ -87,27 +112,13 @@ function pruneEmptyDirs(root) {
   } catch { /* ignore */ }
 }
 
-function cmdInstall(args) {
-  const silent = args.flags.has('quiet') || args.flags.has('silent');
-  const postinstall = args.flags.has('postinstall');
-  const out = silent ? () => {} : log;
+/** Nome do ficheiro em ~/.codex/prompts/ (apenas top-level; `:` → `-`). */
+function codexPromptBasename(commandFile) {
+  const stem = commandFile.replace(/\.md$/i, '').replace(/:/g, '-');
+  return `ksdd-${stem}.md`;
+}
 
-  // Skip postinstall when running from a local checkout (e.g. dev), unless explicitly forced
-  if (postinstall && process.env.KSDD_SKIP_POSTINSTALL === '1') {
-    return;
-  }
-
-  out(bold('KSDD') + ' — instalando em ' + dim(CLAUDE_HOME));
-
-  // If existing install, remove tracked files first for a clean update
-  const prev = loadManifest();
-  if (prev && Array.isArray(prev.files)) {
-    for (const f of prev.files) removePath(f);
-  }
-
-  const tracked = [];
-
-  // 1) commands → ~/.claude/commands/ksdd:<name>.md
+function installClaude(tracked, out) {
   ensureDir(COMMANDS_DIR);
   for (const file of COMMAND_FILES) {
     const src = path.join(PKG_ROOT, 'commands', file);
@@ -115,16 +126,15 @@ function cmdInstall(args) {
     const dst = path.join(COMMANDS_DIR, `ksdd:${file}`);
     copyFile(src, dst);
     tracked.push(dst);
-    out('  ' + green('✓') + ' command  ' + dim('~/.claude/commands/') + `ksdd:${file}`);
+    out('  ' + green('✓') + ' claude   ' + dim('~/.claude/commands/') + `ksdd:${file}`);
   }
 
-  // 2) skills payload → ~/.claude/skills/ksdd/
   ensureDir(SKILLS_DIR);
   for (const sub of ['references', 'agents']) {
     const src = path.join(PKG_ROOT, sub);
     if (fs.existsSync(src)) {
       copyDir(src, path.join(SKILLS_DIR, sub), tracked);
-      out('  ' + green('✓') + ' skill    ' + dim('~/.claude/skills/ksdd/') + sub + '/');
+      out('  ' + green('✓') + ' claude   ' + dim('~/.claude/skills/ksdd/') + sub + '/');
     }
   }
   for (const top of ['README.md', 'INSTALL.md']) {
@@ -135,72 +145,163 @@ function cmdInstall(args) {
       tracked.push(dst);
     }
   }
+}
+
+function installCodex(tracked, out) {
+  ensureDir(CODEX_PROMPTS_DIR);
+  for (const file of COMMAND_FILES) {
+    const src = path.join(PKG_ROOT, 'commands', file);
+    if (!fs.existsSync(src)) continue;
+    const name = codexPromptBasename(file);
+    const dst = path.join(CODEX_PROMPTS_DIR, name);
+    copyFile(src, dst);
+    tracked.push(dst);
+    out('  ' + green('✓') + ' codex    ' + dim('~/.codex/prompts/') + name);
+  }
+
+  ensureDir(AGENTS_SKILLS_KSDD);
+  const skillSrc = path.join(PKG_ROOT, 'references', 'codex-SKILL.md');
+  const skillDst = path.join(AGENTS_SKILLS_KSDD, 'SKILL.md');
+  if (fs.existsSync(skillSrc)) {
+    copyFile(skillSrc, skillDst);
+    tracked.push(skillDst);
+    out('  ' + green('✓') + ' codex    ' + dim('~/.agents/skills/ksdd/') + 'SKILL.md');
+  }
+  for (const sub of ['references', 'agents']) {
+    const src = path.join(PKG_ROOT, sub);
+    if (fs.existsSync(src)) {
+      copyDir(src, path.join(AGENTS_SKILLS_KSDD, sub), tracked);
+      out('  ' + green('✓') + ' codex    ' + dim('~/.agents/skills/ksdd/') + sub + '/');
+    }
+  }
+  for (const top of ['README.md', 'INSTALL.md']) {
+    const src = path.join(PKG_ROOT, top);
+    if (fs.existsSync(src)) {
+      const dst = path.join(AGENTS_SKILLS_KSDD, top);
+      copyFile(src, dst);
+      tracked.push(dst);
+    }
+  }
+}
+
+function cmdInstall(args) {
+  const silent = args.flags.has('quiet') || args.flags.has('silent');
+  const postinstall = args.flags.has('postinstall');
+  const withCodex = args.flags.has('codex') || process.env.KSDD_WITH_CODEX === '1';
+  const out = silent ? () => {} : log;
+
+  if (postinstall && process.env.KSDD_SKIP_POSTINSTALL === '1') {
+    return;
+  }
+
+  out(bold('KSDD') + ' — instalando em ' + dim(CLAUDE_HOME) + (withCodex ? ' + ' + dim(CODEX_HOME) + ' + ' + dim(path.join(os.homedir(), '.agents/skills/ksdd')) : ''));
+
+  const prev = normalizeManifest(loadManifest());
+  const prevClaude = (prev && prev.targets && prev.targets.claude) || [];
+  const prevCodex = (prev && prev.targets && prev.targets.codex) || [];
+
+  for (const f of prevClaude) removePath(f);
+
+  const claudeTracked = [];
+  installClaude(claudeTracked, out);
+
+  let codexTracked = prevCodex;
+  if (withCodex) {
+    for (const f of prevCodex) removePath(f);
+    codexTracked = [];
+    installCodex(codexTracked, out);
+  }
 
   const manifest = {
     version: require('../package.json').version,
     installedAt: new Date().toISOString(),
     pkgRoot: PKG_ROOT,
-    files: tracked,
+    targets: {
+      claude: claudeTracked,
+      codex: codexTracked,
+    },
   };
   saveManifest(manifest);
-  tracked.push(MANIFEST);
-
   out('');
-  out(green('KSDD instalado.') + ' Reinicie o Claude Code e use ' + bold('/ksdd:start'));
+  let tail = green('KSDD instalado (Claude Code).') + ' Reinicie o Claude Code e use ' + bold('/ksdd:start');
+  if (withCodex) {
+    tail += '\n' + green('Integração Codex:') + ' reinicie o Codex CLI/IDE e use ' + bold('/prompts:ksdd-start') + ' (ou ' + bold('$ksdd') + ' skill em ~/.agents/skills/ksdd).';
+  }
+  out(tail);
 }
 
 function cmdUninstall(args) {
   const silent = args.flags.has('quiet') || args.flags.has('silent');
   const out = silent ? () => {} : log;
 
-  const manifest = loadManifest();
-  if (!manifest) {
+  const prev = normalizeManifest(loadManifest());
+  if (!prev) {
     out(yellow('Nada para desinstalar — manifesto não encontrado em ' + MANIFEST));
-    // Best-effort: remove the ksdd: commands and the skills/ksdd dir
     for (const file of COMMAND_FILES) {
       removePath(path.join(COMMANDS_DIR, `ksdd:${file}`));
     }
     removePath(SKILLS_DIR);
+    for (const file of COMMAND_FILES) {
+      removePath(path.join(CODEX_PROMPTS_DIR, codexPromptBasename(file)));
+    }
+    removePath(AGENTS_SKILLS_KSDD);
+    pruneEmptyDirs(path.join(os.homedir(), '.agents', 'skills'));
     return;
   }
 
+  const all = [
+    ...(prev.targets && prev.targets.claude ? prev.targets.claude : []),
+    ...(prev.targets && prev.targets.codex ? prev.targets.codex : []),
+  ];
   let removed = 0;
-  for (const f of manifest.files) {
+  for (const f of all) {
     if (removePath(f)) removed++;
   }
   removePath(MANIFEST);
   removePath(SKILLS_DIR);
   pruneEmptyDirs(path.join(CLAUDE_HOME, 'skills'));
+  pruneEmptyDirs(AGENTS_SKILLS_KSDD);
+  pruneEmptyDirs(path.join(os.homedir(), '.agents', 'skills'));
 
   out(green('KSDD desinstalado.') + ' ' + dim(`(${removed} arquivos removidos)`));
 }
 
 function cmdStatus() {
-  const manifest = loadManifest();
-  if (!manifest) {
+  const prev = normalizeManifest(loadManifest());
+  if (!prev) {
     log(yellow('KSDD não está instalado.'));
-    log('Rode: ' + bold('ksdd install'));
+    log('Rode: ' + bold('ksdd install') + ' ou ' + bold('ksdd install --codex'));
     process.exitCode = 1;
     return;
   }
-  log(bold('KSDD') + ' v' + manifest.version);
-  log('  instalado em : ' + manifest.installedAt);
-  log('  pacote       : ' + dim(manifest.pkgRoot));
-  log('  arquivos     : ' + manifest.files.length);
-  log('  commands dir : ' + dim(COMMANDS_DIR));
-  log('  skill dir    : ' + dim(SKILLS_DIR));
+  log(bold('KSDD') + ' v' + prev.version);
+  log('  instalado em : ' + prev.installedAt);
+  log('  pacote       : ' + dim(prev.pkgRoot));
+  const cl = (prev.targets && prev.targets.claude) || [];
+  const cx = (prev.targets && prev.targets.codex) || [];
+  log('  Claude       : ' + cl.length + ' arquivos — ' + dim(COMMANDS_DIR));
+  log('  Codex        : ' + cx.length + ' arquivos — prompts ' + dim(CODEX_PROMPTS_DIR) + ' · skill ' + dim(AGENTS_SKILLS_KSDD));
 }
 
 function cmdHelp() {
-  log(bold('ksdd') + ' — instalador KSDD para Claude Code\n');
+  log(bold('ksdd') + ' — instalador KSDD para Claude Code e Codex\n');
   log('Uso:');
-  log('  ksdd install      Copia commands e skills para ~/.claude/');
-  log('  ksdd uninstall    Remove arquivos previamente instalados');
-  log('  ksdd status       Mostra estado da instalação');
-  log('  ksdd help         Esta mensagem');
+  log('  ksdd install           Copia commands e skills para ~/.claude/');
+  log('  ksdd install --codex   Também instala prompts em ~/.codex/prompts/ e skill em ~/.agents/skills/ksdd/');
+  log('  ksdd uninstall         Remove arquivos previamente instalados');
+  log('  ksdd status            Mostra estado da instalação');
+  log('  ksdd help              Esta mensagem');
+  log('');
+  log('Variáveis de ambiente:');
+  log('  KSDD_SKIP_POSTINSTALL=1   Pula o postinstall do npm');
+  log('  KSDD_WITH_CODEX=1         Equivale a --codex no postinstall (npm install)');
+  log('  CODEX_HOME                Pasta do Codex (default: ~/.codex)');
   log('');
   log('Flags:');
   log('  --quiet           Silencia a saída');
+  log('');
+  log('Codex (após install --codex):');
+  log('  ' + dim('/prompts:ksdd-start') + ', ' + dim('/prompts:ksdd-spec') + ', ' + dim('/prompts:ksdd-setup') + ', … (ver README)');
   log('');
   log('Instalação global:');
   log('  ' + dim('npm install -g @kognar/ksdd'));
@@ -224,7 +325,6 @@ function main() {
         process.exitCode = 1;
     }
   } catch (e) {
-    // postinstall should never fail the npm install
     if (args.flags.has('postinstall')) {
       err(yellow('KSDD postinstall warning: ') + (e && e.message ? e.message : String(e)));
       err(dim('Rode `ksdd install` manualmente para concluir.'));

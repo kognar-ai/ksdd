@@ -1,23 +1,25 @@
 {
   "name": "@kognar/ksdd",
-  "version": "0.2.0",
-  "description": "KSDD — Kognar Spec-Driven Design & Development. Slash commands para Claude Code que guiam do brainstorm bruto até design system implementável.",
+  "version": "0.5.0",
+  "description": "KSDD — Kognar Spec-Driven Design & Development. Slash commands para Claude Code e integração com OpenAI Codex (prompts + skill) que guiam do brainstorm bruto até design system implementável.",
   "keywords": [
     "claude-code",
     "claude",
+    "codex",
+    "openai-codex",
     "slash-commands",
     "spec-driven",
     "design-system",
     "kognar",
     "ksdd"
   ],
-  "homepage": "https://github.com/kognar-tools/ksdd#readme",
+  "homepage": "https://github.com/kognar-ai/ksdd#readme",
   "bugs": {
-    "url": "https://github.com/kognar-tools/ksdd/issues"
+    "url": "https://github.com/kognar-ai/ksdd/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kognar-tools/ksdd.git"
+    "url": "git+https://github.com/kognar-ai/ksdd.git"
   },
   "license": "AGPL-3.0",
   "author": "Kognar LLC",

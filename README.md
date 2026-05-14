@@ -1,8 +1,24 @@
 # KSDD — Kognar Spec-Driven Design & Development
 
-Um sistema de slash commands para o Claude Code que guia produtos do **brainstorm bruto até um design system implementável**, em quatro etapas com aprovação humana entre cada uma.
+Um sistema de slash commands para o **Claude Code** e **[OpenAI Codex](https://developers.openai.com/codex)** que guia produtos do **brainstorm bruto até um design system implementável**, em quatro etapas com aprovação humana entre cada uma.
 
-```
+## Codex (CLI / IDE)
+
+Após `ksdd install --codex` (ou `KSDD_WITH_CODEX=1` no `npm install`):
+
+| Claude Code | Codex (custom prompts em `~/.codex/prompts/`) |
+|-------------|-----------------------------------------------|
+| `/ksdd:start` | `/prompts:ksdd-start` |
+| `/ksdd:spec` | `/prompts:ksdd-spec` |
+| `/ksdd:tech` | `/prompts:ksdd-tech` |
+| `/ksdd:design` | `/prompts:ksdd-design` |
+| `/ksdd:new:feature` | `/prompts:ksdd-new-feature` |
+| `/ksdd:build:feature` | `/prompts:ksdd-build-feature` |
+| `/ksdd:build:all` | `/prompts:ksdd-build-all` |
+
+Também é instalada a skill **`ksdd`** em `~/.agents/skills/ksdd/` (referências + agentes + `SKILL.md`) — use `$ksdd` ou mencione a skill no prompt. Os prompts do Codex são o mesmo conteúdo dos ficheiros em `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) estão marcados como *deprecated* em favor de skills, mas continuam a funcionar para invocação explícita `/prompts:…`.
+
+Reinicie o Codex após instalar. `CODEX_HOME` (default `~/.codex`) altera a pasta de prompts se definido.
 /ksdd:start        →  brainstorm.md         (ideia → conceito refinado)
 /ksdd:spec         →  SPEC.md               (conceito → especificação produto+design)
 /ksdd:tech         →  architecture.md       (especificação → arquitetura técnica)
@@ -20,9 +36,25 @@ Os artefatos são acumulativos: `SPEC.md` referencia `brainstorm.md`, `architect
 
 ## Instalação
 
+### npm (recomendado)
+
+```bash
+npm install -g @kognar/ksdd
+```
+
+Por omissão instala apenas **Claude Code** (`~/.claude/`). Para incluir **Codex**:
+
+```bash
+ksdd install --codex
+```
+
+Ou numa instalação npm: `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd`
+
+### Manual (Claude Code)
+
 Coloque a pasta `ksdd/` em `~/.claude/skills/ksdd/` ou na raiz do projeto em `.claude/skills/ksdd/`.
 
-Os commands ficam em `ksdd/commands/`. O Claude Code descobre slash commands com prefixo `/ksdd:*` automaticamente a partir dos arquivos `start.md`, `spec.md`, `tech.md` e `design.md`.
+Os commands ficam em `ksdd/commands/`. O Claude Code descobre slash commands com prefixo `/ksdd:*` quando os ficheiros estão em `~/.claude/commands/` com o prefixo `ksdd:`.
 
 ## Fluxo de uso típico
 
@@ -98,7 +130,8 @@ ksdd/
 │   ├── spec-template.md               ← template do SPEC.md
 │   ├── architecture-template.md       ← template do architecture.md
 │   ├── feature-template.md            ← template do FEATURE-[slug].md
-│   ├── build-plan-template.md         ← template do BUILD-[slug].md
+│   ├── build-plan-template.md         ← formato de task (BUILD / build:all)
+│   ├── codex-SKILL.md                 ← corpo da skill Codex (~/.agents/skills/ksdd/SKILL.md)
 │   ├── design-md-spec.md             ← especificação Google Stitch DESIGN.md
 │   ├── personas-guide.md              ← como construir personas úteis
 │   └── approval-gates.md              ← regras dos checkpoints

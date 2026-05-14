@@ -2,6 +2,8 @@
 
 O KSDD é construído sobre **checkpoints obrigatórios**. Não há atalho. Cada comando termina forçando uma decisão humana antes do próximo.
 
+Os mesmos gates aplicam-se quer use **Claude Code** (`/ksdd:…`) quer **OpenAI Codex** (`/prompts:ksdd-…`); só muda o prefixo do comando.
+
 ## Por que checkpoints
 
 1. **Documento ruim na fonte = entulho cascateado.** Se `brainstorm.md` está confuso, `SPEC.md` herda a confusão. Se `SPEC.md` está vago, `DESIGN.md` adivinha. Cada fase precisa estar sólida antes da próxima.
