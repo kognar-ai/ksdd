@@ -1,5 +1,5 @@
 ---
-description: Cria a especificação de uma nova feature para um projeto KSDD existente e quebra em tasks implementáveis salvas em docs/tasks/feature-[slug]/. Lê brainstorm.md, SPEC.md, architecture.md e DESIGN.md para contexto completo.
+description: Cria a especificação de uma nova feature para um projeto KSDD existente (docs/FEATURE-[slug].md) e quebra em tasks implementáveis salvas em docs/tasks/feature-[slug]/. Lê brainstorm.md, SPEC.md, architecture.md e DESIGN.md para contexto completo.
 argument-hint: "[nome ou descrição da feature] [--tasks-only] (opcional — sem args pergunta)"
 allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, list_directory, Glob, Grep
 ---
@@ -8,14 +8,14 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, we
 
 Você é o product owner da fase de feature spec. Pega os artefatos existentes do projeto KSDD e produz:
 
-1. **`FEATURE-[slug].md`** — especificação completa da feature (produto + impacto + critérios)
+1. **`docs/FEATURE-[slug].md`** — especificação completa da feature (produto + impacto + critérios)
 2. **`docs/tasks/feature-[slug]/`** — tasks implementáveis individuais com frontmatter estruturado
 
 ## Argumentos
 
 `$ARGUMENTS` pode conter:
 - Nome/descrição da feature ("notificações push", "sistema de badges de conquistas")
-- `--tasks-only` → pula a geração do FEATURE spec (assume que já existe) e gera só as tasks
+- `--tasks-only` → pula a geração do FEATURE spec (assume `docs/FEATURE-[slug].md`; na raiz, `FEATURE-[slug].md` legado) e gera só as tasks
 - Vazio → pergunte qual feature o usuário quer especificar
 
 ## Pré-requisito obrigatório
@@ -40,7 +40,7 @@ Leia **todos** os artefatos KSDD existentes:
 3. `view architecture.md` (se existir)
 4. `view DESIGN.md` (se existir)
 
-Se existem `FEATURE-*.md` prévios, liste-os e leia os títulos pra evitar duplicação.
+Se existem `docs/FEATURE-*.md` prévios (ou `FEATURE-*.md` na raiz de projetos legados), liste-os e leia os títulos pra evitar duplicação.
 Se existem tasks prévias em `docs/tasks/`, verifique o maior ID existente pra continuar a numeração.
 
 ### 2. Sessão de perguntas (1-2 rodadas)
@@ -78,15 +78,15 @@ Derive um slug curto do nome da feature:
 - "sistema de badges" → `badges`
 - "painel admin" → `admin-panel`
 
-### 5. Gerar `FEATURE-[slug].md`
+### 5. Gerar `docs/FEATURE-[slug].md`
 
-Use o template em `references/feature-template.md`. O FEATURE spec é o **contrato de produto** — descreve o quê e por quê, não o como.
+Crie a pasta `docs/` se não existir. Use o template em `references/feature-template.md`. O FEATURE spec é o **contrato de produto** — descreve o quê e por quê, não o como.
 
 ### 6. Checkpoint do FEATURE spec (OBRIGATÓRIO)
 
 Após gerar:
 
-> FEATURE-[slug].md gerado (~[N] palavras). Recomendo revisar especialmente:
+> `docs/FEATURE-[slug].md` gerado (~[N] palavras). Recomendo revisar especialmente:
 > - Seção 2 (escopo) — confere se o corte v1/depois faz sentido
 > - Seção 5 (impacto em telas) — confere se cobre todas as telas afetadas
 > - Seção 10 (critérios de aceite) — confere se são verificáveis e completos
@@ -123,7 +123,7 @@ priority: P0 | P1 | P2
 estimate: S | M | L
 depends_on: [NNN, NNN]
 feature_refs:
-  - "FEATURE-[slug].md#<seção>"
+  - "docs/FEATURE-[slug].md#<seção>"
 spec_refs:
   - "SPEC.md#<seção>"
 arch_refs:
@@ -178,7 +178,7 @@ Vazio se não houver.
 ```markdown
 # Tasks — Feature: [Nome]
 
-**Feature:** FEATURE-[slug].md
+**Feature:** docs/FEATURE-[slug].md
 **Total:** [N] tasks
 **Prioridade:** P0: [N] · P1: [N] · P2: [N]
 **Estimativa total:** ~[N] dias
@@ -226,7 +226,7 @@ Vazio se não houver.
 
 ## Iteração
 
-Se já existe `FEATURE-[slug].md`, leia, pergunte que seções iterar, e use `str_replace` pra edição cirúrgica.
+Se já existe `docs/FEATURE-[slug].md` (ou `FEATURE-[slug].md` na raiz por legado), leia, pergunte que seções iterar, e use `str_replace` pra edição cirúrgica.
 
 Se já existem tasks em `docs/tasks/feature-[slug]/`, não sobrescreva. Continue a numeração e pule áreas já cobertas (a menos que o usuário peça regeneração explícita).
 

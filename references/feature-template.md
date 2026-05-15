@@ -171,7 +171,7 @@
 |------|-------------|--------|----------------------|
 | Técnica | [descrição] | [resolvida / pendente] | [alto / médio / baixo] |
 | Negócio | [descrição] | [...] | [...] |
-| Feature | [FEATURE-xxx se depende de outra] | [...] | [...] |
+| Feature | [docs/FEATURE-xxx se depende de outra] | [...] | [...] |
 
 ### 9.2 Riscos
 
@@ -208,4 +208,4 @@
 - SPEC.md — seções [X, Y, Z]
 - architecture.md — seções [X, Y] *(se existir)*
 - DESIGN.md — seções [X, Y] *(se existir)*
-- FEATURE-[outro].md — *(se depende de outra feature)*
+- docs/FEATURE-[outro].md — *(se depende de outra feature)*

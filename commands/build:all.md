@@ -45,7 +45,7 @@ Leia **todos** os artefatos KSDD:
 2. `view architecture.md` (se existir) — stack, schemas, APIs, ADRs, roadmap (seção 12)
 3. `view DESIGN.md` (se existir) — componentes, tokens
 4. `view brainstorm.md` (se existir) — contexto original
-5. Verifique `FEATURE-*.md` e `docs/tasks/` existentes (pra `--resume`)
+5. Verifique `docs/FEATURE-*.md` (e `FEATURE-*.md` na raiz se legado) e `docs/tasks/` existentes (pra `--resume`)
 
 #### A.2 Decompor SPEC em features
 
@@ -92,7 +92,7 @@ Se tudo está claro, pule.
 
 Para cada feature identificada, execute internamente o fluxo do `/ksdd:new:feature`:
 
-1. **Gere `FEATURE-[slug].md`** usando `references/feature-template.md`
+1. **Gere `docs/FEATURE-[slug].md`** (crie `docs/` se necessário) usando `references/feature-template.md`
    - Seções de impacto (telas, dados, API, design) derivadas do SPEC + architecture
    - Critérios de aceite derivados da feature e da fase
    - Referências cruzadas pros artefatos
@@ -182,8 +182,8 @@ setup-infra → data-model → core-api → search
 > **Total:** [N] features, [N] tasks
 >
 > Features geradas:
-> 1. `FEATURE-setup-infra.md` — [N] tasks
-> 2. `FEATURE-data-model.md` — [N] tasks
+> 1. `docs/FEATURE-setup-infra.md` — [N] tasks
+> 2. `docs/FEATURE-data-model.md` — [N] tasks
 > 3. ...
 >
 > Recomendo revisar:
@@ -389,7 +389,7 @@ Se em dúvida, **vá sequencial** — é mais seguro e mais fácil de debugar.
 
 ## Artefatos são read-only
 
-**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` durante o build. `FEATURE-*.md` pode ter status atualizado, mas conteúdo é read-only.
+**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` durante o build. `docs/FEATURE-*.md` pode ter status atualizado, mas conteúdo é read-only.
 
 Se algo nos artefatos está errado, sinalize ao usuário. A única exceção: status de tasks e `BUILD-PLAN.md`.
 

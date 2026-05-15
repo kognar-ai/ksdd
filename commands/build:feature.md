@@ -1,5 +1,5 @@
 ---
-description: Implementa tasks de uma feature ponta-a-ponta — issue+subtasks no GitHub, branch, context.md, execução via teammates, validação de quality gates, commit atômico e PR. Lê FEATURE-[slug].md + tasks de docs/tasks/feature-[slug]/.
+description: Implementa tasks de uma feature ponta-a-ponta — issue+subtasks no GitHub, branch, context.md, execução via teammates, validação de quality gates, commit atômico e PR. Lê docs/FEATURE-[slug].md + tasks de docs/tasks/feature-[slug]/.
 argument-hint: "<slug|task-id|--all> (ex: push-notifications, 016, 016-create-endpoint, --all)"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, WebFetch, view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, execute_shell, list_directory, mcp__github__*, mcp__context7__*, mcp__pencil__*, mcp__executeautomation-playwright-server__*
 ---
@@ -51,7 +51,7 @@ Se qualquer pré-requisito **crítico** falhar (git sujo), **STOP** e reporte o 
    - `status` ≠ `para implementar` → pare e pergunte se quer reabrir/forçar.
    - Cada ID em `depends_on` precisa ter `status: concluída`. Se algum não está, liste os pendentes e **pare**.
 4. **Leia** os artefatos referenciados (use `Grep` para localizar seções e `Read` com `offset`/`limit` para extrair só os trechos):
-   - `FEATURE-[slug].md` — seções em `feature_refs`
+   - `docs/FEATURE-[slug].md` (ou caminho em `feature_refs`, incl. legado na raiz) — seções em `feature_refs`
    - `SPEC.md` — seções em `spec_refs`
    - `architecture.md` — seções em `arch_refs` (se existir)
    - `DESIGN.md` — componentes/tokens referenciados (se existir)
@@ -268,7 +268,7 @@ Use `gh pr create` com:
 Closes #<ISSUE_NUM>
 
 ## Feature
-FEATURE-[slug].md — [nome da feature]
+docs/FEATURE-[slug].md — [nome da feature]
 
 ## Critérios de aceitação
 <checklist marcada>
@@ -339,7 +339,7 @@ Build da feature [slug] concluído:
 
 ## Artefatos são read-only durante build
 
-**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` ou `FEATURE-[slug].md` durante o build. Se durante a implementação ficar claro que algo está errado ou incompleto num artefato, sinalize ao usuário — não corrija automaticamente.
+**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` ou `docs/FEATURE-[slug].md` durante o build. Se durante a implementação ficar claro que algo está errado ou incompleto num artefato, sinalize ao usuário — não corrija automaticamente.
 
 A única exceção são os arquivos de task: `status` e o `README.md` de tasks podem ser atualizados.
 

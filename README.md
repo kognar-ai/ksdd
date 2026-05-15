@@ -19,11 +19,13 @@ Após `ksdd install --codex` (ou `KSDD_WITH_CODEX=1` no `npm install`):
 Também é instalada a skill **`ksdd`** em `~/.agents/skills/ksdd/` (referências + agentes + `SKILL.md`) — use `$ksdd` ou mencione a skill no prompt. Os prompts do Codex são o mesmo conteúdo dos ficheiros em `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) estão marcados como *deprecated* em favor de skills, mas continuam a funcionar para invocação explícita `/prompts:…`.
 
 Reinicie o Codex após instalar. `CODEX_HOME` (default `~/.codex`) altera a pasta de prompts se definido.
+
+```
 /ksdd:start        →  brainstorm.md         (ideia → conceito refinado)
 /ksdd:spec         →  SPEC.md               (conceito → especificação produto+design)
 /ksdd:tech         →  architecture.md       (especificação → arquitetura técnica)
 /ksdd:design       →  DESIGN.md             (especificação → design system Stitch-compatible)
-/ksdd:new:feature    →  FEATURE-[slug].md     (nova feature → spec + tasks implementáveis)
+/ksdd:new:feature    →  docs/FEATURE-[slug].md  (nova feature → spec + tasks implementáveis)
 /ksdd:build:feature  →  task por task          (feature → implementação com issue, branch, PR)
 /ksdd:build:all      →  BUILD-PLAN.md         (SPEC inteiro → features + tasks + implementação completa)
 ```
@@ -88,11 +90,11 @@ Claude : [lê SPEC.md (+ architecture.md se existir)]
 Você   : /ksdd:new:feature notificações push
 Claude : [lê SPEC.md, architecture.md, DESIGN.md]
          [faz perguntas sobre escopo, personas impactadas, prioridade]
-         [gera FEATURE-push-notifications.md com impacto em telas, dados, API e design]
+         [gera docs/FEATURE-push-notifications.md com impacto em telas, dados, API e design]
          [PARA]
 
 Você   : /ksdd:build:feature push-notifications
-Claude : [lê FEATURE + tasks + todos os artefatos]
+Claude : [lê docs/FEATURE-push-notifications.md + tasks + todos os artefatos]
          [para cada task: issue → branch → context.md → implementa → quality gates → PR]
          [PARA — checkpoint por feature]
 
@@ -129,7 +131,7 @@ ksdd/
 │   ├── brainstorm-template.md         ← template do brainstorm.md
 │   ├── spec-template.md               ← template do SPEC.md
 │   ├── architecture-template.md       ← template do architecture.md
-│   ├── feature-template.md            ← template do FEATURE-[slug].md
+│   ├── feature-template.md            ← template do docs/FEATURE-[slug].md
 │   ├── build-plan-template.md         ← formato de task (BUILD / build:all)
 │   ├── codex-SKILL.md                 ← corpo da skill Codex (~/.agents/skills/ksdd/SKILL.md)
 │   ├── design-md-spec.md             ← especificação Google Stitch DESIGN.md
@@ -173,14 +175,15 @@ projeto/
 ├── SPEC.md                    (~3000-8000 palavras)
 ├── architecture.md            (~2000-5000 palavras, opcional)
 ├── DESIGN.md                  (YAML frontmatter + ~1500-3500 palavras)
-├── FEATURE-[slug].md          (~1500-4000 palavras, uma por feature)
 ├── BUILD-PLAN.md              (plano mestre do build completo)
-└── docs/tasks/
-    └── feature-[slug]/
-        ├── README.md          (índice de tasks da feature)
-        ├── NNN-slug.md        (task individual com frontmatter)
-        └── .context/
-            └── NNN-context.md (contexto compilado para implementação)
+└── docs/
+    ├── FEATURE-[slug].md      (~1500-4000 palavras, uma por feature)
+    └── tasks/
+        └── feature-[slug]/
+            ├── README.md          (índice de tasks da feature)
+            ├── NNN-slug.md        (task individual com frontmatter)
+            └── .context/
+                └── NNN-context.md (contexto compilado para implementação)
 ```
 
 Pronto pra ser consumido por ferramentas de design (Stitch, v0, Lovable, Pencil) e agentes de código (Claude Code, Cursor) com contexto persistente.
