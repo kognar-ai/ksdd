@@ -37,7 +37,7 @@ Os mesmos gates aplicam-se quer use **Claude Code** (`/ksdd:…`) quer **OpenAI 
 
 O `/ksdd:new:feature` tem **dois checkpoints internos**:
 
-1. **Checkpoint do FEATURE spec:** Após gerar `FEATURE-[slug].md`, antes de quebrar em tasks. O usuário aprova escopo, impacto e critérios de aceite.
+1. **Checkpoint do FEATURE spec:** Após gerar `docs/FEATURE-[slug].md`, antes de quebrar em tasks. O usuário aprova escopo, impacto e critérios de aceite.
 2. **Checkpoint das tasks:** Após gerar `docs/tasks/feature-[slug]/`, com resumo de tasks por prioridade e estimativa total.
 
 **Pré-condição:** `SPEC.md` deve existir (obrigatório). `architecture.md` e `DESIGN.md` são opcionais mas enriquecem a análise de impacto e a granularidade das tasks.
@@ -52,9 +52,9 @@ O build tem **checkpoints por task**:
 4. **Validação de critérios:** Cada critério de aceitação da task demonstrado com evidência.
 5. **PR aberto:** Não faz merge — aguarda review humano.
 
-**Pré-condição:** `FEATURE-[slug].md` deve existir e estar aprovado. Tasks em `docs/tasks/feature-[slug]/` devem existir. `SPEC.md` obrigatório. Dependencies (`depends_on`) da task devem ter `status: concluída`.
+**Pré-condição:** `docs/FEATURE-[slug].md` deve existir e estar aprovado (na raiz `FEATURE-[slug].md` apenas em projetos legados). Tasks em `docs/tasks/feature-[slug]/` devem existir. `SPEC.md` obrigatório. Dependencies (`depends_on`) da task devem ter `status: concluída`.
 
-**O build NUNCA modifica artefatos KSDD** (SPEC.md, architecture.md, DESIGN.md, FEATURE-[slug].md). Se durante a implementação ficar claro que algo está errado ou incompleto, sinalize ao usuário — não corrija automaticamente. A única exceção: status das tasks e o README de tasks podem ser atualizados.
+**O build NUNCA modifica artefatos KSDD** (SPEC.md, architecture.md, DESIGN.md, docs/FEATURE-[slug].md). Se durante a implementação ficar claro que algo está errado ou incompleto, sinalize ao usuário — não corrija automaticamente. A única exceção: status das tasks e o README de tasks podem ser atualizados.
 
 ### Gate 7 — Durante `/ksdd:build:all`
 

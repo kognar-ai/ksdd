@@ -41,7 +41,7 @@ Exceção: se houver issues estruturais que exigem decisão humana (ex: spec do 
 - [ ] Roadmap alinha com fases do SPEC?
 - [ ] Não over-engineering pra MVP?
 
-#### FEATURE-[slug].md
+#### docs/FEATURE-[slug].md
 - [ ] Motivação conecta com problema/personas do SPEC?
 - [ ] Escopo corta explicitamente v1 do "depois"?
 - [ ] User stories referenciam personas do SPEC?

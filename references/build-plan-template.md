@@ -8,7 +8,7 @@ priority: P0 | P1 | P2
 estimate: S | M | L
 depends_on: [NNN, NNN]
 feature_refs:
-  - "FEATURE-[slug].md#<seção>"
+  - "docs/FEATURE-[slug].md#<seção>"
 spec_refs:
   - "SPEC.md#<seção>"
 arch_refs:

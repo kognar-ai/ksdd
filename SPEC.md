@@ -130,7 +130,7 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
 | `SPEC.md` | raiz | `/ksdd:spec` | 3000-8000 palavras |
 | `architecture.md` | raiz | `/ksdd:tech` | 2000-5000 palavras |
 | `DESIGN.md` | raiz | `/ksdd:design` | YAML + 1500-3500 palavras |
-| `FEATURE-[slug].md` | raiz | `/ksdd:new:feature` | 1500-4000 palavras (1 por feature) |
+| `FEATURE-[slug].md` | `docs/` | `/ksdd:new:feature` | 1500-4000 palavras (1 por feature) |
 | `BUILD-PLAN.md` | raiz | `/ksdd:build:all` | mapa de execução completo |
 | `docs/tasks/feature-[slug]/NNN-*.md` | `docs/tasks/feature-[slug]/` | `/ksdd:new:feature` | task individual com frontmatter |
 | `docs/tasks/feature-[slug]/.context/NNN-context.md` | idem `.context/` | `/ksdd:build:feature` | contexto compilado de implementação |
@@ -150,7 +150,7 @@ brainstorm.md  ──referenciado por──▶  SPEC.md
                                        │
                                        └─referenciado por──▶  DESIGN.md (Google Stitch)
                                                                   │
-                                                                  └─ todos consumidos por ──▶  FEATURE-[slug].md
+                                                                  └─ todos consumidos por ──▶  docs/FEATURE-[slug].md
                                                                                                   │
                                                                                                   └─ consumido por ──▶  build:feature / build:all → docs/tasks/
 ```
@@ -305,7 +305,7 @@ Implicações práticas:
 
 1. Usuário com SPEC aprovado roda `/ksdd:new:feature [slug]`
 2. Lê SPEC + architecture + DESIGN para análise de impacto
-3. Gera `FEATURE-[slug].md` → Gate 5a (checkpoint do spec da feature)
+3. Gera `docs/FEATURE-[slug].md` → Gate 5a (checkpoint do spec da feature)
 4. Aprovado → quebra em tasks em `docs/tasks/feature-[slug]/NNN-*.md` → Gate 5b (checkpoint das tasks)
 5. Aprovado → `/ksdd:build:feature [slug]` com `--all` ou task por task
 6. Para cada task: pre-flight → issue GitHub → branch → context.md → implementação via subagents → quality gates (build, testes, lint, E2E, code review, security audit) → commits atômicos → PR aberto (sem merge)

@@ -4,9 +4,11 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
----
+## [0.5.2] - 2026-05-15
 
-## [0.5.1] - 2026-05-14
+### Alterado
+
+- **`/ksdd:new:feature`** — a spec de feature passa a ser gerada como `docs/FEATURE-[slug].md` (criar `docs/` se necessário), alinhado às tasks em `docs/tasks/`. Comandos e documentação (`build:feature`, `build:all`, SPEC, README, gates) atualizados; projetos com `FEATURE-*.md` na raiz são tratados como legado em `--tasks-only` e resume.
 
 ### Adicionado
 

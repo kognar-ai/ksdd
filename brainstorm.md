@@ -60,7 +60,7 @@ O loop principal: ideia bruta → `/ksdd:start` → brainstorm aprovado → `/ks
 **Já entregue (até v0.5.0):**
 
 - 8 slash commands: `start`, `spec`, `tech`, `design`, `new:feature`, `build:feature`, `build:all`, `setup`
-- 4 artefatos canônicos gerados (brainstorm, SPEC, architecture, DESIGN) + feature-level (FEATURE-*.md, BUILD-PLAN.md, tasks)
+- 4 artefatos canônicos gerados (brainstorm, SPEC, architecture, DESIGN) + feature-level (`docs/FEATURE-*.md`, BUILD-PLAN.md, tasks)
 - Instalador CLI Node.js (`bin/ksdd.js`) com `install` / `install --codex` / `uninstall` / `status` / `help`
 - Distribuição via npm (`@kognar/ksdd`) com postinstall hook
 - Suporte dual: Claude Code (`~/.claude/commands/`) + OpenAI Codex (`~/.codex/prompts/` + `~/.agents/skills/ksdd/`)
