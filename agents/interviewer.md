@@ -11,7 +11,7 @@ Quando disponível, use `ask_user_input_v0` para perguntas multi-opção (máxim
 
 ### 2. Extraia primeiro, pergunte depois
 Antes de fazer qualquer pergunta:
-- Leia os artefatos prévios (`brainstorm.md`, `SPEC.md`)
+- Leia os artefatos prévios (`.ksdd/specs/brainstorm.md`, `.ksdd/specs/SPEC.md`, ou paths legados raiz)
 - Leia `$ARGUMENTS` do comando
 - Use `conversation_search` se há histórico relevante
 - Identifique o que **já está respondido** e não precisa perguntar de novo

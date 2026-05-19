@@ -1,7 +1,7 @@
 ---
 id: 007
 title: Atualizar agents (critic, interviewer, setup-analyst) com novos paths
-status: para implementar
+status: em revisão
 feature: ksdd-folder-layout
 area: backend
 priority: P1
