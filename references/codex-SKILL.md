@@ -1,6 +1,6 @@
 ---
 name: ksdd
-description: Kognar Spec-Driven Design & Development (KSDD). Use when the user mentions KSDD, brainstorm/spec-driven workflow, docs/FEATURE-*.md tasks, BUILD-PLAN, or wants structured product specs before coding. Triggers also include slash-style prompts ksdd-start, ksdd-spec, or "spec driven design".
+description: Kognar Spec-Driven Design & Development (KSDD). Use when the user mentions KSDD, brainstorm/spec-driven workflow, .ksdd/features/FEATURE-*.md tasks (or legacy docs/FEATURE-*.md), .ksdd/build/BUILD-PLAN.md, or wants structured product specs before coding. Triggers also include slash-style prompts ksdd-start, ksdd-spec, or "spec driven design".
 ---
 
 # KSDD no Codex

@@ -1,3 +1,7 @@
+<!--
+Salvar em: .ksdd/specs/SPEC.md (default v0.6.0+; fallback raiz SPEC.md legado)
+-->
+
 # SPEC.md — [Nome do Projeto]
 
 > [Tagline curta — o que é o produto]

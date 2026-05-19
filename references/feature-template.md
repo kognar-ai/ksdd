@@ -21,7 +21,7 @@
 
 ### 1.2 Personas Impactadas
 
-[Para cada persona do SPEC.md afetada:
+[Para cada persona do SPEC (`.ksdd/specs/SPEC.md`, ou raiz legado) afetada:
 - **[Nome — Papel]:** como essa feature melhora a experiência dela. Referência SPEC seção 2.]
 
 ### 1.3 Métricas de Sucesso
@@ -87,7 +87,7 @@
 
 ### 5.1 Telas Modificadas
 
-| Tela (SPEC seção 7) | O que muda | Onde na tela | Por quê |
+| Tela (`.ksdd/specs/SPEC.md` seção 7, ou raiz legado) | O que muda | Onde na tela | Por quê |
 |----------------------|------------|--------------|---------|
 | [Nome da tela] | [mudança] | [seção/componente] | [justificativa] |
 
@@ -101,7 +101,7 @@
 - A. [Seção] — [conteúdo]
 - B. [Seção] — [conteúdo]
 
-**Componentes usados:** [referência ao SPEC seção 8 e DESIGN.md]
+**Componentes usados:** [referência ao SPEC seção 8 e `.ksdd/specs/DESIGN.md`]
 
 **Comportamento mobile:** [adaptações]
 
@@ -117,7 +117,7 @@
 
 ### 6.2 Alterações em Entidades Existentes
 
-| Entidade (SPEC seção 4) | Alteração | Migração |
+| Entidade (`.ksdd/specs/SPEC.md` seção 4, ou raiz legado) | Alteração | Migração |
 |--------------------------|-----------|----------|
 | [Nome] | [campo novo / campo alterado] | [sim/não — complexidade] |
 
@@ -125,7 +125,7 @@
 
 ## 7. Impacto na API
 
-[Se architecture.md existir, referenciar endpoints existentes. Se não existir, marcar como "[a confirmar após /ksdd:tech]".]
+[Se architecture existir (`.ksdd/specs/architecture.md` ou raiz legado), referenciar endpoints existentes. Se não existir, marcar como "[a confirmar após /ksdd:tech]".]
 
 ### 7.1 Novos Endpoints
 
@@ -135,19 +135,19 @@
 
 ### 7.2 Endpoints Modificados
 
-| Endpoint (architecture seção 4) | Alteração |
-|----------------------------------|-----------|
+| Endpoint (`.ksdd/specs/architecture.md` seção 4, ou raiz legado) | Alteração |
+|------------------------------------------------------------------|-----------|
 | [método + path] | [o que muda] |
 
 ---
 
 ## 8. Impacto no Design
 
-[Se DESIGN.md existir, referenciar tokens e componentes. Se não existir, marcar como "[a confirmar após /ksdd:design]".]
+[Se DESIGN existir (`.ksdd/specs/DESIGN.md` ou raiz legado), referenciar tokens e componentes. Se não existir, marcar como "[a confirmar após /ksdd:design]".]
 
 ### 8.1 Componentes Existentes Reutilizados
 
-| Componente (DESIGN.md) | Onde é usado na feature | Variante |
+| Componente (`.ksdd/specs/DESIGN.md`) | Onde é usado na feature | Variante |
 |-------------------------|------------------------|----------|
 | [Nome] | [tela/contexto] | [existente / nova variante] |
 
@@ -171,7 +171,7 @@
 |------|-------------|--------|----------------------|
 | Técnica | [descrição] | [resolvida / pendente] | [alto / médio / baixo] |
 | Negócio | [descrição] | [...] | [...] |
-| Feature | [docs/FEATURE-xxx se depende de outra] | [...] | [...] |
+| Feature | [.ksdd/features/FEATURE-xxx se depende de outra; ou path legado] | [...] | [...] |
 
 ### 9.2 Riscos
 
@@ -205,7 +205,7 @@
 ---
 
 **Referências:**
-- SPEC.md — seções [X, Y, Z]
-- architecture.md — seções [X, Y] *(se existir)*
-- DESIGN.md — seções [X, Y] *(se existir)*
-- docs/FEATURE-[outro].md — *(se depende de outra feature)*
+- `.ksdd/specs/SPEC.md` (ou raiz legado) — seções [X, Y, Z]
+- `.ksdd/specs/architecture.md` (ou raiz legado) — seções [X, Y] *(se existir)*
+- `.ksdd/specs/DESIGN.md` (ou raiz legado) — seções [X, Y] *(se existir)*
+- `.ksdd/features/FEATURE-[outro].md` (ou `docs/FEATURE-[outro].md` legado) — *(se depende de outra feature)*
