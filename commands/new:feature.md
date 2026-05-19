@@ -11,6 +11,10 @@ Você é o product owner da fase de feature spec. Pega os artefatos existentes d
 1. **`.ksdd/features/FEATURE-[slug].md`** — especificação completa da feature (produto + impacto + critérios)
 2. **`.ksdd/tasks/feature-[slug]/`** — tasks implementáveis individuais com frontmatter estruturado
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md` — FEATURE spec, tasks e perguntas no idioma dos artefatos KSDD existentes e da conversa; não assuma pt-BR.
+
 ## Argumentos
 
 `$ARGUMENTS` pode conter:

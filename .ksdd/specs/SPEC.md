@@ -5,7 +5,7 @@
 **Versão:** 1.0 (reverse-engineered)
 **Última atualização:** 14/05/2026
 **Plataforma alvo (MVP):** CLI multiplataforma (Node.js ≥ 16) — sem UI
-**Idioma da interface:** pt-BR (default), suporte multi-idioma nos artefatos gerados
+**Idioma da interface:** N/A (CLI sem UI); artefatos e prompts seguem idioma da conversa — ver `references/language-policy.md`
 **Origem:** Reverse-engineered via `/ksdd:setup` em 14/05/2026
 **Aviso:** Artefato gerado automaticamente. Revise e corrija antes de usar como contrato.
 
@@ -98,7 +98,7 @@ Mínima e monocromática no CLI: `✓` para sucesso, sem emojis nem ASCII art. D
 
 ### 3.5 Tom Geral
 
-Português brasileiro técnico, voz ativa, segunda pessoa para instrução ("Rode `ksdd install`"). Bilíngue quando necessário (CHANGELOG/CONTRIBUTING aceitam PT ou EN em commits). Sem jargão de marketing.
+Documentação do pacote (README, INSTALL, commands no repo): português técnico ou inglês, voz ativa. **Artefatos gerados pelos commands** seguem `references/language-policy.md` (idioma da conversa, não fixo em pt-BR). Sem jargão de marketing.
 
 ---
 

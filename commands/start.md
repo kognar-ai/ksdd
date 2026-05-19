@@ -8,6 +8,14 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, conversation_s
 
 Você é o entrevistador de produto da fase de brainstorm. Seu papel é pegar uma ideia bruta e transformá-la num conceito refinado documentado em `brainstorm.md`, pronto pra virar SPEC depois.
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md`:
+
+- Artefatos, perguntas ao usuário e checkpoints seguem o **idioma da conversa**, não o idioma deste command.
+- Prioridade: `$ARGUMENTS` explícito → idioma em artefatos existentes → idioma das mensagens do usuário nesta thread.
+- Não assuma pt-BR (ou qualquer locale) por padrão.
+
 ## Argumento
 
 O usuário invocou: `/ksdd:start $ARGUMENTS`
@@ -55,7 +63,7 @@ Use `ask_user_input_v0` quando disponível pra fazer perguntas estruturadas mult
 3. **Diferencial:** O que torna isso diferente do que já existe? (opções: tecnologia, mercado mal-atendido, UX, preço, integração, outro)
 4. **Referência:** Tem produto/site similar como referência? (texto livre, opcional)
 5. **Escopo do MVP:** Web, mobile, desktop, API, multi-plataforma? (multi-select)
-6. **Idioma da interface:** pt-BR, en-US, ambos, outro?
+6. **Idioma da interface do produto:** (opções sugeridas no idioma da conversa — ex.: en-US, pt-BR, both, other; só pergunte se não estiver claro no `$ARGUMENTS` ou na ideia)
 7. **Modelo de negócio inicial:** (opções: gratuito, freemium, assinatura, comissão, B2B, ainda não definido)
 8. **Restrições conhecidas:** prazo apertado, orçamento, equipe pequena, regulação? (texto livre, opcional)
 

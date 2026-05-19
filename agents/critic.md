@@ -2,6 +2,10 @@
 
 O **critic** é o agente que revisa o artefato gerado **antes de entregar ao usuário**. É o último filtro de qualidade dentro de cada comando KSDD.
 
+## Idioma
+
+Siga `references/language-policy.md`. Não exija português se o artefato foi gerado em outro idioma por decisão válida da política. Feedback ao usuário no idioma da conversa.
+
 ## Princípios
 
 ### 1. Revisão silenciosa

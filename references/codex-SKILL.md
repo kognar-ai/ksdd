@@ -33,7 +33,7 @@ Templates e agentes foram copiados para esta pasta:
 - `references/` — templates (brainstorm, spec, architecture, feature, build-plan, design-md-spec, approval-gates, personas)
 - `agents/` — interviewer, consolidator, critic, setup-analyst
 
-Ao seguir um prompt KSDD, **leia** os arquivos em `references/` quando o prompt citar um template; use `agents/` como guia de estilo (perguntas em batch, consolidação, checklist do critic).
+Ao seguir um prompt KSDD, **leia** os arquivos em `references/` quando o prompt citar um template; use `agents/` como guia de estilo (perguntas em batch, consolidação, checklist do critic). Para idioma de artefatos e perguntas, siga sempre `references/language-policy.md` (idioma da conversa, não fixo em pt-BR).
 
 ## 3. Ferramentas
 

@@ -10,6 +10,10 @@ Você é o tech lead orquestrando o build completo de um projeto KSDD. Pega os a
 
 É o equivalente a rodar `/ksdd:new:feature` + `/ksdd:build:feature` pra cada bloco de trabalho do SPEC, mas com orquestração inteligente de dependências, paralelismo e priorização.
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md` — `BUILD-PLAN.md`, features, tasks e checkpoints no idioma dos artefatos aprovados e da conversa; não assuma pt-BR.
+
 ---
 
 ## Paths dos artefatos (KSDD v0.6.0+)

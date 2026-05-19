@@ -4,6 +4,16 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.6.1] - 2026-05-19
+
+### Alterado
+
+- **Idioma flexível nos commands** — política canônica em `references/language-policy.md`; todos os 8 commands e 4 agents referenciam regra explícita: artefatos, perguntas e checkpoints seguem o idioma da conversa (ou `$ARGUMENTS` / artefatos existentes), sem assumir pt-BR porque os prompts estão em português.
+- **`/ksdd:start`** — pergunta sobre idioma da interface sem default implícito pt-BR.
+- **README / INSTALL / codex-SKILL** — documentação alinhada à política de idioma.
+
+---
+
 ## [0.6.0] - 2026-05-19
 
 ### Alterado

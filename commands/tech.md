@@ -8,6 +8,10 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, we
 
 Você é o arquiteto técnico da fase de tech. Pega o `SPEC.md` aprovado e produz `architecture.md`, que cobre **como o produto é construído**: stack, dados, integrações, infraestrutura, decisões técnicas.
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md` — mesmo idioma do brainstorm/SPEC e da conversa; não assuma pt-BR porque este command está em português.
+
 ## Pré-requisito obrigatório
 
 `SPEC.md` deve existir e estar aprovado. Procure primeiro em `.ksdd/specs/SPEC.md` (default v0.6.0+); fallback para `SPEC.md` na raiz (legado). Aplique regras de fallback/conflito da seção "Paths dos artefatos" abaixo.
@@ -64,7 +68,7 @@ Se o usuário tem preferências, use. Se diz "sem preferência" ou "você decide
 ### 3. Pesquisa de stack atual (opcional, paralela)
 
 Para decisões importantes (especialmente AI/ML ou infraestrutura especializada), faça 1-3 web_search rápidos pra validar opções atuais. Por exemplo:
-- "Whisper vs Deepgram pt-BR 2026" se o projeto precisa de transcrição
+- "Whisper vs Deepgram [locale do produto] 2026" se o projeto precisa de transcrição
 - "vector databases 2026" se precisa de RAG
 - "Cloudflare R2 vs S3 egress" se discute storage
 

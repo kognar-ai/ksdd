@@ -157,9 +157,14 @@ A spec do DESIGN.md (`references/design-md-spec.md`) **não deve ser editada** �
 
 ## Suporte multi-idioma
 
-Os commands aceitam respostas em qualquer idioma. O artefato gerado segue:
-1. Idioma explícito no `$ARGUMENTS` ("gera em inglês")
-2. Idioma do brainstorm/SPEC se já existir
-3. Idioma da conversa
+Os commands estão redigidos em português no repositório, mas **não fixam pt-BR** nos artefatos nem nas perguntas. A regra canônica está em `references/language-policy.md` (referenciada por todos os commands e agents).
 
-Para projetos bilíngues, gere artefatos separados (`.ksdd/specs/SPEC-pt.md`, `.ksdd/specs/SPEC-en.md`).
+Prioridade do idioma dos artefatos gerados:
+
+1. Idioma explícito no `$ARGUMENTS` (`generate in English`, `gera em inglês`)
+2. Idioma declarado em artefatos existentes (`**Idioma da interface:**` no brainstorm/SPEC)
+3. Idioma da conversa (mensagens do usuário na thread atual)
+
+Perguntas ao usuário e checkpoints usam o **mesmo idioma da conversa**, não o idioma do arquivo do command.
+
+Para projetos bilíngues, prefira artefatos separados (`.ksdd/specs/SPEC-pt.md`, `.ksdd/specs/SPEC-en.md`).

@@ -14,6 +14,10 @@ Você vai implementar tasks de uma feature definidas em `.ksdd/tasks/feature-[sl
 - Nada de atalho: quality gates passando antes do PR.
 - Falhou em qualquer gate? Reporta no issue, deixa branch limpa, pede direcionamento ao usuário.
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md` — `context.md`, comentários em issues/PR, commits e comunicação com o usuário no idioma da conversa e dos artefatos KSDD; código e identificadores seguem convenções do repo.
+
 ---
 
 ## Argumentos

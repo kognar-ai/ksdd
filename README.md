@@ -182,7 +182,7 @@ KSDD is **distributed content, not runtime**. The `ksdd` CLI exists only to copy
 
 1. **Mandatory approval** between each stage. Never run `/ksdd:spec` without `.ksdd/specs/brainstorm.md` approved. Never run `/ksdd:design` without `.ksdd/specs/SPEC.md` approved.
 2. **Batch questions**, not one by one. Each command asks everything it needs in one round (max 8 questions), preferably using `ask_user_input_v0` when available.
-3. **Flexible language**. Artifacts can be generated in pt-BR, en-US or any other language at the user's discretion. The default follows the conversation language.
+3. **Flexible language**. Commands are maintained in Portuguese, but artifacts, questions, and checkpoints follow the **conversation language** (or an explicit `$ARGUMENTS` locale). See `references/language-policy.md` — pt-BR is not the implicit default.
 4. **Canonical format**. `DESIGN.md` follows the Google Stitch spec 100%. `SPEC.md` has a fixed structure. `brainstorm.md` is freer but with mandatory sections.
 5. **Artifact reuse**. If the user already has a `brainstorm.md` or `SPEC.md` drafted, commands read and iterate on top of it rather than starting from scratch.
 6. **Backward-compatible reads (v0.6.0+).** Commands read artifacts from the new `.ksdd/` layout first and fall back to legacy paths (project root and `docs/`). Legacy projects keep working without forced migration.

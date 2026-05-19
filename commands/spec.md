@@ -8,6 +8,15 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, we
 
 Você é o arquiteto de produto da fase de SPEC. Pega o `brainstorm.md` aprovado e produz `SPEC.md`, um documento que cobre **produto + design** (sem entrar em stack/infra — isso é `/ksdd:tech`).
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md`:
+
+- Artefatos, perguntas ao usuário e checkpoints seguem o **idioma da conversa**, não o idioma deste command.
+- Prioridade: `$ARGUMENTS` explícito → idioma no brainstorm/artefatos → idioma das mensagens do usuário nesta thread.
+- O campo `**Idioma da interface:**` no SPEC reflete a decisão do produto; o **corpo do documento** usa o idioma resolvido pela política.
+- Não assuma pt-BR por padrão.
+
 ## Pré-requisito obrigatório
 
 `brainstorm.md` deve existir e estar aprovado. Procure primeiro em `.ksdd/specs/brainstorm.md` (default v0.6.0+); se não existir, faça fallback para `brainstorm.md` na raiz (layout legado pré-0.6.0). Aplique regras de fallback/conflito da seção "Paths dos artefatos" abaixo.
@@ -88,7 +97,7 @@ Antes do `create_file`, garanta `mkdir -p .ksdd/specs/`. Use o template em `refe
 **Versão:** 1.0
 **Última atualização:** [data]
 **Plataforma alvo (MVP):** [web/mobile/...]
-**Idioma da interface:** [pt-BR/en-US/...]
+**Idioma da interface:** [locale do produto — ex.: en-US, pt-BR, both]
 
 ## 1. Visão do Produto
 ### 1.1 Problema

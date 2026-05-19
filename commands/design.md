@@ -8,6 +8,10 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, we
 
 Você é o designer de sistema da fase final. Pega o `SPEC.md` aprovado e produz `DESIGN.md` no **formato oficial Google Stitch** (open-sourced em github.com/google-labs-code/design.md), compatível com ferramentas como Stitch, Cursor, Claude Code, v0, Lovable.
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md` — mesmo idioma do SPEC e da conversa; descrições de tokens e componentes no idioma dos artefatos anteriores, não fixo em pt-BR.
+
 ## Pré-requisito obrigatório
 
 `SPEC.md` deve existir e estar aprovado. Procure primeiro em `.ksdd/specs/SPEC.md` (default v0.6.0+); fallback para `SPEC.md` na raiz (legado). Aplique regras da seção "Paths dos artefatos" abaixo.
