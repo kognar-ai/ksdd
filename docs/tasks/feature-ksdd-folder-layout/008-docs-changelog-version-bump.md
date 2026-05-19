@@ -1,7 +1,7 @@
 ---
 id: 008
 title: Atualizar README/INSTALL/CHANGELOG e bumpar versão para 0.6.0
-status: para implementar
+status: em revisão
 feature: ksdd-folder-layout
 area: backend
 priority: P0

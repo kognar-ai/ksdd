@@ -4,6 +4,23 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.6.0] - 2026-05-19
+
+### Alterado
+
+- **Novo layout `.ksdd/` para todos os artefatos KSDD** — `brainstorm.md`, `SPEC.md`, `architecture.md` e `DESIGN.md` passam a ser gerados em `.ksdd/specs/`; `FEATURE-[slug].md` em `.ksdd/features/`; tasks e context.md em `.ksdd/tasks/feature-[slug]/`; `BUILD-PLAN.md` em `.ksdd/build/`. Mantém raiz do projeto limpa e separa artefatos de processo dos artefatos de produto.
+- **Leitura backward-compatible** — todos os 8 commands continuam reconhecendo artefatos em paths legados (raiz e `docs/`), emitindo warning amarelo claro quando detectam o layout antigo. Projetos existentes continuam funcionando sem migração obrigatória.
+- **Sugestão de migração via `git mv`** — quando detecta legados, o command sugere o comando shell exato para mover via git (preserva histórico). Migração executada manualmente pelo usuário, não automatizada nesta versão.
+- **Abort em conflito** — se mesmo artefato existe em path novo E legado com conteúdos diferentes, o command aborta com erro pedindo resolução manual em vez de escolher por heurística.
+- **`/ksdd:setup`** — Fase 0.1 detecta legados e pergunta ao usuário antes de prosseguir (3 opções: gerar separado em `.ksdd/`, pausar para migrar manual, abortar).
+
+### Planejado para 1.0.0 (futuro)
+
+- **Remoção do fallback de leitura legado** — janela mínima de 6 meses de compat antes da remoção.
+- **Comando `ksdd migrate`** explícito no CLI para mover artefatos legados automaticamente (avaliado conforme demanda).
+
+---
+
 ## [0.5.2] - 2026-05-15
 
 ### Alterado

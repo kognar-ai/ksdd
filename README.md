@@ -21,14 +21,16 @@ Também é instalada a skill **`ksdd`** em `~/.agents/skills/ksdd/` (referência
 Reinicie o Codex após instalar. `CODEX_HOME` (default `~/.codex`) altera a pasta de prompts se definido.
 
 ```
-/ksdd:start        →  brainstorm.md         (ideia → conceito refinado)
-/ksdd:spec         →  SPEC.md               (conceito → especificação produto+design)
-/ksdd:tech         →  architecture.md       (especificação → arquitetura técnica)
-/ksdd:design       →  DESIGN.md             (especificação → design system Stitch-compatible)
-/ksdd:new:feature    →  docs/FEATURE-[slug].md  (nova feature → spec + tasks implementáveis)
-/ksdd:build:feature  →  task por task          (feature → implementação com issue, branch, PR)
-/ksdd:build:all      →  BUILD-PLAN.md         (SPEC inteiro → features + tasks + implementação completa)
+/ksdd:start        →  .ksdd/specs/brainstorm.md     (ideia → conceito refinado)
+/ksdd:spec         →  .ksdd/specs/SPEC.md           (conceito → especificação produto+design)
+/ksdd:tech         →  .ksdd/specs/architecture.md   (especificação → arquitetura técnica)
+/ksdd:design       →  .ksdd/specs/DESIGN.md         (especificação → design system Stitch-compatible)
+/ksdd:new:feature    →  .ksdd/features/FEATURE-[slug].md  (nova feature → spec + tasks implementáveis)
+/ksdd:build:feature  →  task por task                    (feature → implementação com issue, branch, PR)
+/ksdd:build:all      →  .ksdd/build/BUILD-PLAN.md        (SPEC inteiro → features + tasks + implementação completa)
 ```
+
+> **Migrando da v0.5.x?** A partir da v0.6.0, KSDD usa o layout `.ksdd/` em vez de espalhar artefatos pela raiz/`docs/`. Projetos legados continuam funcionando — cada command lê do path antigo se o novo não existe e mostra como migrar via `git mv`. Veja [CHANGELOG](CHANGELOG.md#060---2026-05-19) para detalhes.
 
 ## Filosofia
 
@@ -88,23 +90,23 @@ Claude : [lê SPEC.md (+ architecture.md se existir)]
          [PARA]
 
 Você   : /ksdd:new:feature notificações push
-Claude : [lê SPEC.md, architecture.md, DESIGN.md]
+Claude : [lê .ksdd/specs/{SPEC,architecture,DESIGN}.md]
          [faz perguntas sobre escopo, personas impactadas, prioridade]
-         [gera docs/FEATURE-push-notifications.md com impacto em telas, dados, API e design]
+         [gera .ksdd/features/FEATURE-push-notifications.md com impacto em telas, dados, API e design]
          [PARA]
 
 Você   : /ksdd:build:feature push-notifications
-Claude : [lê docs/FEATURE-push-notifications.md + tasks + todos os artefatos]
+Claude : [lê .ksdd/features/FEATURE-push-notifications.md + tasks + todos os artefatos]
          [para cada task: issue → branch → context.md → implementa → quality gates → PR]
          [PARA — checkpoint por feature]
 
 --- OU, para buildar o projeto inteiro: ---
 
 Você   : /ksdd:build:all
-Claude : [lê SPEC.md, architecture.md, DESIGN.md]
+Claude : [lê .ksdd/specs/{SPEC,architecture,DESIGN}.md]
          [decompõe fases de entrega em features]
          [quebra cada feature em tasks implementáveis]
-         [gera BUILD-PLAN.md com plano completo]
+         [gera .ksdd/build/BUILD-PLAN.md com plano completo]
          [PARA — pede aprovação do plano]
 
 Você   : "aprovado"
@@ -167,24 +169,30 @@ Os commands aproveitam tools nativos do Claude Code e podem invocar skills auxil
 
 ## Output esperado
 
-Após o fluxo completo, o usuário tem 4+ arquivos no diretório do projeto:
+Após o fluxo completo, o usuário tem a pasta `.ksdd/` na raiz do projeto:
 
 ```
 projeto/
-├── brainstorm.md              (~500-1500 palavras)
-├── SPEC.md                    (~3000-8000 palavras)
-├── architecture.md            (~2000-5000 palavras, opcional)
-├── DESIGN.md                  (YAML frontmatter + ~1500-3500 palavras)
-├── BUILD-PLAN.md              (plano mestre do build completo)
-└── docs/
-    ├── FEATURE-[slug].md      (~1500-4000 palavras, uma por feature)
-    └── tasks/
-        └── feature-[slug]/
-            ├── README.md          (índice de tasks da feature)
-            ├── NNN-slug.md        (task individual com frontmatter)
-            └── .context/
-                └── NNN-context.md (contexto compilado para implementação)
+├── (código do projeto, README, configs, etc. — raiz limpa)
+└── .ksdd/
+    ├── specs/
+    │   ├── brainstorm.md          (~500-1500 palavras)
+    │   ├── SPEC.md                (~3000-8000 palavras)
+    │   ├── architecture.md        (~2000-5000 palavras, opcional)
+    │   └── DESIGN.md              (YAML frontmatter + ~1500-3500 palavras)
+    ├── features/
+    │   └── FEATURE-[slug].md      (~1500-4000 palavras, uma por feature)
+    ├── tasks/
+    │   └── feature-[slug]/
+    │       ├── README.md          (índice de tasks da feature)
+    │       ├── NNN-slug.md        (task individual com frontmatter)
+    │       └── .context/
+    │           └── NNN-context.md (contexto compilado para implementação)
+    └── build/
+        └── BUILD-PLAN.md          (plano mestre do build completo)
 ```
+
+> Projetos legados pré-v0.6.0 podem ter artefatos na raiz (`SPEC.md`, etc.) e em `docs/` (FEATURE/tasks) — os commands continuam lendo de lá com warning de migração, sem quebrar nada.
 
 Pronto pra ser consumido por ferramentas de design (Stitch, v0, Lovable, Pencil) e agentes de código (Claude Code, Cursor) com contexto persistente.
 
