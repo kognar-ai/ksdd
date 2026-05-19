@@ -113,23 +113,25 @@ Todos os commands detectam artefatos existentes e perguntam se quer iterar ou re
 
 ### Comandos suportados
 
+Todos os artefatos KSDD ficam em `.ksdd/` a partir da v0.6.0 (com fallback de leitura para layout legado raiz/`docs/`).
+
 | Comando | Input | Output | Próximo |
 |---------|-------|--------|---------|
-| `/ksdd:start [ideia]` | Ideia bruta | `brainstorm.md` | `/ksdd:spec` |
-| `/ksdd:spec [foco?]` | `brainstorm.md` | `SPEC.md` | `/ksdd:tech` ou `/ksdd:design` |
-| `/ksdd:tech [stack?]` | `SPEC.md` | `architecture.md` | `/ksdd:design` |
-| `/ksdd:design [direção?]` | `SPEC.md` (+ `architecture.md` opcional) | `DESIGN.md` (Google Stitch format) | — |
+| `/ksdd:start [ideia]` | Ideia bruta | `.ksdd/specs/brainstorm.md` | `/ksdd:spec` |
+| `/ksdd:spec [foco?]` | `.ksdd/specs/brainstorm.md` | `.ksdd/specs/SPEC.md` | `/ksdd:tech` ou `/ksdd:design` |
+| `/ksdd:tech [stack?]` | `.ksdd/specs/SPEC.md` | `.ksdd/specs/architecture.md` | `/ksdd:design` |
+| `/ksdd:design [direção?]` | `.ksdd/specs/SPEC.md` (+ `.ksdd/specs/architecture.md` opcional) | `.ksdd/specs/DESIGN.md` (Google Stitch format) | — |
 
 ## Validando os artefatos
 
 ### DESIGN.md
 ```bash
-npx @google/design.md lint DESIGN.md
+npx @google/design.md lint .ksdd/specs/DESIGN.md
 ```
 
 Exportar pra Tailwind:
 ```bash
-npx @google/design.md export --format css-tailwind DESIGN.md > theme.css
+npx @google/design.md export --format css-tailwind .ksdd/specs/DESIGN.md > theme.css
 ```
 
 ### brainstorm.md, SPEC.md, architecture.md
@@ -155,9 +157,14 @@ A spec do DESIGN.md (`references/design-md-spec.md`) **não deve ser editada** �
 
 ## Suporte multi-idioma
 
-Os commands aceitam respostas em qualquer idioma. O artefato gerado segue:
-1. Idioma explícito no `$ARGUMENTS` ("gera em inglês")
-2. Idioma do brainstorm/SPEC se já existir
-3. Idioma da conversa
+Os commands estão redigidos em português no repositório, mas **não fixam pt-BR** nos artefatos nem nas perguntas. A regra canônica está em `references/language-policy.md` (referenciada por todos os commands e agents).
 
-Para projetos bilíngues, gere artefatos separados (`SPEC-pt.md`, `SPEC-en.md`).
+Prioridade do idioma dos artefatos gerados:
+
+1. Idioma explícito no `$ARGUMENTS` (`generate in English`, `gera em inglês`)
+2. Idioma declarado em artefatos existentes (`**Idioma da interface:**` no brainstorm/SPEC)
+3. Idioma da conversa (mensagens do usuário na thread atual)
+
+Perguntas ao usuário e checkpoints usam o **mesmo idioma da conversa**, não o idioma do arquivo do command.
+
+Para projetos bilíngues, prefira artefatos separados (`.ksdd/specs/SPEC-pt.md`, `.ksdd/specs/SPEC-en.md`).

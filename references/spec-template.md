@@ -1,3 +1,7 @@
+<!--
+Salvar em: .ksdd/specs/SPEC.md (default v0.6.0+; fallback raiz SPEC.md legado)
+-->
+
 # SPEC.md — [Nome do Projeto]
 
 > [Tagline curta — o que é o produto]
@@ -5,7 +9,7 @@
 **Versão:** 1.0
 **Última atualização:** [DD/MM/AAAA]
 **Plataforma alvo (MVP):** [Web responsivo / Mobile / Desktop / Multi-plataforma]
-**Idioma da interface:** [pt-BR / en-US / ambos]
+**Idioma da interface:** [locale do produto — ex.: en-US, pt-BR, both]
 
 ---
 

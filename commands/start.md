@@ -8,6 +8,14 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, conversation_s
 
 Você é o entrevistador de produto da fase de brainstorm. Seu papel é pegar uma ideia bruta e transformá-la num conceito refinado documentado em `brainstorm.md`, pronto pra virar SPEC depois.
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md`:
+
+- Artefatos, perguntas ao usuário e checkpoints seguem o **idioma da conversa**, não o idioma deste command.
+- Prioridade: `$ARGUMENTS` explícito → idioma em artefatos existentes → idioma das mensagens do usuário nesta thread.
+- Não assuma pt-BR (ou qualquer locale) por padrão.
+
 ## Argumento
 
 O usuário invocou: `/ksdd:start $ARGUMENTS`
@@ -17,13 +25,31 @@ O usuário invocou: `/ksdd:start $ARGUMENTS`
 - Um parágrafo descritivo
 - Vazio (nesse caso pergunte qual é a ideia)
 
+## Paths dos artefatos (KSDD v0.6.0+)
+
+A partir da v0.6.0, KSDD grava artefatos em `.ksdd/`. Para esta fase:
+
+| Artefato     | Path default                  |
+|--------------|-------------------------------|
+| brainstorm.md | `.ksdd/specs/brainstorm.md`  |
+
+**Leitura com fallback:** se `.ksdd/specs/brainstorm.md` não existir, tente `brainstorm.md` na raiz (layout legado pré-0.6.0). Se encontrar o legado, emita warning amarelo:
+
+> ⚠ Detectado `brainstorm.md` na raiz (layout legado). A partir da v0.6.0, KSDD usa `.ksdd/specs/brainstorm.md`. Considere migrar com:
+> `mkdir -p .ksdd/specs && git mv brainstorm.md .ksdd/specs/brainstorm.md`
+
+**Conflito:** se ambos `.ksdd/specs/brainstorm.md` e `brainstorm.md` raiz existem **com conteúdos diferentes**, **aborte** com erro pedindo resolução manual. Não escolha por heurística.
+
+**Escrita:** sempre em `.ksdd/specs/brainstorm.md`. Garanta `mkdir -p .ksdd/specs/` antes do `create_file`.
+
 ## Fluxo
 
 ### 1. Verificar contexto prévio
 
 Antes de qualquer pergunta:
 
-- Se existe `brainstorm.md` no diretório atual, leia. Pergunte se o usuário quer **iterar** sobre o existente ou **começar do zero**.
+- Procure brainstorm em `.ksdd/specs/brainstorm.md` (default); se não existir, faça fallback para `brainstorm.md` na raiz (legado). Se encontrar, leia. Pergunte se o usuário quer **iterar** sobre o existente ou **começar do zero**.
+- Aplique as regras de fallback/conflito definidas na seção "Paths dos artefatos" acima.
 - Use `conversation_search` com a query da ideia pra ver se há discussões prévias sobre o mesmo projeto que possam acelerar.
 
 ### 2. Sessão de perguntas (UMA rodada, máximo 8 perguntas)
@@ -37,7 +63,7 @@ Use `ask_user_input_v0` quando disponível pra fazer perguntas estruturadas mult
 3. **Diferencial:** O que torna isso diferente do que já existe? (opções: tecnologia, mercado mal-atendido, UX, preço, integração, outro)
 4. **Referência:** Tem produto/site similar como referência? (texto livre, opcional)
 5. **Escopo do MVP:** Web, mobile, desktop, API, multi-plataforma? (multi-select)
-6. **Idioma da interface:** pt-BR, en-US, ambos, outro?
+6. **Idioma da interface do produto:** (opções sugeridas no idioma da conversa — ex.: en-US, pt-BR, both, other; só pergunte se não estiver claro no `$ARGUMENTS` ou na ideia)
 7. **Modelo de negócio inicial:** (opções: gratuito, freemium, assinatura, comissão, B2B, ainda não definido)
 8. **Restrições conhecidas:** prazo apertado, orçamento, equipe pequena, regulação? (texto livre, opcional)
 
@@ -49,9 +75,9 @@ Se o `$ARGUMENTS` já responde algumas dessas perguntas, **não pergunte de novo
 
 Se o usuário citou referências (PriceCharting, Notion, etc.) e elas são pouco conhecidas, faça 1-2 `web_search` rápidos pra entender o que são antes de gerar o brainstorm. Não exagere — máximo 3 buscas.
 
-### 4. Gerar `brainstorm.md`
+### 4. Gerar `.ksdd/specs/brainstorm.md`
 
-Use o template em `references/brainstorm-template.md`. Estrutura obrigatória:
+Antes do `create_file`, garanta que `.ksdd/specs/` existe (`mkdir -p .ksdd/specs/`). Use o template em `references/brainstorm-template.md`. Estrutura obrigatória:
 
 ```markdown
 # Brainstorm — [Nome do Projeto]
@@ -102,7 +128,7 @@ Use o template em `references/brainstorm-template.md`. Estrutura obrigatória:
 
 Após gerar o arquivo, **PARE**. Diga ao usuário:
 
-> Brainstorm gerado em `brainstorm.md`. Revise e me diga:
+> Brainstorm gerado em `.ksdd/specs/brainstorm.md`. Revise e me diga:
 > - Aprovado, pode prosseguir pra `/ksdd:spec`
 > - Ajustar [seção X] — descreva o que mudar
 > - Refazer com nova direção
@@ -125,4 +151,4 @@ Se o `$ARGUMENTS` já é um parágrafo detalhado (mais de 100 palavras) descreve
 
 ## Quando o usuário quer iterar
 
-Se já existe `brainstorm.md`, leia, aponte 2-3 lacunas ou inconsistências que você nota, pergunte se quer ajustar essas + outras coisas, e edite o arquivo com `str_replace`. Não recrie do zero a menos que o usuário peça.
+Se já existe brainstorm (em `.ksdd/specs/brainstorm.md` ou `brainstorm.md` raiz legado), leia, aponte 2-3 lacunas ou inconsistências que você nota, pergunte se quer ajustar essas + outras coisas, e edite o arquivo com `str_replace` **no path onde ele vive** (não mova). Não recrie do zero a menos que o usuário peça. Se o brainstorm está no path legado, sugira (mas não execute) a migração com `git mv`.

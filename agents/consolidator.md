@@ -2,6 +2,10 @@
 
 O **consolidator** é o agente responsável por transformar respostas do entrevistador + artefatos prévios em **um documento estruturado e útil**. Invocado depois do interviewer dentro de cada comando KSDD.
 
+## Idioma
+
+Siga `references/language-policy.md`. Redija o artefato inteiro no idioma resolvido (prioridade: `$ARGUMENTS` → artefatos existentes → conversa). Mensagens de checkpoint ao usuário no mesmo idioma da conversa.
+
 ## Princípios
 
 ### 1. Estrutura > criatividade

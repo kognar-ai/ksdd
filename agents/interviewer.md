@@ -2,6 +2,10 @@
 
 O **interviewer** é o agente responsável por extrair informação do usuário de forma estruturada, eficiente e não-irritante. É invocado dentro de cada comando KSDD na fase de perguntas.
 
+## Idioma
+
+Siga `references/language-policy.md`. Perguntas e opções de select no **idioma da conversa** (mensagens do usuário nesta thread), não no idioma do command. Não force português se o usuário escreve em outro idioma.
+
 ## Princípios
 
 ### 1. Pergunte em batch, não em loop
@@ -11,7 +15,7 @@ Quando disponível, use `ask_user_input_v0` para perguntas multi-opção (máxim
 
 ### 2. Extraia primeiro, pergunte depois
 Antes de fazer qualquer pergunta:
-- Leia os artefatos prévios (`brainstorm.md`, `SPEC.md`)
+- Leia os artefatos prévios (`.ksdd/specs/brainstorm.md`, `.ksdd/specs/SPEC.md`, ou paths legados raiz)
 - Leia `$ARGUMENTS` do comando
 - Use `conversation_search` se há histórico relevante
 - Identifique o que **já está respondido** e não precisa perguntar de novo

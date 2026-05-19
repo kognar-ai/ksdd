@@ -1,5 +1,5 @@
 ---
-description: Cria a especificação de uma nova feature para um projeto KSDD existente (docs/FEATURE-[slug].md) e quebra em tasks implementáveis salvas em docs/tasks/feature-[slug]/. Lê brainstorm.md, SPEC.md, architecture.md e DESIGN.md para contexto completo.
+description: Cria a especificação de uma nova feature para um projeto KSDD existente (.ksdd/features/FEATURE-[slug].md) e quebra em tasks implementáveis salvas em .ksdd/tasks/feature-[slug]/. Lê brainstorm.md, SPEC.md, architecture.md e DESIGN.md (de .ksdd/specs/ com fallback raiz) para contexto completo.
 argument-hint: "[nome ou descrição da feature] [--tasks-only] (opcional — sem args pergunta)"
 allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, list_directory, Glob, Grep
 ---
@@ -8,40 +8,68 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, we
 
 Você é o product owner da fase de feature spec. Pega os artefatos existentes do projeto KSDD e produz:
 
-1. **`docs/FEATURE-[slug].md`** — especificação completa da feature (produto + impacto + critérios)
-2. **`docs/tasks/feature-[slug]/`** — tasks implementáveis individuais com frontmatter estruturado
+1. **`.ksdd/features/FEATURE-[slug].md`** — especificação completa da feature (produto + impacto + critérios)
+2. **`.ksdd/tasks/feature-[slug]/`** — tasks implementáveis individuais com frontmatter estruturado
+
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md` — FEATURE spec, tasks e perguntas no idioma dos artefatos KSDD existentes e da conversa; não assuma pt-BR.
 
 ## Argumentos
 
 `$ARGUMENTS` pode conter:
 - Nome/descrição da feature ("notificações push", "sistema de badges de conquistas")
-- `--tasks-only` → pula a geração do FEATURE spec (assume `docs/FEATURE-[slug].md`; na raiz, `FEATURE-[slug].md` legado) e gera só as tasks
+- `--tasks-only` → pula a geração do FEATURE spec (procura nesta ordem: `.ksdd/features/FEATURE-[slug].md` → `docs/FEATURE-[slug].md` → `FEATURE-[slug].md` raiz, ambos legados) e gera só as tasks
 - Vazio → pergunte qual feature o usuário quer especificar
 
 ## Pré-requisito obrigatório
 
-`SPEC.md` deve existir no diretório atual. É o documento mínimo necessário.
+`SPEC.md` deve existir. Procure primeiro em `.ksdd/specs/SPEC.md` (default v0.6.0+); fallback para `SPEC.md` na raiz (legado). É o documento mínimo necessário.
 
-Se não existir: pare e instrua o usuário a rodar `/ksdd:spec` primeiro.
+Se não existir em nenhum dos paths: pare e instrua o usuário a rodar `/ksdd:spec` primeiro.
 
-Artefatos complementares (leia se existirem):
+Artefatos complementares (leia se existirem, sempre em `.ksdd/specs/` primeiro, fallback raiz):
 - `brainstorm.md` — contexto original do projeto
 - `architecture.md` — stack, modelo de dados, APIs existentes
 - `DESIGN.md` — design system, tokens, componentes
+
+## Paths dos artefatos (KSDD v0.6.0+)
+
+A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos. Para este command:
+
+| Artefato            | Leitura (em ordem, com fallback)                                              | Escrita default                         |
+|---------------------|-------------------------------------------------------------------------------|-----------------------------------------|
+| SPEC.md             | `.ksdd/specs/SPEC.md` → raiz `SPEC.md`                                       | n/a (input)                             |
+| brainstorm.md       | `.ksdd/specs/brainstorm.md` → raiz `brainstorm.md`                           | n/a (input)                             |
+| architecture.md     | `.ksdd/specs/architecture.md` → raiz `architecture.md`                       | n/a (input)                             |
+| DESIGN.md           | `.ksdd/specs/DESIGN.md` → raiz `DESIGN.md`                                   | n/a (input)                             |
+| FEATURE-[slug].md   | `.ksdd/features/FEATURE-[slug].md` → `docs/FEATURE-[slug].md` → raiz legado  | `.ksdd/features/FEATURE-[slug].md`      |
+| tasks               | `.ksdd/tasks/feature-[slug]/` → `docs/tasks/feature-[slug]/`                 | `.ksdd/tasks/feature-[slug]/`           |
+
+**Fallback de leitura:** ao detectar artefato em path legado, emita warning amarelo:
+
+> ⚠ Detectado `<arquivo>` em path legado (`<path antigo>`). A partir da v0.6.0, KSDD usa `<path novo>`. Considere migrar com:
+> `mkdir -p <novo-dir> && git mv <path antigo> <path novo>`
+
+**Conflito:** se mesmo artefato existe em mais de um path **com conteúdos diferentes**, **aborte** com erro pedindo resolução manual.
+
+**Escrita:** sempre nos paths default `.ksdd/features/` e `.ksdd/tasks/`. Garanta `mkdir -p .ksdd/features/` e `mkdir -p .ksdd/tasks/feature-[slug]/` antes dos `create_file`.
+
+**Numeração de tasks:** ao calcular o próximo ID, considere IDs existentes **em ambos** `.ksdd/tasks/feature-[slug]/` E `docs/tasks/feature-[slug]/` (legado) para evitar colisão.
 
 ## Fluxo
 
 ### 1. Ler e absorver o contexto do projeto
 
-Leia **todos** os artefatos KSDD existentes:
+Leia **todos** os artefatos KSDD existentes (aplicando fallback definido em "Paths dos artefatos"):
 
-1. `view SPEC.md` (obrigatório)
-2. `view brainstorm.md` (se existir)
-3. `view architecture.md` (se existir)
-4. `view DESIGN.md` (se existir)
+1. `view .ksdd/specs/SPEC.md` (obrigatório; fallback `view SPEC.md` raiz)
+2. `view .ksdd/specs/brainstorm.md` (se existir; fallback raiz)
+3. `view .ksdd/specs/architecture.md` (se existir; fallback raiz)
+4. `view .ksdd/specs/DESIGN.md` (se existir; fallback raiz)
 
-Se existem `docs/FEATURE-*.md` prévios (ou `FEATURE-*.md` na raiz de projetos legados), liste-os e leia os títulos pra evitar duplicação.
-Se existem tasks prévias em `docs/tasks/`, verifique o maior ID existente pra continuar a numeração.
+Se existem features prévias (em `.ksdd/features/FEATURE-*.md`, `docs/FEATURE-*.md` legado, ou `FEATURE-*.md` raiz mais legado), liste-as e leia os títulos pra evitar duplicação.
+Se existem tasks prévias (em `.ksdd/tasks/` ou `docs/tasks/` legado), verifique o maior ID existente **em ambos** pra continuar a numeração sem colisão.
 
 ### 2. Sessão de perguntas (1-2 rodadas)
 
@@ -53,15 +81,15 @@ Faça perguntas em batch (máximo 3 por rodada de `ask_user_input_v0`, complemen
 
 2. **Motivação / problema:** Por que essa feature agora? É uma necessidade de usuários, oportunidade de negócio, dívida técnica, ou outra coisa? (opções derivadas do contexto + texto livre)
 
-3. **Personas impactadas:** Quais das personas do SPEC.md são afetadas? (multi-select com as personas existentes + "nova persona")
+3. **Personas impactadas:** Quais das personas do SPEC (de `.ksdd/specs/SPEC.md` ou raiz legado) são afetadas? (multi-select com as personas existentes + "nova persona")
 
 4. **Prioridade:** Crítica (bloqueia uso), Alta (melhora significativa), Média (nice-to-have pro próximo ciclo), Baixa (backlog)
 
 5. **Escopo:** Mínimo viável da feature — o que entra na v1 da feature e o que fica pra depois?
 
-6. **Telas envolvidas:** Quais telas do SPEC.md são afetadas? Precisa de telas novas? (multi-select com telas existentes + "nova tela")
+6. **Telas envolvidas:** Quais telas do SPEC são afetadas? Precisa de telas novas? (multi-select com telas existentes + "nova tela")
 
-7. **Modelo de dados:** A feature exige novas entidades ou altera as existentes? (se architecture.md existe, referencie)
+7. **Modelo de dados:** A feature exige novas entidades ou altera as existentes? (se architecture existe — em `.ksdd/specs/architecture.md` ou raiz legado — referencie)
 
 8. **Dependências:** Depende de outra feature, serviço externo, ou decisão pendente?
 
@@ -78,15 +106,15 @@ Derive um slug curto do nome da feature:
 - "sistema de badges" → `badges`
 - "painel admin" → `admin-panel`
 
-### 5. Gerar `docs/FEATURE-[slug].md`
+### 5. Gerar `.ksdd/features/FEATURE-[slug].md`
 
-Crie a pasta `docs/` se não existir. Use o template em `references/feature-template.md`. O FEATURE spec é o **contrato de produto** — descreve o quê e por quê, não o como.
+Antes do `create_file`, garanta `mkdir -p .ksdd/features/`. Use o template em `references/feature-template.md`. O FEATURE spec é o **contrato de produto** — descreve o quê e por quê, não o como.
 
 ### 6. Checkpoint do FEATURE spec (OBRIGATÓRIO)
 
 Após gerar:
 
-> `docs/FEATURE-[slug].md` gerado (~[N] palavras). Recomendo revisar especialmente:
+> `.ksdd/features/FEATURE-[slug].md` gerado (~[N] palavras). Recomendo revisar especialmente:
 > - Seção 2 (escopo) — confere se o corte v1/depois faz sentido
 > - Seção 5 (impacto em telas) — confere se cobre todas as telas afetadas
 > - Seção 10 (critérios de aceite) — confere se são verificáveis e completos
@@ -106,9 +134,9 @@ Após aprovação do FEATURE spec (ou se `--tasks-only` com FEATURE existente):
 - Identifique dependências (uma task só pode depender de tasks com ID menor).
 - Distribua tasks em áreas: `backend`, `frontend`, `infra`, `data-model`, `auth`, `billing`, `observability`, `qa`, `design` (ou outras conforme o projeto).
 
-**b) Gere os arquivos** em `docs/tasks/feature-[slug]/` com nomenclatura `NNN-slug-curto.md` (ID com 3 dígitos zero-padded, slug em kebab-case sem acentos).
+**b) Gere os arquivos** em `.ksdd/tasks/feature-[slug]/` com nomenclatura `NNN-slug-curto.md` (ID com 3 dígitos zero-padded, slug em kebab-case sem acentos). Antes do primeiro `create_file`, garanta `mkdir -p .ksdd/tasks/feature-[slug]/`.
 
-Se já existem tasks no projeto, continue a numeração a partir do maior ID existente.
+Se já existem tasks no projeto (em `.ksdd/tasks/` ou `docs/tasks/` legado), continue a numeração a partir do **maior ID encontrado nos dois paths combinados** — não colida.
 
 **c) Formato obrigatório de cada task:**
 
@@ -123,11 +151,11 @@ priority: P0 | P1 | P2
 estimate: S | M | L
 depends_on: [NNN, NNN]
 feature_refs:
-  - "docs/FEATURE-[slug].md#<seção>"
+  - ".ksdd/features/FEATURE-[slug].md#<seção>"
 spec_refs:
-  - "SPEC.md#<seção>"
+  - ".ksdd/specs/SPEC.md#<seção>"
 arch_refs:
-  - "architecture.md#<seção>"
+  - ".ksdd/specs/architecture.md#<seção>"
 ---
 
 # NNN — Título da task
@@ -167,18 +195,20 @@ Vazio se não houver.
   - **P1** — importante mas a feature entrega valor sem ela.
   - **P2** — nice-to-have ou preparação para v2.
 - **Estimate:** S = até 1 dia, M = 1-2 dias, L = 2-3 dias.
-- **Respeite os artefatos.** Não invente tecnologia fora do que `architecture.md` decidiu. Se uma necessidade não tem ADR, cite em "Riscos / dependências externas".
-- **Não duplique informação** dos artefatos — referencie via `feature_refs`/`spec_refs`/`arch_refs`. A task descreve o **trabalho a fazer**, não o produto.
+- **Respeite os artefatos.** Não invente tecnologia fora do que `architecture.md` (em `.ksdd/specs/` ou raiz legado) decidiu. Se uma necessidade não tem ADR, cite em "Riscos / dependências externas".
+- **Não duplique informação** dos artefatos — referencie via `feature_refs`/`spec_refs`/`arch_refs` com paths atuais (`.ksdd/...`). A task descreve o **trabalho a fazer**, não o produto.
+
+**Nota sobre refs em projetos legados:** Se a feature está sendo gerada num projeto que ainda tem artefatos na raiz/`docs/`, os `*_refs` da task podem apontar para os paths legados onde o artefato realmente vive — o `/ksdd:build:feature` resolve qualquer um dos paths.
 - **Tasks de teste fazem parte das tasks de feature**, não tasks separadas, salvo infra de teste.
 
-### 8. Gerar `docs/tasks/feature-[slug]/README.md`
+### 8. Gerar `.ksdd/tasks/feature-[slug]/README.md`
 
 Índice de tasks da feature:
 
 ```markdown
 # Tasks — Feature: [Nome]
 
-**Feature:** docs/FEATURE-[slug].md
+**Feature:** .ksdd/features/FEATURE-[slug].md
 **Total:** [N] tasks
 **Prioridade:** P0: [N] · P1: [N] · P2: [N]
 **Estimativa total:** ~[N] dias
@@ -193,7 +223,7 @@ Vazio se não houver.
 
 ### 9. Checkpoint final (OBRIGATÓRIO)
 
-> [N] tasks geradas em `docs/tasks/feature-[slug]/`:
+> [N] tasks geradas em `.ksdd/tasks/feature-[slug]/`:
 > - P0: [N] tasks (~[N] dias)
 > - P1: [N] tasks (~[N] dias)
 > - P2: [N] tasks (~[N] dias)
@@ -226,13 +256,13 @@ Vazio se não houver.
 
 ## Iteração
 
-Se já existe `docs/FEATURE-[slug].md` (ou `FEATURE-[slug].md` na raiz por legado), leia, pergunte que seções iterar, e use `str_replace` pra edição cirúrgica.
+Se já existe FEATURE (em `.ksdd/features/FEATURE-[slug].md`, ou `docs/FEATURE-[slug].md` ou `FEATURE-[slug].md` raiz por legado), leia, pergunte que seções iterar, e use `str_replace` pra edição cirúrgica **no path onde ela vive** (não mova). Se está em path legado, sugira (mas não execute) `mkdir -p .ksdd/features && git mv <path antigo> .ksdd/features/`.
 
-Se já existem tasks em `docs/tasks/feature-[slug]/`, não sobrescreva. Continue a numeração e pule áreas já cobertas (a menos que o usuário peça regeneração explícita).
+Se já existem tasks (em `.ksdd/tasks/feature-[slug]/` ou `docs/tasks/feature-[slug]/` legado), não sobrescreva. Continue a numeração considerando IDs de ambos os paths, e pule áreas já cobertas (a menos que o usuário peça regeneração explícita).
 
 ## Quando os artefatos são parciais
 
-Se o projeto só tem SPEC.md (sem architecture.md ou DESIGN.md):
+Se o projeto só tem SPEC.md (sem architecture.md ou DESIGN.md, em qualquer dos paths):
 - Seções 7 e 8 do FEATURE spec (API e Design) são geradas como sugestões, marcadas com `[a confirmar após /ksdd:tech]` ou `[a confirmar após /ksdd:design]`.
 - Tasks de backend/infra omitem `arch_refs` e marcam "Decisão arquitetural pendente" em Riscos.
 - Tasks de frontend/design omitem referências ao DESIGN.md.

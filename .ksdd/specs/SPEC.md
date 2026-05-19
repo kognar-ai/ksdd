@@ -5,7 +5,7 @@
 **Versão:** 1.0 (reverse-engineered)
 **Última atualização:** 14/05/2026
 **Plataforma alvo (MVP):** CLI multiplataforma (Node.js ≥ 16) — sem UI
-**Idioma da interface:** pt-BR (default), suporte multi-idioma nos artefatos gerados
+**Idioma da interface:** N/A (CLI sem UI); artefatos e prompts seguem idioma da conversa — ver `references/language-policy.md`
 **Origem:** Reverse-engineered via `/ksdd:setup` em 14/05/2026
 **Aviso:** Artefato gerado automaticamente. Revise e corrija antes de usar como contrato.
 
@@ -98,7 +98,7 @@ Mínima e monocromática no CLI: `✓` para sucesso, sem emojis nem ASCII art. D
 
 ### 3.5 Tom Geral
 
-Português brasileiro técnico, voz ativa, segunda pessoa para instrução ("Rode `ksdd install`"). Bilíngue quando necessário (CHANGELOG/CONTRIBUTING aceitam PT ou EN em commits). Sem jargão de marketing.
+Documentação do pacote (README, INSTALL, commands no repo): português técnico ou inglês, voz ativa. **Artefatos gerados pelos commands** seguem `references/language-policy.md` (idioma da conversa, não fixo em pt-BR). Sem jargão de marketing.
 
 ---
 
@@ -124,16 +124,18 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
 
 ### 4.2 Artefatos KSDD (gerados pelos commands no diretório do projeto-alvo)
 
-| Artefato | Path | Gerado por | Tamanho típico |
-|----------|------|------------|----------------|
-| `brainstorm.md` | raiz do projeto | `/ksdd:start` | 500-1500 palavras |
-| `SPEC.md` | raiz | `/ksdd:spec` | 3000-8000 palavras |
-| `architecture.md` | raiz | `/ksdd:tech` | 2000-5000 palavras |
-| `DESIGN.md` | raiz | `/ksdd:design` | YAML + 1500-3500 palavras |
-| `FEATURE-[slug].md` | `docs/` | `/ksdd:new:feature` | 1500-4000 palavras (1 por feature) |
-| `BUILD-PLAN.md` | raiz | `/ksdd:build:all` | mapa de execução completo |
-| `docs/tasks/feature-[slug]/NNN-*.md` | `docs/tasks/feature-[slug]/` | `/ksdd:new:feature` | task individual com frontmatter |
-| `docs/tasks/feature-[slug]/.context/NNN-context.md` | idem `.context/` | `/ksdd:build:feature` | contexto compilado de implementação |
+A partir da v0.6.0, todos os artefatos vivem em `.ksdd/`. Projetos legados (pré-0.6.0) podem manter o layout antigo (raiz + `docs/`) — commands fazem fallback de leitura.
+
+| Artefato | Path default (v0.6.0+) | Path legado (pré-0.6.0) | Gerado por | Tamanho típico |
+|----------|------------------------|--------------------------|------------|----------------|
+| `brainstorm.md` | `.ksdd/specs/brainstorm.md` | raiz `brainstorm.md` | `/ksdd:start` | 500-1500 palavras |
+| `SPEC.md` | `.ksdd/specs/SPEC.md` | raiz `SPEC.md` | `/ksdd:spec` | 3000-8000 palavras |
+| `architecture.md` | `.ksdd/specs/architecture.md` | raiz `architecture.md` | `/ksdd:tech` | 2000-5000 palavras |
+| `DESIGN.md` | `.ksdd/specs/DESIGN.md` | raiz `DESIGN.md` | `/ksdd:design` | YAML + 1500-3500 palavras |
+| `FEATURE-[slug].md` | `.ksdd/features/FEATURE-[slug].md` | `docs/FEATURE-[slug].md` (ou raiz mais legado) | `/ksdd:new:feature` | 1500-4000 palavras (1 por feature) |
+| `BUILD-PLAN.md` | `.ksdd/build/BUILD-PLAN.md` | raiz `BUILD-PLAN.md` | `/ksdd:build:all` | mapa de execução completo |
+| tasks `NNN-*.md` | `.ksdd/tasks/feature-[slug]/` | `docs/tasks/feature-[slug]/` | `/ksdd:new:feature` | task individual com frontmatter |
+| context `NNN-context.md` | `.ksdd/tasks/feature-[slug]/.context/` | `docs/tasks/feature-[slug]/.context/` | `/ksdd:build:feature` | contexto compilado de implementação |
 
 Cada artefato tem campo `Status:` (Rascunho / Aprovado) que é o sinal explícito de checkpoint cumprido.
 

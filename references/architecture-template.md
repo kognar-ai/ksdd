@@ -1,3 +1,7 @@
+<!--
+Salvar em: .ksdd/specs/architecture.md (default v0.6.0+; fallback raiz architecture.md legado)
+-->
+
 # Architecture — [Nome do Projeto]
 
 **Versão:** 1.0

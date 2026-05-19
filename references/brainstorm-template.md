@@ -1,3 +1,7 @@
+<!--
+Salvar em: .ksdd/specs/brainstorm.md (default v0.6.0+; fallback raiz brainstorm.md legado)
+-->
+
 # Brainstorm — [Nome do Projeto]
 
 > [Tagline em uma linha — o que é, pra quem, qual o diferencial]

@@ -8,14 +8,41 @@ allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, we
 
 Você é o arquiteto de produto da fase de SPEC. Pega o `brainstorm.md` aprovado e produz `SPEC.md`, um documento que cobre **produto + design** (sem entrar em stack/infra — isso é `/ksdd:tech`).
 
+## Idioma (obrigatório)
+
+Siga `references/language-policy.md`:
+
+- Artefatos, perguntas ao usuário e checkpoints seguem o **idioma da conversa**, não o idioma deste command.
+- Prioridade: `$ARGUMENTS` explícito → idioma no brainstorm/artefatos → idioma das mensagens do usuário nesta thread.
+- O campo `**Idioma da interface:**` no SPEC reflete a decisão do produto; o **corpo do documento** usa o idioma resolvido pela política.
+- Não assuma pt-BR por padrão.
+
 ## Pré-requisito obrigatório
 
-`brainstorm.md` deve existir e estar aprovado no diretório atual.
+`brainstorm.md` deve existir e estar aprovado. Procure primeiro em `.ksdd/specs/brainstorm.md` (default v0.6.0+); se não existir, faça fallback para `brainstorm.md` na raiz (layout legado pré-0.6.0). Aplique regras de fallback/conflito da seção "Paths dos artefatos" abaixo.
 
-Se não existir: pare e instrua o usuário a rodar `/ksdd:start` primeiro.
+Se não existir em nenhum dos paths: pare e instrua o usuário a rodar `/ksdd:start` primeiro.
 
 Se existir mas o usuário não confirmou aprovação na conversa, pergunte:
-> Encontrei `brainstorm.md` mas não vi aprovação explícita. Posso prosseguir assumindo que está aprovado, ou você quer revisar antes?
+> Encontrei o brainstorm em `<path>`, mas não vi aprovação explícita. Posso prosseguir assumindo que está aprovado, ou você quer revisar antes?
+
+## Paths dos artefatos (KSDD v0.6.0+)
+
+A partir da v0.6.0, KSDD grava artefatos em `.ksdd/`. Para esta fase:
+
+| Artefato       | Leitura (com fallback)                              | Escrita default              |
+|----------------|------------------------------------------------------|------------------------------|
+| brainstorm.md  | `.ksdd/specs/brainstorm.md` → raiz `brainstorm.md`  | n/a (input)                  |
+| SPEC.md        | `.ksdd/specs/SPEC.md` → raiz `SPEC.md`              | `.ksdd/specs/SPEC.md`        |
+
+**Fallback de leitura:** ao detectar artefato legado na raiz, emita warning amarelo:
+
+> ⚠ Detectado `<arquivo>` na raiz (layout legado). A partir da v0.6.0, KSDD usa `.ksdd/specs/<arquivo>`. Considere migrar com:
+> `mkdir -p .ksdd/specs && git mv <arquivo> .ksdd/specs/<arquivo>`
+
+**Conflito:** se ambos `.ksdd/specs/X.md` e `X.md` raiz existem **com conteúdos diferentes**, **aborte** com erro pedindo resolução manual. Não escolha por heurística.
+
+**Escrita:** `.ksdd/specs/SPEC.md`. Garanta `mkdir -p .ksdd/specs/` antes do `create_file`.
 
 ## Argumento
 
@@ -28,7 +55,7 @@ Se existir mas o usuário não confirmou aprovação na conversa, pergunte:
 
 ### 1. Ler e absorver o brainstorm
 
-`view brainstorm.md`. Internalize: problema, solução, público, escopo MVP, diferencial. Identifique lacunas que o SPEC precisa preencher.
+`view .ksdd/specs/brainstorm.md` (fallback `view brainstorm.md` se o legado for o que existe). Internalize: problema, solução, público, escopo MVP, diferencial. Identifique lacunas que o SPEC precisa preencher.
 
 ### 2. Sessão de perguntas (1-2 rodadas)
 
@@ -58,9 +85,9 @@ Não pergunte tudo — extraia do brainstorm o que já está claro. Pergunte só
 
 Se o brainstorm cita produtos de referência, faça 1-3 web_search/web_fetch pra entender padrões usados (ex: como o PriceCharting estrutura página de detalhe). Use isso pra propor estrutura, não pra copiar.
 
-### 4. Gerar `SPEC.md`
+### 4. Gerar `.ksdd/specs/SPEC.md`
 
-Use o template em `references/spec-template.md`. Estrutura obrigatória:
+Antes do `create_file`, garanta `mkdir -p .ksdd/specs/`. Use o template em `references/spec-template.md`. Estrutura obrigatória:
 
 ```markdown
 # SPEC.md — [Nome do Projeto]
@@ -70,7 +97,7 @@ Use o template em `references/spec-template.md`. Estrutura obrigatória:
 **Versão:** 1.0
 **Última atualização:** [data]
 **Plataforma alvo (MVP):** [web/mobile/...]
-**Idioma da interface:** [pt-BR/en-US/...]
+**Idioma da interface:** [locale do produto — ex.: en-US, pt-BR, both]
 
 ## 1. Visão do Produto
 ### 1.1 Problema
@@ -148,7 +175,7 @@ Use o template em `references/spec-template.md`. Estrutura obrigatória:
 
 Após gerar:
 
-> SPEC.md gerado (~[N] palavras). Recomendo revisar especialmente:
+> SPEC.md gerado em `.ksdd/specs/SPEC.md` (~[N] palavras). Recomendo revisar especialmente:
 > - Seção 7 (estrutura de telas) — confere se cobre todos os fluxos críticos
 > - Seção 6 (permissões) — confere a matriz de roles
 > - Seção 14 (fases) — confere o que entra no MVP
@@ -163,8 +190,8 @@ Após gerar:
 - ❌ Especificar tokens de design ("cor primária #7C3AED"). → Isso é `/ksdd:design`.
 - ❌ Inventar personas sem base. → Derive do brainstorm e confirme com o usuário.
 - ❌ Pular as fases de entrega. → SPEC sem priorização é wishlist, não plano.
-- ❌ Gerar SPEC sem ler o brainstorm. → Sempre comece com `view brainstorm.md`.
+- ❌ Gerar SPEC sem ler o brainstorm. → Sempre comece com `view .ksdd/specs/brainstorm.md` (fallback legado raiz).
 
 ## Iteração
 
-Se já existe `SPEC.md`, leia, pergunte que seções iterar, e use `str_replace` para edição cirúrgica. Refazer do zero só se o usuário pedir.
+Se já existe SPEC (em `.ksdd/specs/SPEC.md` ou `SPEC.md` raiz legado), leia, pergunte que seções iterar, e use `str_replace` para edição cirúrgica no path onde ele vive. Refazer do zero só se o usuário pedir. Se está no path legado, sugira migração com `git mv`.

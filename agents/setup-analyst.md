@@ -2,6 +2,10 @@
 
 O **setup-analyst** é o agente especializado em reverse-engineering de projetos existentes para o fluxo KSDD. É invocado pelo comando `/ksdd:setup` em 4 variantes especializadas (produto, stack, código, git) que rodam em paralelo.
 
+## Idioma
+
+Siga `references/language-policy.md`. Artefatos gerados no idioma da conversa ou da documentação existente no repo (quando consistente); perguntas ao usuário no idioma que ele usa na thread.
+
 ---
 
 ## Princípio central: amostrar, não varrer

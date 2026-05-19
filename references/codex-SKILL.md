@@ -1,6 +1,6 @@
 ---
 name: ksdd
-description: Kognar Spec-Driven Design & Development (KSDD). Use when the user mentions KSDD, brainstorm/spec-driven workflow, docs/FEATURE-*.md tasks, BUILD-PLAN, or wants structured product specs before coding. Triggers also include slash-style prompts ksdd-start, ksdd-spec, or "spec driven design".
+description: Kognar Spec-Driven Design & Development (KSDD). Use when the user mentions KSDD, brainstorm/spec-driven workflow, .ksdd/features/FEATURE-*.md tasks (or legacy docs/FEATURE-*.md), .ksdd/build/BUILD-PLAN.md, or wants structured product specs before coding. Triggers also include slash-style prompts ksdd-start, ksdd-spec, or "spec driven design".
 ---
 
 # KSDD no Codex
@@ -33,7 +33,7 @@ Templates e agentes foram copiados para esta pasta:
 - `references/` — templates (brainstorm, spec, architecture, feature, build-plan, design-md-spec, approval-gates, personas)
 - `agents/` — interviewer, consolidator, critic, setup-analyst
 
-Ao seguir um prompt KSDD, **leia** os arquivos em `references/` quando o prompt citar um template; use `agents/` como guia de estilo (perguntas em batch, consolidação, checklist do critic).
+Ao seguir um prompt KSDD, **leia** os arquivos em `references/` quando o prompt citar um template; use `agents/` como guia de estilo (perguntas em batch, consolidação, checklist do critic). Para idioma de artefatos e perguntas, siga sempre `references/language-policy.md` (idioma da conversa, não fixo em pt-BR).
 
 ## 3. Ferramentas
 

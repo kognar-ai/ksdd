@@ -2,6 +2,8 @@
 
 Resumo da spec oficial open-source publicada por Google Labs em `github.com/google-labs-code/design.md`. Use isto como autoridade ao gerar `DESIGN.md` via `/ksdd:design`.
 
+**Path KSDD v0.6.0+:** salvar em `.ksdd/specs/DESIGN.md` (fallback raiz `DESIGN.md` legado).
+
 ## Estrutura geral
 
 Um arquivo DESIGN.md tem duas camadas:
@@ -140,7 +142,7 @@ Guardrails concretos. Lista de regras práticas e armadilhas comuns. Cobrir cor,
 | `token-summary` | info | Resumo de quantos tokens por seção |
 | `missing-sections` | info | Seções opcionais ausentes |
 
-Erro = file rejeitado. Validar com `npx @google/design.md lint DESIGN.md`.
+Erro = file rejeitado. Validar com `npx @google/design.md lint .ksdd/specs/DESIGN.md`.
 
 ---
 
@@ -148,13 +150,13 @@ Erro = file rejeitado. Validar com `npx @google/design.md lint DESIGN.md`.
 
 ```bash
 # Tailwind v3 config
-npx @google/design.md export --format json-tailwind DESIGN.md > tailwind.theme.json
+npx @google/design.md export --format json-tailwind .ksdd/specs/DESIGN.md > tailwind.theme.json
 
 # Tailwind v4 @theme block (CSS custom properties)
-npx @google/design.md export --format css-tailwind DESIGN.md > theme.css
+npx @google/design.md export --format css-tailwind .ksdd/specs/DESIGN.md > theme.css
 
 # W3C Design Tokens Format Module
-npx @google/design.md export --format dtcg DESIGN.md > tokens.json
+npx @google/design.md export --format dtcg .ksdd/specs/DESIGN.md > tokens.json
 ```
 
 ---

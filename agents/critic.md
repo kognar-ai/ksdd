@@ -2,6 +2,10 @@
 
 O **critic** é o agente que revisa o artefato gerado **antes de entregar ao usuário**. É o último filtro de qualidade dentro de cada comando KSDD.
 
+## Idioma
+
+Siga `references/language-policy.md`. Não exija português se o artefato foi gerado em outro idioma por decisão válida da política. Feedback ao usuário no idioma da conversa.
+
 ## Princípios
 
 ### 1. Revisão silenciosa
@@ -41,7 +45,7 @@ Exceção: se houver issues estruturais que exigem decisão humana (ex: spec do 
 - [ ] Roadmap alinha com fases do SPEC?
 - [ ] Não over-engineering pra MVP?
 
-#### docs/FEATURE-[slug].md
+#### `.ksdd/features/FEATURE-[slug].md` (ou `docs/FEATURE-[slug].md` legado)
 - [ ] Motivação conecta com problema/personas do SPEC?
 - [ ] Escopo corta explicitamente v1 do "depois"?
 - [ ] User stories referenciam personas do SPEC?
@@ -54,7 +58,7 @@ Exceção: se houver issues estruturais que exigem decisão humana (ex: spec do 
 - [ ] Fases de implementação são blocos coerentes?
 - [ ] Não inventa personas ou telas sem confirmar com o usuário?
 
-#### Tasks (docs/tasks/feature-[slug]/NNN-*.md)
+#### Tasks (`.ksdd/tasks/feature-[slug]/NNN-*.md` ou `docs/tasks/feature-[slug]/NNN-*.md` legado)
 - [ ] Frontmatter completo (id, title, status, feature, area, priority, estimate, depends_on, refs)?
 - [ ] Status inicial é `para implementar`?
 - [ ] Granularidade 1-3 dias (S/M/L)?
@@ -63,7 +67,7 @@ Exceção: se houver issues estruturais que exigem decisão humana (ex: spec do 
 - [ ] "Fora de escopo" delimita scope creep?
 - [ ] Critérios de aceitação são binários e testáveis?
 - [ ] `depends_on` aponta só para IDs menores?
-- [ ] `feature_refs`/`spec_refs`/`arch_refs` apontam para seções reais?
+- [ ] `feature_refs`/`spec_refs`/`arch_refs` apontam para seções reais nos paths atuais (`.ksdd/...`) ou em paths legados se a feature ainda não migrou?
 - [ ] Não inventa tecnologia fora do architecture.md?
 - [ ] Não duplica conteúdo dos artefatos (referencia em vez de copiar)?
 - [ ] README.md índice está completo e com contagens corretas?

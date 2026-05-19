@@ -47,10 +47,13 @@ KSDD é um pacote npm que distribui **conteúdo Markdown** (commands, references
                                           ▼
                        ┌────────────────────────────────────┐
                        │  Diretório do projeto-alvo         │
-                       │  brainstorm.md SPEC.md             │
-                       │  architecture.md DESIGN.md         │
-                       │  docs/FEATURE-*.md BUILD-PLAN.md   │
-                       │  docs/tasks/feature-*/             │
+                       │  .ksdd/specs/{brainstorm,SPEC,     │
+                       │       architecture,DESIGN}.md      │
+                       │  .ksdd/features/FEATURE-*.md       │
+                       │  .ksdd/tasks/feature-*/            │
+                       │  .ksdd/build/BUILD-PLAN.md         │
+                       │  (legado: raiz/docs/, lido via     │
+                       │   fallback com warning)            │
                        └────────────────────────────────────┘
 ```
 

@@ -8,11 +8,11 @@ priority: P0 | P1 | P2
 estimate: S | M | L
 depends_on: [NNN, NNN]
 feature_refs:
-  - "docs/FEATURE-[slug].md#<seção>"
+  - ".ksdd/features/FEATURE-[slug].md#<seção>"
 spec_refs:
-  - "SPEC.md#<seção>"
+  - ".ksdd/specs/SPEC.md#<seção>"
 arch_refs:
-  - "architecture.md#<seção>"
+  - ".ksdd/specs/architecture.md#<seção>"
 ---
 
 # NNN — Título da task
@@ -49,7 +49,7 @@ Conecte com o objetivo da feature e do produto.]
 ## Notas técnicas
 
 [Decisões já tomadas, libs específicas, gotchas.
-Cite seções de artefatos: "Ver architecture.md seção 3 (schema)".
+Cite seções de artefatos: "Ver `.ksdd/specs/architecture.md` seção 3 (schema)" (ou path legado raiz).
 Cite ADRs quando aplicável: "Ver ADR-003".]
 
 - [Nota 1]
