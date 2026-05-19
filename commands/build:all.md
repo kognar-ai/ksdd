@@ -12,6 +12,31 @@ Você é o tech lead orquestrando o build completo de um projeto KSDD. Pega os a
 
 ---
 
+## Paths dos artefatos (KSDD v0.6.0+)
+
+A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos:
+
+| Artefato         | Leitura (em ordem, com fallback)                                              | Escrita default                  |
+|------------------|-------------------------------------------------------------------------------|----------------------------------|
+| SPEC.md          | `.ksdd/specs/SPEC.md` → raiz `SPEC.md`                                       | n/a (input)                      |
+| architecture.md  | `.ksdd/specs/architecture.md` → raiz `architecture.md`                       | n/a (input)                      |
+| DESIGN.md        | `.ksdd/specs/DESIGN.md` → raiz `DESIGN.md`                                   | n/a (input)                      |
+| brainstorm.md    | `.ksdd/specs/brainstorm.md` → raiz `brainstorm.md`                           | n/a (input)                      |
+| FEATURE-*.md     | `.ksdd/features/` → `docs/` → raiz (legados)                                  | `.ksdd/features/FEATURE-*.md`    |
+| tasks            | `.ksdd/tasks/` → `docs/tasks/` (legado)                                       | `.ksdd/tasks/feature-*/`         |
+| BUILD-PLAN.md    | `.ksdd/build/BUILD-PLAN.md` → raiz `BUILD-PLAN.md`                            | `.ksdd/build/BUILD-PLAN.md`      |
+
+**Fallback de leitura:** ao detectar artefato em path legado, emita warning amarelo:
+
+> ⚠ Detectado `<arquivo>` em path legado (`<path antigo>`). A partir da v0.6.0, KSDD usa `<path novo>`. Considere migrar com:
+> `mkdir -p <novo-dir> && git mv <path antigo> <path novo>`
+
+**Conflito:** se mesmo artefato existe em mais de um path **com conteúdos diferentes**, **aborte** com erro pedindo resolução manual.
+
+**Escrita:** sempre nos paths default. Garanta `mkdir -p .ksdd/{features,tasks,build}/` conforme necessário antes dos `create_file`.
+
+---
+
 ## Argumentos
 
 `$ARGUMENTS` pode conter:
@@ -39,13 +64,13 @@ Se apenas `SPEC.md` existe:
 
 #### A.1 Absorver contexto completo
 
-Leia **todos** os artefatos KSDD:
+Leia **todos** os artefatos KSDD (aplicando hierarquia de paths definida em "Paths dos artefatos"):
 
-1. `view SPEC.md` — especialmente seção 14 (Fases de Entrega), seção 7 (Telas), seção 4 (Modelo de Dados), seção 13 (Fluxos Críticos)
-2. `view architecture.md` (se existir) — stack, schemas, APIs, ADRs, roadmap (seção 12)
-3. `view DESIGN.md` (se existir) — componentes, tokens
-4. `view brainstorm.md` (se existir) — contexto original
-5. Verifique `docs/FEATURE-*.md` (e `FEATURE-*.md` na raiz se legado) e `docs/tasks/` existentes (pra `--resume`)
+1. `view .ksdd/specs/SPEC.md` (fallback raiz) — especialmente seção 14 (Fases de Entrega), seção 7 (Telas), seção 4 (Modelo de Dados), seção 13 (Fluxos Críticos)
+2. `view .ksdd/specs/architecture.md` (fallback raiz, se existir) — stack, schemas, APIs, ADRs, roadmap (seção 12)
+3. `view .ksdd/specs/DESIGN.md` (fallback raiz, se existir) — componentes, tokens
+4. `view .ksdd/specs/brainstorm.md` (fallback raiz, se existir) — contexto original
+5. Verifique features existentes em `.ksdd/features/`, `docs/` legado, raiz legado; e tasks em `.ksdd/tasks/` ou `docs/tasks/` legado (pra `--resume`)
 
 #### A.2 Decompor SPEC em features
 
@@ -92,23 +117,23 @@ Se tudo está claro, pule.
 
 Para cada feature identificada, execute internamente o fluxo do `/ksdd:new:feature`:
 
-1. **Gere `docs/FEATURE-[slug].md`** (crie `docs/` se necessário) usando `references/feature-template.md`
+1. **Gere `.ksdd/features/FEATURE-[slug].md`** (crie pasta se necessário com `mkdir -p .ksdd/features/`) usando `references/feature-template.md`
    - Seções de impacto (telas, dados, API, design) derivadas do SPEC + architecture
    - Critérios de aceite derivados da feature e da fase
-   - Referências cruzadas pros artefatos
+   - Referências cruzadas pros artefatos com paths atuais
 
-2. **Quebre em tasks** em `docs/tasks/feature-[slug]/NNN-slug.md`
-   - Frontmatter com `feature_refs`, `spec_refs`, `arch_refs`
+2. **Quebre em tasks** em `.ksdd/tasks/feature-[slug]/NNN-slug.md` (`mkdir -p .ksdd/tasks/feature-[slug]/`)
+   - Frontmatter com `feature_refs`, `spec_refs`, `arch_refs` apontando para paths novos por default
    - Granularidade 1-3 dias
    - Dependências entre tasks e entre features
 
-3. **Gere README.md** de cada feature com índice de tasks
+3. **Gere README.md** de cada feature em `.ksdd/tasks/feature-[slug]/README.md` com índice de tasks
 
 **Numeração de tasks:** IDs globais contínuos (não reinicia por feature). Feature 1 tem tasks 001-008, Feature 2 tem 009-015, etc. Isso permite `depends_on` entre features.
 
-#### A.5 Gerar plano mestre `BUILD-PLAN.md`
+#### A.5 Gerar plano mestre `.ksdd/build/BUILD-PLAN.md`
 
-Crie `BUILD-PLAN.md` na raiz — é o mapa de execução do projeto inteiro:
+Antes do `create_file`, garanta `mkdir -p .ksdd/build/`. Crie `.ksdd/build/BUILD-PLAN.md` — é o mapa de execução do projeto inteiro:
 
 ```markdown
 # Build Plan — [Nome do Projeto]
@@ -175,19 +200,19 @@ setup-infra → data-model → core-api → search
 
 #### A.6 Checkpoint do plano (OBRIGATÓRIO)
 
-> BUILD-PLAN.md gerado para o projeto **[nome]**:
+> `.ksdd/build/BUILD-PLAN.md` gerado para o projeto **[nome]**:
 >
 > **Fase 1 — MVP:** [N] features, [N] tasks, ~[N] dias
 > **Fase 2 — [tema]:** [N] features, [N] tasks, ~[N] dias
 > **Total:** [N] features, [N] tasks
 >
 > Features geradas:
-> 1. `docs/FEATURE-setup-infra.md` — [N] tasks
-> 2. `docs/FEATURE-data-model.md` — [N] tasks
+> 1. `.ksdd/features/FEATURE-setup-infra.md` — [N] tasks
+> 2. `.ksdd/features/FEATURE-data-model.md` — [N] tasks
 > 3. ...
 >
 > Recomendo revisar:
-> - BUILD-PLAN.md — ordem de execução e dependências
+> - `.ksdd/build/BUILD-PLAN.md` — ordem de execução e dependências
 > - FEATURE specs — escopo de cada bloco
 > - Tasks P0 — são a espinha dorsal do MVP
 >
@@ -284,7 +309,7 @@ Após todas as features de uma fase:
 
 #### B.7 Atualizar BUILD-PLAN.md
 
-Após cada feature/fase concluída, atualize o `BUILD-PLAN.md`:
+Após cada feature/fase concluída, atualize o `.ksdd/build/BUILD-PLAN.md` (ou path legado raiz se a sessão de planejamento usou o legado):
 - Status das features e fases
 - Data de conclusão
 - Desvios do plano
@@ -335,8 +360,8 @@ Após todas as fases implementadas:
 
 Se o build foi interrompido (features/tasks existentes com status misto):
 
-1. Leia `BUILD-PLAN.md` e identifique o estado
-2. Leia todos os `docs/tasks/feature-*/README.md` pra ver status de cada task
+1. Leia `.ksdd/build/BUILD-PLAN.md` (fallback `BUILD-PLAN.md` raiz legado) e identifique o estado
+2. Leia todos os `.ksdd/tasks/feature-*/README.md` (e `docs/tasks/feature-*/README.md` legado) pra ver status de cada task
 3. Apresente resumo:
 
 ```
@@ -365,7 +390,7 @@ O build ainda funciona, mas com decisões adicionais:
    - Banco: PostgreSQL / MySQL / MongoDB / outro?
    - Hosting: Vercel / AWS / Docker local?
 
-2. **Registra decisões no BUILD-PLAN.md** seção "Decisões tomadas no planejamento"
+2. **Registra decisões no `.ksdd/build/BUILD-PLAN.md`** seção "Decisões tomadas no planejamento"
 3. **Tasks de infra** ficam mais genéricas (sem refs a ADRs)
 4. **Sugere:** "Considere rodar `/ksdd:tech` antes do build pra ter decisões documentadas"
 
@@ -389,9 +414,9 @@ Se em dúvida, **vá sequencial** — é mais seguro e mais fácil de debugar.
 
 ## Artefatos são read-only
 
-**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` durante o build. `docs/FEATURE-*.md` pode ter status atualizado, mas conteúdo é read-only.
+**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` (em `.ksdd/specs/` ou raiz legado) durante o build. `FEATURE-*.md` (em qualquer dos paths) pode ter status atualizado, mas conteúdo é read-only.
 
-Se algo nos artefatos está errado, sinalize ao usuário. A única exceção: status de tasks e `BUILD-PLAN.md`.
+Se algo nos artefatos está errado, sinalize ao usuário. As únicas exceções: status de tasks e `BUILD-PLAN.md` (em `.ksdd/build/` ou raiz legado).
 
 ---
 

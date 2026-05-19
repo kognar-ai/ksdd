@@ -10,7 +10,7 @@
 | 001 | Atualizar commands de spec-phase (start/spec/tech/design) para .ksdd/specs/ | backend  | P0         | M          | em revisão        | —                         |
 | 002 | Atualizar commands/new:feature.md para .ksdd/features/ + .ksdd/tasks/  | backend  | P0         | M          | em revisão        | —                         |
 | 003 | Atualizar commands/build:feature.md para .ksdd/tasks/.context/         | backend  | P0         | S          | em revisão        | 002                       |
-| 004 | Atualizar commands/build:all.md para .ksdd/build/BUILD-PLAN.md         | backend  | P0         | S          | para implementar  | —                         |
+| 004 | Atualizar commands/build:all.md para .ksdd/build/BUILD-PLAN.md         | backend  | P0         | S          | em revisão        | —                         |
 | 005 | Atualizar commands/setup.md com novo layout + detecção de legados      | backend  | P0         | M          | para implementar  | 001, 002                  |
 | 006 | Atualizar templates em references/ com paths .ksdd/                    | backend  | P0         | M          | para implementar  | —                         |
 | 007 | Atualizar agents (critic/interviewer/setup-analyst) com novos paths    | backend  | P1         | S          | para implementar  | —                         |

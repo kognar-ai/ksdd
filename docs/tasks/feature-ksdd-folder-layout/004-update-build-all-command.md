@@ -1,7 +1,7 @@
 ---
 id: 004
 title: Atualizar commands/build:all.md para .ksdd/build/BUILD-PLAN.md
-status: para implementar
+status: em revisão
 feature: ksdd-folder-layout
 area: backend
 priority: P0
