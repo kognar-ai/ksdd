@@ -1,12 +1,12 @@
 # KSDD — Kognar Spec-Driven Design & Development
 
-Um sistema de slash commands para o **Claude Code** e **[OpenAI Codex](https://developers.openai.com/codex)** que guia produtos do **brainstorm bruto até um design system implementável**, em quatro etapas com aprovação humana entre cada uma.
+A slash command system for **Claude Code** and **[OpenAI Codex](https://developers.openai.com/codex)** that guides products from **raw brainstorm to an implementable design system**, in four stages with mandatory human approval between each one — plus feature-level workflows for breaking specs into tasks and shipping code through quality gates and PRs.
 
 ## Codex (CLI / IDE)
 
-Após `ksdd install --codex` (ou `KSDD_WITH_CODEX=1` no `npm install`):
+After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`):
 
-| Claude Code | Codex (custom prompts em `~/.codex/prompts/`) |
+| Claude Code | Codex (custom prompts in `~/.codex/prompts/`) |
 |-------------|-----------------------------------------------|
 | `/ksdd:start` | `/prompts:ksdd-start` |
 | `/ksdd:spec` | `/prompts:ksdd-spec` |
@@ -15,112 +15,141 @@ Após `ksdd install --codex` (ou `KSDD_WITH_CODEX=1` no `npm install`):
 | `/ksdd:new:feature` | `/prompts:ksdd-new-feature` |
 | `/ksdd:build:feature` | `/prompts:ksdd-build-feature` |
 | `/ksdd:build:all` | `/prompts:ksdd-build-all` |
+| `/ksdd:setup` | `/prompts:ksdd-setup` |
 
-Também é instalada a skill **`ksdd`** em `~/.agents/skills/ksdd/` (referências + agentes + `SKILL.md`) — use `$ksdd` ou mencione a skill no prompt. Os prompts do Codex são o mesmo conteúdo dos ficheiros em `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) estão marcados como *deprecated* em favor de skills, mas continuam a funcionar para invocação explícita `/prompts:…`.
+The `ksdd` skill is also installed in `~/.agents/skills/ksdd/` (references + agents + `SKILL.md`) — use `$ksdd` or mention the skill in your prompt. Codex prompts are the same content as the files in `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) are flagged as *deprecated* in favor of skills, but still work for explicit `/prompts:…` invocation.
 
-Reinicie o Codex após instalar. `CODEX_HOME` (default `~/.codex`) altera a pasta de prompts se definido.
+Restart Codex after installing. `CODEX_HOME` (default `~/.codex`) changes the prompts folder if set.
 
 ```
-/ksdd:start        →  .ksdd/specs/brainstorm.md     (ideia → conceito refinado)
-/ksdd:spec         →  .ksdd/specs/SPEC.md           (conceito → especificação produto+design)
-/ksdd:tech         →  .ksdd/specs/architecture.md   (especificação → arquitetura técnica)
-/ksdd:design       →  .ksdd/specs/DESIGN.md         (especificação → design system Stitch-compatible)
-/ksdd:new:feature    →  .ksdd/features/FEATURE-[slug].md  (nova feature → spec + tasks implementáveis)
-/ksdd:build:feature  →  task por task                    (feature → implementação com issue, branch, PR)
-/ksdd:build:all      →  .ksdd/build/BUILD-PLAN.md        (SPEC inteiro → features + tasks + implementação completa)
+/ksdd:start          →  .ksdd/specs/brainstorm.md         (raw idea → refined concept)
+/ksdd:spec           →  .ksdd/specs/SPEC.md               (concept → product + design spec)
+/ksdd:tech           →  .ksdd/specs/architecture.md       (spec → technical architecture)
+/ksdd:design         →  .ksdd/specs/DESIGN.md             (spec → Stitch-compatible design system)
+/ksdd:new:feature    →  .ksdd/features/FEATURE-[slug].md  (new feature → spec + implementable tasks)
+/ksdd:build:feature  →  task by task                       (feature → implementation with issue, branch, PR)
+/ksdd:build:all      →  .ksdd/build/BUILD-PLAN.md         (entire SPEC → features + tasks + full implementation)
+/ksdd:setup          →  .ksdd/specs/{brainstorm,SPEC,architecture,DESIGN}.md  (existing project → reverse-engineered artifacts)
 ```
 
-> **Migrando da v0.5.x?** A partir da v0.6.0, KSDD usa o layout `.ksdd/` em vez de espalhar artefatos pela raiz/`docs/`. Projetos legados continuam funcionando — cada command lê do path antigo se o novo não existe e mostra como migrar via `git mv`. Veja [CHANGELOG](CHANGELOG.md#060---2026-05-19) para detalhes.
+> **Migrating from v0.5.x?** Starting in v0.6.0, KSDD uses the `.ksdd/` layout instead of scattering artifacts across the project root and `docs/`. Legacy projects keep working — each command reads from the old path if the new one doesn't exist and shows how to migrate via `git mv`. See [CHANGELOG](CHANGELOG.md#060---2026-05-19) for details.
 
-## Filosofia
+## Philosophy
 
-Inspirado no **SPEC Development model** com checkpoints obrigatórios de aprovação. Cada comando lê o output do anterior, faz perguntas estruturadas pra preencher lacunas, gera o artefato em formato canônico e **para antes de avançar** pro próximo. O humano valida, ajusta, e só então roda o próximo comando.
+Inspired by the **SPEC Development model** with mandatory approval checkpoints. Each command reads the previous output, asks structured questions to fill gaps, generates the artifact in canonical format, and **stops before advancing** to the next one. The human validates, adjusts, and only then runs the next command.
 
-Os artefatos são acumulativos: `SPEC.md` referencia `brainstorm.md`, `architecture.md` e `DESIGN.md` referenciam ambos. Cada documento é um "contrato" que o próximo respeita.
+Artifacts are cumulative: `SPEC.md` references `brainstorm.md`; `architecture.md` and `DESIGN.md` reference both. Each document is a "contract" the next one respects.
 
-## Instalação
+## Installation
 
-### npm (recomendado)
+### npm (recommended)
 
 ```bash
 npm install -g @kognar/ksdd
 ```
 
-Por omissão instala apenas **Claude Code** (`~/.claude/`). Para incluir **Codex**:
+By default this installs only **Claude Code** (`~/.claude/`). To also install **Codex**:
 
 ```bash
 ksdd install --codex
 ```
 
-Ou numa instalação npm: `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd`
+Or in an npm install: `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd`
+
+CLI commands:
+
+```bash
+ksdd install          # reinstalls / updates (Claude Code only)
+ksdd install --codex  # Claude + Codex (prompts + skill)
+ksdd status           # shows installation state
+ksdd uninstall        # removes copied files
+```
+
+To uninstall everything:
+
+```bash
+npm uninstall -g @kognar/ksdd
+```
 
 ### Manual (Claude Code)
 
-Coloque a pasta `ksdd/` em `~/.claude/skills/ksdd/` ou na raiz do projeto em `.claude/skills/ksdd/`.
+Place the `ksdd/` folder in `~/.claude/skills/ksdd/` or at the project root in `.claude/skills/ksdd/`.
 
-Os commands ficam em `ksdd/commands/`. O Claude Code descobre slash commands com prefixo `/ksdd:*` quando os ficheiros estão em `~/.claude/commands/` com o prefixo `ksdd:`.
+Commands live in `ksdd/commands/`. Claude Code discovers slash commands with the `/ksdd:*` prefix when the files are in `~/.claude/commands/` with the `ksdd:` prefix.
 
-## Fluxo de uso típico
+## Typical usage flow
 
 ```
-Você   : /ksdd:start
-         "quero fazer um marketplace de retro games com preço coletado de lives"
-Claude : [faz 5-8 perguntas estruturadas sobre escopo, público, diferencial]
-         [gera brainstorm.md com conceito refinado]
-         [PARA — pede aprovação]
+You    : /ksdd:start
+         "I want to build a retro games marketplace with prices crawled from livestreams"
+Claude : [asks 5-8 structured questions about scope, audience, differentiator]
+         [generates .ksdd/specs/brainstorm.md with refined concept]
+         [STOPS — requests approval]
 
-Você   : "tá ótimo, ajusta só o público pra incluir lojistas"
-Claude : [edita brainstorm.md]
-         [PARA novamente]
+You    : "looks great, tweak the audience to include shop owners too"
+Claude : [edits .ksdd/specs/brainstorm.md]
+         [STOPS again]
 
-Você   : /ksdd:spec
-Claude : [lê brainstorm.md]
-         [faz perguntas sobre personas, fluxos críticos, modelo de negócio]
-         [gera SPEC.md completo com produto + design]
-         [PARA]
+You    : /ksdd:spec
+Claude : [reads .ksdd/specs/brainstorm.md]
+         [asks about personas, critical flows, business model]
+         [generates .ksdd/specs/SPEC.md covering product + design]
+         [STOPS]
 
-Você   : /ksdd:tech     # opcional, pode pular pra /ksdd:design
-Claude : [lê SPEC.md]
-         [gera architecture.md com stack, modelo de dados, integrações]
-         [PARA]
+You    : /ksdd:tech     # optional, can skip straight to /ksdd:design
+Claude : [reads .ksdd/specs/SPEC.md]
+         [generates .ksdd/specs/architecture.md with stack, data model, integrations]
+         [STOPS]
 
-Você   : /ksdd:design
-Claude : [lê SPEC.md (+ architecture.md se existir)]
-         [gera DESIGN.md no formato Google Stitch — YAML tokens + 8 seções]
-         [PARA]
+You    : /ksdd:design
+Claude : [reads .ksdd/specs/SPEC.md (+ .ksdd/specs/architecture.md if it exists)]
+         [generates .ksdd/specs/DESIGN.md in Google Stitch format — YAML tokens + 8 sections]
+         [STOPS]
 
-Você   : /ksdd:new:feature notificações push
-Claude : [lê .ksdd/specs/{SPEC,architecture,DESIGN}.md]
-         [faz perguntas sobre escopo, personas impactadas, prioridade]
-         [gera .ksdd/features/FEATURE-push-notifications.md com impacto em telas, dados, API e design]
-         [PARA]
+You    : /ksdd:new:feature push notifications
+Claude : [reads .ksdd/specs/{SPEC,architecture,DESIGN}.md]
+         [asks about scope, affected personas, priority]
+         [generates .ksdd/features/FEATURE-push-notifications.md with impact on screens, data, API and design]
+         [STOPS]
 
-Você   : /ksdd:build:feature push-notifications
-Claude : [lê .ksdd/features/FEATURE-push-notifications.md + tasks + todos os artefatos]
-         [para cada task: issue → branch → context.md → implementa → quality gates → PR]
-         [PARA — checkpoint por feature]
+You    : /ksdd:build:feature push-notifications
+Claude : [reads .ksdd/features/FEATURE-push-notifications.md + tasks + all artifacts]
+         [per task: issue → branch → context.md → implement → quality gates → PR]
+         [STOPS — checkpoint per feature]
 
---- OU, para buildar o projeto inteiro: ---
+--- OR, to build the entire project: ---
 
-Você   : /ksdd:build:all
-Claude : [lê .ksdd/specs/{SPEC,architecture,DESIGN}.md]
-         [decompõe fases de entrega em features]
-         [quebra cada feature em tasks implementáveis]
-         [gera .ksdd/build/BUILD-PLAN.md com plano completo]
-         [PARA — pede aprovação do plano]
+You    : /ksdd:build:all
+Claude : [reads .ksdd/specs/{SPEC,architecture,DESIGN}.md]
+         [decomposes delivery phases into features]
+         [breaks each feature into implementable tasks]
+         [generates .ksdd/build/BUILD-PLAN.md with the full plan]
+         [STOPS — requests plan approval]
 
-Você   : "aprovado"
-Claude : [implementa feature por feature, task por task]
+You    : "approved"
+Claude : [implements feature by feature, task by task]
          [issue → branch → context.md → code → quality gates → PR]
-         [PARA — checkpoint por feature e por fase]
-         [valida critérios do SPEC ao final]
+         [STOPS — checkpoint per feature and per phase]
+         [validates SPEC criteria at the end]
+
+--- For existing projects (reverse-engineering): ---
+
+You    : /ksdd:setup
+Claude : [pre-flight: detects KSDD artifacts in .ksdd/ or legacy locations]
+         [Phase 1: discovery of structure, git history, manifests in parallel]
+         [Phase 2: 4 parallel agents analyze product, stack, code, git]
+         [Phase 3: synthesizes findings, asks only about real gaps (max 6 questions)]
+         [Phase 4: generates .ksdd/specs/{brainstorm,SPEC,architecture,DESIGN}.md with reverse-engineered header]
+         [STOPS — review checklist with priority]
 ```
 
-## Estrutura do sistema
+## System structure
 
 ```
 ksdd/
-├── README.md                          ← este arquivo
+├── README.md                          ← this file
+├── bin/
+│   └── ksdd.js                        ← CLI installer (zero runtime deps)
 ├── commands/
 │   ├── start.md                       ← /ksdd:start
 │   ├── spec.md                        ← /ksdd:spec
@@ -128,76 +157,82 @@ ksdd/
 │   ├── design.md                      ← /ksdd:design
 │   ├── new:feature.md                 ← /ksdd:new:feature
 │   ├── build:feature.md               ← /ksdd:build:feature
-│   └── build:all.md                   ← /ksdd:build:all
+│   ├── build:all.md                   ← /ksdd:build:all
+│   └── setup.md                       ← /ksdd:setup
 ├── references/
-│   ├── brainstorm-template.md         ← template do brainstorm.md
-│   ├── spec-template.md               ← template do SPEC.md
-│   ├── architecture-template.md       ← template do architecture.md
-│   ├── feature-template.md            ← template do docs/FEATURE-[slug].md
-│   ├── build-plan-template.md         ← formato de task (BUILD / build:all)
-│   ├── codex-SKILL.md                 ← corpo da skill Codex (~/.agents/skills/ksdd/SKILL.md)
-│   ├── design-md-spec.md             ← especificação Google Stitch DESIGN.md
-│   ├── personas-guide.md              ← como construir personas úteis
-│   └── approval-gates.md              ← regras dos checkpoints
+│   ├── brainstorm-template.md         ← template for brainstorm.md
+│   ├── spec-template.md               ← template for SPEC.md
+│   ├── architecture-template.md       ← template for architecture.md
+│   ├── feature-template.md            ← template for .ksdd/features/FEATURE-[slug].md
+│   ├── build-plan-template.md         ← task frontmatter format (build:feature / build:all)
+│   ├── codex-SKILL.md                 ← body of the Codex skill (~/.agents/skills/ksdd/SKILL.md)
+│   ├── design-md-spec.md              ← Google Stitch DESIGN.md specification
+│   ├── personas-guide.md              ← how to build useful personas
+│   └── approval-gates.md              ← checkpoint rules
 └── agents/
-    ├── interviewer.md                 ← agente que faz perguntas estruturadas
-    ├── consolidator.md                ← agente que sintetiza respostas em artefato
-    └── critic.md                      ← agente que revisa o artefato antes de entregar
+    ├── interviewer.md                 ← agent that asks structured questions
+    ├── consolidator.md                ← agent that synthesizes responses into the artifact
+    ├── critic.md                      ← agent that reviews the artifact before delivery
+    └── setup-analyst.md               ← agent for reverse-engineering (4 parallel variants)
 ```
 
-## Princípios
+KSDD is **distributed content, not runtime**. The `ksdd` CLI exists only to copy these markdown files into the conventional folders that Claude Code and Codex read. There are no runtime dependencies — `bin/ksdd.js` uses Node built-ins only (`fs`, `path`, `os`).
 
-1. **Aprovação obrigatória** entre cada etapa. Nunca rodar `/ksdd:spec` sem ter `brainstorm.md` aprovado. Nunca rodar `/ksdd:design` sem ter `SPEC.md` aprovado.
-2. **Perguntas em batch**, não uma por uma. Cada comando pergunta tudo que precisa de uma vez (máximo 8 perguntas), de preferência usando `ask_user_input_v0` quando disponível.
-3. **Idioma flexível**. Artefatos podem ser gerados em pt-BR, en-US ou outro idioma a critério do usuário. O default segue o idioma da conversa.
-4. **Formato canônico**. `DESIGN.md` segue 100% a spec do Google Stitch. `SPEC.md` tem estrutura fixa. `brainstorm.md` é mais livre mas com seções obrigatórias.
-5. **Reuso de artefatos**. Se o usuário já tem um `brainstorm.md` ou `SPEC.md` rascunhado, os commands leem e iteram em cima, em vez de começar do zero.
+## Principles
 
-## Skills e tools usados
+1. **Mandatory approval** between each stage. Never run `/ksdd:spec` without `.ksdd/specs/brainstorm.md` approved. Never run `/ksdd:design` without `.ksdd/specs/SPEC.md` approved.
+2. **Batch questions**, not one by one. Each command asks everything it needs in one round (max 8 questions), preferably using `ask_user_input_v0` when available.
+3. **Flexible language**. Artifacts can be generated in pt-BR, en-US or any other language at the user's discretion. The default follows the conversation language.
+4. **Canonical format**. `DESIGN.md` follows the Google Stitch spec 100%. `SPEC.md` has a fixed structure. `brainstorm.md` is freer but with mandatory sections.
+5. **Artifact reuse**. If the user already has a `brainstorm.md` or `SPEC.md` drafted, commands read and iterate on top of it rather than starting from scratch.
+6. **Backward-compatible reads (v0.6.0+).** Commands read artifacts from the new `.ksdd/` layout first and fall back to legacy paths (project root and `docs/`). Legacy projects keep working without forced migration.
 
-Os commands aproveitam tools nativos do Claude Code e podem invocar skills auxiliares:
+## Skills and tools used
 
-| Tool/Skill | Uso |
+The commands leverage native Claude Code tools and may invoke auxiliary skills:
+
+| Tool/Skill | Use |
 |------------|-----|
-| `view`, `create_file`, `str_replace` | Leitura e escrita dos artefatos |
-| `ask_user_input_v0` | Perguntas estruturadas multi-opção (mobile-friendly) |
-| `web_search`, `web_fetch` | Pesquisa de mercado, validação de referências (ex: spec do DESIGN.md) |
-| `image_search` | Mood board e referências visuais durante `/ksdd:design` |
-| `conversation_search` | Recuperar contexto de conversas anteriores sobre o mesmo projeto |
-| `skill-creator` | Empacotar o projeto KSDD em si como uma skill instalável |
-| `frontend-design` (Anthropic) | Referência de tokens e padrões durante `/ksdd:design` |
+| `view`, `create_file`, `str_replace` | Reading and writing artifacts |
+| `ask_user_input_v0` | Structured multi-option questions (mobile-friendly) |
+| `web_search`, `web_fetch` | Market research, reference validation (e.g. the DESIGN.md spec) |
+| `image_search` | Mood board and visual references during `/ksdd:design` |
+| `conversation_search` | Recover context from previous conversations about the same project |
+| `Agent` | Parallel sub-agents for reverse-engineering (`/ksdd:setup`) and feature implementation (`/ksdd:build:feature`) |
+| `skill-creator` | Package the KSDD project itself as an installable skill |
+| `frontend-design` (Anthropic) | Token and pattern reference during `/ksdd:design` |
 
-## Output esperado
+## Expected output
 
-Após o fluxo completo, o usuário tem a pasta `.ksdd/` na raiz do projeto:
+After the full flow, the user has the `.ksdd/` folder at the project root:
 
 ```
-projeto/
-├── (código do projeto, README, configs, etc. — raiz limpa)
+project/
+├── (project code, README, configs, etc. — clean root)
 └── .ksdd/
     ├── specs/
-    │   ├── brainstorm.md          (~500-1500 palavras)
-    │   ├── SPEC.md                (~3000-8000 palavras)
-    │   ├── architecture.md        (~2000-5000 palavras, opcional)
-    │   └── DESIGN.md              (YAML frontmatter + ~1500-3500 palavras)
+    │   ├── brainstorm.md          (~500-1500 words)
+    │   ├── SPEC.md                (~3000-8000 words)
+    │   ├── architecture.md        (~2000-5000 words, optional)
+    │   └── DESIGN.md              (YAML frontmatter + ~1500-3500 words)
     ├── features/
-    │   └── FEATURE-[slug].md      (~1500-4000 palavras, uma por feature)
+    │   └── FEATURE-[slug].md      (~1500-4000 words, one per feature)
     ├── tasks/
     │   └── feature-[slug]/
-    │       ├── README.md          (índice de tasks da feature)
-    │       ├── NNN-slug.md        (task individual com frontmatter)
+    │       ├── README.md          (index of feature tasks)
+    │       ├── NNN-slug.md        (individual task with frontmatter)
     │       └── .context/
-    │           └── NNN-context.md (contexto compilado para implementação)
+    │           └── NNN-context.md (compiled context for implementation)
     └── build/
-        └── BUILD-PLAN.md          (plano mestre do build completo)
+        └── BUILD-PLAN.md          (master plan for the full build)
 ```
 
-> Projetos legados pré-v0.6.0 podem ter artefatos na raiz (`SPEC.md`, etc.) e em `docs/` (FEATURE/tasks) — os commands continuam lendo de lá com warning de migração, sem quebrar nada.
+> Pre-v0.6.0 legacy projects may have artifacts at the project root (`SPEC.md`, etc.) and in `docs/` (FEATURE/tasks) — commands keep reading from there with a migration warning, without breaking anything.
 
-Pronto pra ser consumido por ferramentas de design (Stitch, v0, Lovable, Pencil) e agentes de código (Claude Code, Cursor) com contexto persistente.
+Ready to be consumed by design tools (Stitch, v0, Lovable, Pencil) and coding agents (Claude Code, Cursor) with persistent context.
 
-O fluxo completo: `/ksdd:build:all` decompõe o SPEC em features e tasks, gera o `BUILD-PLAN.md` como mapa de execução, e implementa task por task com issues, branches, quality gates e PRs. Para features individuais fora do fluxo completo, use `/ksdd:new:feature` + `/ksdd:build:feature`.
+The full flow: `/ksdd:build:all` decomposes the SPEC into features and tasks, generates `.ksdd/build/BUILD-PLAN.md` as the execution map, and implements task by task with issues, branches, quality gates and PRs. For individual features outside the full flow, use `/ksdd:new:feature` + `/ksdd:build:feature`. For pre-existing projects, `/ksdd:setup` reverse-engineers the four canonical artifacts from your codebase and git history.
 
-## Licença e contribuição
+## License and contributing
 
-Este projeto está sob [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). Para contribuir, veja [CONTRIBUTING.md](CONTRIBUTING.md).
+This project is licensed under [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). To contribute, see [CONTRIBUTING.md](CONTRIBUTING.md).
