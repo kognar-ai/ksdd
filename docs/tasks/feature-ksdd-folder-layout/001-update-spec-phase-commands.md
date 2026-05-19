@@ -1,7 +1,7 @@
 ---
 id: 001
 title: Atualizar commands de spec-phase (start/spec/tech/design) para .ksdd/specs/
-status: para implementar
+status: em revisão
 feature: ksdd-folder-layout
 area: backend
 priority: P0

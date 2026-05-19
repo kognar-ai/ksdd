@@ -10,9 +10,28 @@ Você é o arquiteto técnico da fase de tech. Pega o `SPEC.md` aprovado e produ
 
 ## Pré-requisito obrigatório
 
-`SPEC.md` deve existir e estar aprovado no diretório atual.
+`SPEC.md` deve existir e estar aprovado. Procure primeiro em `.ksdd/specs/SPEC.md` (default v0.6.0+); fallback para `SPEC.md` na raiz (legado). Aplique regras de fallback/conflito da seção "Paths dos artefatos" abaixo.
 
-Se não existir: pare e instrua o usuário a rodar `/ksdd:spec` primeiro.
+Se não existir em nenhum dos paths: pare e instrua o usuário a rodar `/ksdd:spec` primeiro.
+
+## Paths dos artefatos (KSDD v0.6.0+)
+
+A partir da v0.6.0, KSDD grava artefatos em `.ksdd/`. Para esta fase:
+
+| Artefato         | Leitura (com fallback)                              | Escrita default                  |
+|------------------|------------------------------------------------------|----------------------------------|
+| SPEC.md          | `.ksdd/specs/SPEC.md` → raiz `SPEC.md`              | n/a (input)                      |
+| brainstorm.md    | `.ksdd/specs/brainstorm.md` → raiz `brainstorm.md`  | n/a (input)                      |
+| architecture.md  | `.ksdd/specs/architecture.md` → raiz `architecture.md` | `.ksdd/specs/architecture.md` |
+
+**Fallback de leitura:** ao detectar artefato legado na raiz, emita warning amarelo:
+
+> ⚠ Detectado `<arquivo>` na raiz (layout legado). A partir da v0.6.0, KSDD usa `.ksdd/specs/<arquivo>`. Considere migrar com:
+> `mkdir -p .ksdd/specs && git mv <arquivo> .ksdd/specs/<arquivo>`
+
+**Conflito:** se ambos `.ksdd/specs/X.md` e `X.md` raiz existem **com conteúdos diferentes**, **aborte** com erro pedindo resolução manual.
+
+**Escrita:** `.ksdd/specs/architecture.md`. Garanta `mkdir -p .ksdd/specs/` antes do `create_file`.
 
 ## Argumento
 
@@ -26,7 +45,7 @@ Se não existir: pare e instrua o usuário a rodar `/ksdd:spec` primeiro.
 
 ### 1. Ler SPEC e brainstorm
 
-`view SPEC.md` e `view brainstorm.md` (contexto adicional). Internalize: o que precisa ser construído, escopo do MVP, restrições.
+`view .ksdd/specs/SPEC.md` e `view .ksdd/specs/brainstorm.md` (fallback raiz para cada um se o legado for o que existe). Internalize: o que precisa ser construído, escopo do MVP, restrições.
 
 ### 2. Sessão de perguntas (1 rodada, focada)
 
@@ -51,9 +70,9 @@ Para decisões importantes (especialmente AI/ML ou infraestrutura especializada)
 
 Não exagere. Pesquise só o que afeta decisão estrutural.
 
-### 4. Gerar `architecture.md`
+### 4. Gerar `.ksdd/specs/architecture.md`
 
-Use o template em `references/architecture-template.md`. Estrutura obrigatória:
+Antes do `create_file`, garanta `mkdir -p .ksdd/specs/`. Use o template em `references/architecture-template.md`. Estrutura obrigatória:
 
 ```markdown
 # Architecture — [Nome do Projeto]
@@ -189,7 +208,7 @@ POST   /api/prices                      Submeter preço (auth)
 
 ### 6. Checkpoint de aprovação (OBRIGATÓRIO)
 
-> architecture.md gerado. Pontos de atenção:
+> architecture.md gerado em `.ksdd/specs/architecture.md`. Pontos de atenção:
 > - Stack escolhida: [resumo] — confere se faz sentido pra equipe/contexto
 > - Decisões arquiteturais (seção 10) — leia com atenção, são reversíveis com custo
 > - Riscos (seção 11) — algum bloqueador conhecido?
@@ -206,4 +225,4 @@ POST   /api/prices                      Submeter preço (auth)
 
 ## Iteração
 
-Se já existe `architecture.md`, leia, pergunte que partes iterar, use `str_replace`.
+Se já existe architecture (em `.ksdd/specs/architecture.md` ou `architecture.md` raiz legado), leia, pergunte que partes iterar, use `str_replace` no path onde ele vive. Se está no path legado, sugira migração com `git mv`.

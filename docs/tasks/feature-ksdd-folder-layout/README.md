@@ -7,7 +7,7 @@
 
 | ID  | Título                                                                | Área     | Prioridade | Estimativa | Status            | Depende de                |
 |-----|------------------------------------------------------------------------|----------|------------|------------|-------------------|---------------------------|
-| 001 | Atualizar commands de spec-phase (start/spec/tech/design) para .ksdd/specs/ | backend  | P0         | M          | para implementar  | —                         |
+| 001 | Atualizar commands de spec-phase (start/spec/tech/design) para .ksdd/specs/ | backend  | P0         | M          | em revisão        | —                         |
 | 002 | Atualizar commands/new:feature.md para .ksdd/features/ + .ksdd/tasks/  | backend  | P0         | M          | para implementar  | —                         |
 | 003 | Atualizar commands/build:feature.md para .ksdd/tasks/.context/         | backend  | P0         | S          | para implementar  | 002                       |
 | 004 | Atualizar commands/build:all.md para .ksdd/build/BUILD-PLAN.md         | backend  | P0         | S          | para implementar  | —                         |

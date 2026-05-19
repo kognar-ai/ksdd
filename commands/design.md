@@ -10,11 +10,30 @@ Você é o designer de sistema da fase final. Pega o `SPEC.md` aprovado e produz
 
 ## Pré-requisito obrigatório
 
-`SPEC.md` deve existir e estar aprovado no diretório atual.
+`SPEC.md` deve existir e estar aprovado. Procure primeiro em `.ksdd/specs/SPEC.md` (default v0.6.0+); fallback para `SPEC.md` na raiz (legado). Aplique regras da seção "Paths dos artefatos" abaixo.
 
-`architecture.md` é opcional — se existir, leia também (informa decisões de design, ex: real-time → animações pulsantes).
+`architecture.md` é opcional — se existir (em `.ksdd/specs/architecture.md` ou raiz legado), leia também (informa decisões de design, ex: real-time → animações pulsantes).
 
-Se SPEC não existir: pare e instrua a rodar `/ksdd:spec` primeiro.
+Se SPEC não existir em nenhum dos paths: pare e instrua a rodar `/ksdd:spec` primeiro.
+
+## Paths dos artefatos (KSDD v0.6.0+)
+
+A partir da v0.6.0, KSDD grava artefatos em `.ksdd/`. Para esta fase:
+
+| Artefato         | Leitura (com fallback)                                  | Escrita default              |
+|------------------|----------------------------------------------------------|------------------------------|
+| SPEC.md          | `.ksdd/specs/SPEC.md` → raiz `SPEC.md`                  | n/a (input)                  |
+| architecture.md  | `.ksdd/specs/architecture.md` → raiz `architecture.md`  | n/a (input, opcional)        |
+| DESIGN.md        | `.ksdd/specs/DESIGN.md` → raiz `DESIGN.md`              | `.ksdd/specs/DESIGN.md`      |
+
+**Fallback de leitura:** ao detectar artefato legado na raiz, emita warning amarelo:
+
+> ⚠ Detectado `<arquivo>` na raiz (layout legado). A partir da v0.6.0, KSDD usa `.ksdd/specs/<arquivo>`. Considere migrar com:
+> `mkdir -p .ksdd/specs && git mv <arquivo> .ksdd/specs/<arquivo>`
+
+**Conflito:** se ambos `.ksdd/specs/X.md` e `X.md` raiz existem **com conteúdos diferentes**, **aborte** com erro pedindo resolução manual.
+
+**Escrita:** `.ksdd/specs/DESIGN.md`. Garanta `mkdir -p .ksdd/specs/` antes do `create_file`.
 
 ## Argumento
 
@@ -28,7 +47,7 @@ Se SPEC não existir: pare e instrua a rodar `/ksdd:spec` primeiro.
 
 ### 1. Ler SPEC (e architecture.md se existir)
 
-`view SPEC.md`. Foque especialmente:
+`view .ksdd/specs/SPEC.md` (fallback raiz se legado). Foque especialmente:
 - Seção 3 (Identidade Visual e Direção de Design)
 - Seção 8 (Componentes Globais)
 - Personas (informa tom)
@@ -59,7 +78,9 @@ Se o usuário citou referência visual ou se você acha que ajuda, use `image_se
 
 Mostre as imagens antes de gerar e confirme se a direção está certa.
 
-### 5. Gerar `DESIGN.md` no formato Google Stitch
+### 5. Gerar `.ksdd/specs/DESIGN.md` no formato Google Stitch
+
+Antes do `create_file`, garanta `mkdir -p .ksdd/specs/`.
 
 #### Estrutura OBRIGATÓRIA
 
@@ -189,9 +210,9 @@ Antes de finalizar, verifique:
 
 ### 7. Checkpoint de aprovação (OBRIGATÓRIO)
 
-> DESIGN.md gerado no formato Google Stitch. Você pode:
-> - Validar com `npx @google/design.md lint DESIGN.md`
-> - Exportar pra Tailwind: `npx @google/design.md export --format css-tailwind DESIGN.md > theme.css`
+> DESIGN.md gerado em `.ksdd/specs/DESIGN.md` no formato Google Stitch. Você pode:
+> - Validar com `npx @google/design.md lint .ksdd/specs/DESIGN.md`
+> - Exportar pra Tailwind: `npx @google/design.md export --format css-tailwind .ksdd/specs/DESIGN.md > theme.css`
 > - Importar no Stitch, Cursor, v0, Lovable diretamente
 >
 > Aprovado? Quer ajustar tokens específicos ou expandir alguma seção?
@@ -208,7 +229,7 @@ Antes de finalizar, verifique:
 
 ## Iteração
 
-Se já existe `DESIGN.md`, leia, identifique se está no formato Stitch (frontmatter + 8 seções). Se sim, edite com `str_replace`. Se não, pergunte se quer **migrar pro formato Stitch** ou apenas iterar no formato atual.
+Se já existe DESIGN (em `.ksdd/specs/DESIGN.md` ou `DESIGN.md` raiz legado), leia, identifique se está no formato Stitch (frontmatter + 8 seções). Se sim, edite com `str_replace` no path onde ele vive. Se não, pergunte se quer **migrar pro formato Stitch** ou apenas iterar no formato atual. Se está no path legado, sugira migração com `git mv`.
 
 ## Quando o SPEC não tem direção visual
 
