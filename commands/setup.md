@@ -1,5 +1,5 @@
 ---
-description: Faz o onboarding de um projeto existente para o KSDD — analisa codebase, git history e estrutura para gerar os artefatos (brainstorm.md, SPEC.md, architecture.md, DESIGN.md) por reverse-engineering. Use em projetos que já existem e precisam de documentação KSDD.
+description: Faz o onboarding de um projeto existente para o KSDD — analisa codebase, git history e estrutura para gerar os artefatos (brainstorm.md, SPEC.md, architecture.md, DESIGN.md) por reverse-engineering em .ksdd/specs/. Use em projetos que já existem e precisam de documentação KSDD.
 argument-hint: "[--artifacts brainstorm,spec,arch,design] [--depth shallow|deep] [--skip-questions]"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, WebFetch, view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, execute_shell, list_directory, mcp__github__*, mcp__context7__*
 ---
@@ -22,23 +22,59 @@ Não invente. Extraia. O que não estiver claro no projeto, pergunte ao usuário
 
 ---
 
+## Paths dos artefatos (KSDD v0.6.0+)
+
+A partir da v0.6.0, KSDD usa `.ksdd/specs/` para os artefatos de spec. Este command **gera direto no novo layout**, mas detecta legados na raiz/`docs/` para evitar duplicação acidental.
+
+| Artefato         | Detecção (em ordem)                                          | Escrita default                  |
+|------------------|---------------------------------------------------------------|----------------------------------|
+| brainstorm.md    | `.ksdd/specs/` → raiz                                         | `.ksdd/specs/brainstorm.md`      |
+| SPEC.md          | `.ksdd/specs/` → raiz                                         | `.ksdd/specs/SPEC.md`            |
+| architecture.md  | `.ksdd/specs/` → raiz                                         | `.ksdd/specs/architecture.md`    |
+| DESIGN.md        | `.ksdd/specs/` → raiz                                         | `.ksdd/specs/DESIGN.md`          |
+
+Garanta `mkdir -p .ksdd/specs/` antes de qualquer `create_file`.
+
+---
+
 ## Fase 0 — Pre-flight
 
 ### 0.1 Verificar artefatos KSDD existentes
 
-Verifique quais artefatos já existem no diretório atual:
+Verifique quais artefatos já existem em ambos os layouts:
 
 ```bash
-ls brainstorm.md SPEC.md architecture.md DESIGN.md 2>/dev/null
+ls .ksdd/specs/brainstorm.md .ksdd/specs/SPEC.md .ksdd/specs/architecture.md .ksdd/specs/DESIGN.md 2>/dev/null
+ls brainstorm.md SPEC.md architecture.md DESIGN.md 2>/dev/null   # layout legado
+ls docs/FEATURE-*.md 2>/dev/null                                 # features legadas
 ```
 
-Para cada artefato existente:
-- **Se está marcado como `Status: Aprovado`** → não sobrescreva. Informe ao usuário e pule.
-- **Se está em rascunho / não existe** → será gerado ou atualizado.
+Para cada artefato encontrado:
+- **No layout novo (`.ksdd/specs/`):** Se `Status: Aprovado`, não sobrescreva — pule. Se rascunho, será gerado/atualizado no mesmo path.
+- **No layout legado (raiz ou `docs/`):** detectou? **Pergunte ao usuário antes de prosseguir** (ver 0.1.1).
 
-Se todos os artefatos solicitados já existem e estão aprovados, pare:
+Se **todos** os artefatos solicitados já existem em `.ksdd/specs/` aprovados, pare:
 
-> Todos os artefatos KSDD já existem e estão aprovados neste projeto. Para iterar sobre algum deles, rode o comando específico (ex: `/ksdd:tech`, `/ksdd:spec`).
+> Todos os artefatos KSDD já existem e estão aprovados em `.ksdd/specs/`. Para iterar sobre algum deles, rode o comando específico (ex: `/ksdd:tech`, `/ksdd:spec`).
+
+### 0.1.1 Detecção de artefatos legados (raiz / docs/)
+
+Se detectar pelo menos um artefato legado (raiz: `brainstorm.md`/`SPEC.md`/`architecture.md`/`DESIGN.md`; ou `docs/FEATURE-*.md`) E o layout novo está vazio (sem `.ksdd/specs/`):
+
+> ⚠ Detectei artefatos KSDD em layout legado:
+> - [lista do que foi encontrado: `SPEC.md` raiz, `brainstorm.md` raiz, `docs/FEATURE-*.md`, etc.]
+>
+> A partir da v0.6.0, KSDD usa `.ksdd/`. Como prosseguir?
+>
+> (a) **Gerar artefatos novos em `.ksdd/` separadamente** — mantenho os legados como estão; você terá artefatos em ambos os locais até decidir migrar.
+> (b) **Pausar para você migrar os legados primeiro** — sugiro o comando:
+>     `mkdir -p .ksdd/specs .ksdd/features && git mv brainstorm.md SPEC.md architecture.md DESIGN.md .ksdd/specs/ 2>/dev/null; git mv docs/FEATURE-*.md .ksdd/features/ 2>/dev/null`
+>     Após mover, re-rode `/ksdd:setup`.
+> (c) **Abortar** — sem mudanças.
+
+Use a escolha do usuário para decidir como prosseguir. Se `--skip-questions`, default = (a).
+
+Se detectar artefatos em **ambos** os layouts (novo + legado) com conteúdos diferentes, **aborte com erro** pedindo resolução manual antes de prosseguir.
 
 ### 0.2 Verificar que é um projeto existente
 
@@ -449,6 +485,8 @@ Se `--skip-questions`, pule o checkpoint e gere diretamente.
 
 Gere cada artefato usando o template canônico correspondente de `references/`. Adapte o conteúdo para refletir o estado **atual** do projeto, não um estado aspiracional.
 
+**Path de escrita:** sempre `.ksdd/specs/<arquivo>.md` (default v0.6.0+). Garanta `mkdir -p .ksdd/specs/` antes do primeiro `create_file`.
+
 ### Cabeçalho obrigatório em todos os artefatos gerados pelo setup
 
 Adicione após o `**Status:**`:
@@ -458,7 +496,7 @@ Adicione após o `**Status:**`:
 **Aviso:** Artefato gerado automaticamente. Revise e corrija antes de usar como contrato.
 ```
 
-### 4.1 Gerar `brainstorm.md`
+### 4.1 Gerar `.ksdd/specs/brainstorm.md`
 
 Use `references/brainstorm-template.md`. Preencha com os dados do Agent A + histórico git.
 
@@ -474,7 +512,7 @@ Ao final:
 **Próximo passo:** Este brainstorm foi gerado por reverse-engineering. Revise, aprove e então rode `/ksdd:spec` se quiser um SPEC a partir dele — ou continue para `/ksdd:setup` gerar o SPEC automaticamente (já está em andamento se você rodou sem `--artifacts`).
 ```
 
-### 4.2 Gerar `SPEC.md`
+### 4.2 Gerar `.ksdd/specs/SPEC.md`
 
 Use `references/spec-template.md`. Este é o artefato mais complexo de gerar por reverse-engineering.
 
@@ -500,7 +538,7 @@ Use `references/spec-template.md`. Este é o artefato mais complexo de gerar por
 
 **Regra principal:** Documente o que **existe hoje** como "Fase 1 — Entregue". O que está em branches ativas ou mencionado em TODO/FIXME no código vai para fases futuras.
 
-### 4.3 Gerar `architecture.md`
+### 4.3 Gerar `.ksdd/specs/architecture.md`
 
 Use `references/architecture-template.md`. Este é o mais direto — documente a stack real.
 
@@ -521,7 +559,7 @@ Use `references/architecture-template.md`. Este é o mais direto — documente a
 **Consequência:** [impacto observado no código]
 ```
 
-### 4.4 Gerar `DESIGN.md` (apenas se frontend detectado)
+### 4.4 Gerar `.ksdd/specs/DESIGN.md` (apenas se frontend detectado)
 
 Se não há frontend, pule. Informe ao usuário.
 
@@ -546,13 +584,13 @@ Após gerar todos os artefatos:
 
 > **Setup concluído para `[nome do projeto]`.**
 >
-> **Artefatos gerados:**
-> | Artefato | Status | Gaps marcados |
-> |----------|--------|---------------|
-> | `brainstorm.md` | Gerado | [N] `[verificar]` |
-> | `SPEC.md` | Gerado | [N] `[verificar]` |
-> | `architecture.md` | Gerado | [N] `[verificar]` |
-> | `DESIGN.md` | Gerado / — N/A | [N] `[verificar]` |
+> **Artefatos gerados em `.ksdd/specs/`:**
+> | Artefato                       | Status | Gaps marcados |
+> |--------------------------------|--------|---------------|
+> | `.ksdd/specs/brainstorm.md`    | Gerado | [N] `[verificar]` |
+> | `.ksdd/specs/SPEC.md`          | Gerado | [N] `[verificar]` |
+> | `.ksdd/specs/architecture.md`  | Gerado | [N] `[verificar]` |
+> | `.ksdd/specs/DESIGN.md`        | Gerado / — N/A | [N] `[verificar]` |
 >
 > **Próximos passos recomendados:**
 >
@@ -612,7 +650,8 @@ Pule a Fase 2 (agentes). Use apenas o que foi detectado na Fase 1 (manifests, es
 - ❌ Ler todos os arquivos do projeto. → Estratégia de amostragem — leia os mais informativos por categoria.
 - ❌ Gerar SPEC com 0 lacunas. → Um projeto real sempre tem aspectos não documentados no código.
 - ❌ Tratar TODO/FIXME como features confirmadas. → São intenções, não contratos.
-- ❌ Sobrescrever artefatos aprovados. → Verifique o `Status:` antes de qualquer escrita.
+- ❌ Sobrescrever artefatos aprovados. → Verifique o `Status:` antes de qualquer escrita, em ambos os layouts.
+- ❌ Sobrescrever artefatos legados sem perguntar. → Detecte legados em raiz/`docs/` na Fase 0.1 e pergunte ao usuário.
 - ❌ Spawn sequencial dos agentes A/B/C/D. → Paralelisme para reduzir tempo de análise.
 - ❌ Perguntar sobre cada campo do artefato. → Pergunte apenas os gaps que não podem ser inferidos.
 - ❌ Gerar DESIGN.md para projetos sem frontend. → Detecte antes, informe ao usuário.
