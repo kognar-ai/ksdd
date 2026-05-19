@@ -1,7 +1,7 @@
 ---
 id: 003
 title: Atualizar commands/build:feature.md para .ksdd/tasks/.context/
-status: para implementar
+status: em revisão
 feature: ksdd-folder-layout
 area: backend
 priority: P0

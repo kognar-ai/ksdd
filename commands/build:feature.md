@@ -1,12 +1,12 @@
 ---
-description: Implementa tasks de uma feature ponta-a-ponta — issue+subtasks no GitHub, branch, context.md, execução via teammates, validação de quality gates, commit atômico e PR. Lê docs/FEATURE-[slug].md + tasks de docs/tasks/feature-[slug]/.
+description: Implementa tasks de uma feature ponta-a-ponta — issue+subtasks no GitHub, branch, context.md, execução via teammates, validação de quality gates, commit atômico e PR. Lê .ksdd/features/FEATURE-[slug].md + tasks de .ksdd/tasks/feature-[slug]/ (com fallback para docs/ e raiz legados).
 argument-hint: "<slug|task-id|--all> (ex: push-notifications, 016, 016-create-endpoint, --all)"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, WebFetch, view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, execute_shell, list_directory, mcp__github__*, mcp__context7__*, mcp__pencil__*, mcp__executeautomation-playwright-server__*
 ---
 
 # /ksdd:build:feature — Implementar feature task por task
 
-Você vai implementar tasks de uma feature definidas em `docs/tasks/feature-[slug]/` seguindo o fluxo completo: pre-flight → leitura de contexto → issue no GitHub → branch → context.md → execução com teammates → quality gates → commit → PR.
+Você vai implementar tasks de uma feature definidas em `.ksdd/tasks/feature-[slug]/` (com fallback para `docs/tasks/feature-[slug]/` legado) seguindo o fluxo completo: pre-flight → leitura de contexto → issue no GitHub → branch → context.md → execução com teammates → quality gates → commit → PR.
 
 **Princípios:**
 
@@ -21,12 +21,32 @@ Você vai implementar tasks de uma feature definidas em `docs/tasks/feature-[slu
 `$ARGUMENTS` aceita:
 
 - **Slug da feature:** `push-notifications` → implementa a próxima task `para implementar` da feature (respeita dependências).
-- **ID de task:** `016` → resolve para `docs/tasks/feature-*/016-*.md`.
+- **ID de task:** `016` → resolve para `.ksdd/tasks/feature-*/016-*.md` (fallback `docs/tasks/feature-*/016-*.md`).
 - **Slug parcial:** `016-create-endpoint` ou `create-endpoint`.
-- **Caminho completo:** `docs/tasks/feature-push-notifications/016-create-endpoint.md`.
+- **Caminho completo:** `.ksdd/tasks/feature-push-notifications/016-create-endpoint.md` (ou path legado).
 - **`--all`:** implementa todas as tasks `para implementar` da feature em ordem de dependência (com checkpoint entre cada uma).
 
-Se ambíguo (mais de um match), **pare e peça desambiguação** — não adivinhe.
+Se ambíguo (mais de um match — incl. mesmo ID em paths novo e legado), **pare e peça desambiguação** — não adivinhe.
+
+---
+
+## Paths dos artefatos (KSDD v0.6.0+)
+
+Resolução de paths neste command segue esta hierarquia:
+
+| Artefato                | Ordem de busca                                                                       |
+|-------------------------|---------------------------------------------------------------------------------------|
+| task `NNN-*.md`         | `.ksdd/tasks/feature-[slug]/` → `docs/tasks/feature-[slug]/`                          |
+| FEATURE-[slug].md       | `.ksdd/features/FEATURE-[slug].md` → `docs/FEATURE-[slug].md` → raiz `FEATURE-[slug].md` |
+| SPEC.md                 | `.ksdd/specs/SPEC.md` → raiz `SPEC.md`                                                |
+| architecture.md         | `.ksdd/specs/architecture.md` → raiz `architecture.md`                                |
+| DESIGN.md               | `.ksdd/specs/DESIGN.md` → raiz `DESIGN.md`                                            |
+
+**Regra-chave:** o path onde a **task** vive dita onde fica seu `.context/NNN-context.md` e qual `README.md` é atualizado:
+- Task em `.ksdd/tasks/feature-[slug]/NNN-*.md` → context em `.ksdd/tasks/feature-[slug]/.context/` e README atualizado em `.ksdd/tasks/feature-[slug]/README.md`.
+- Task em `docs/tasks/feature-[slug]/NNN-*.md` (legado) → context em `docs/tasks/feature-[slug]/.context/` e README legado atualizado. Sem migração automática.
+
+Quando encontrar artefatos em paths legados, emita o warning amarelo padronizado descrito nos outros commands KSDD v0.6.0+ e sugira `git mv` para migração manual.
 
 ---
 
@@ -50,11 +70,11 @@ Se qualquer pré-requisito **crítico** falhar (git sujo), **STOP** e reporte o 
 3. **Bloqueios:**
    - `status` ≠ `para implementar` → pare e pergunte se quer reabrir/forçar.
    - Cada ID em `depends_on` precisa ter `status: concluída`. Se algum não está, liste os pendentes e **pare**.
-4. **Leia** os artefatos referenciados (use `Grep` para localizar seções e `Read` com `offset`/`limit` para extrair só os trechos):
-   - `docs/FEATURE-[slug].md` (ou caminho em `feature_refs`, incl. legado na raiz) — seções em `feature_refs`
-   - `SPEC.md` — seções em `spec_refs`
-   - `architecture.md` — seções em `arch_refs` (se existir)
-   - `DESIGN.md` — componentes/tokens referenciados (se existir)
+4. **Leia** os artefatos referenciados (use `Grep` para localizar seções e `Read` com `offset`/`limit` para extrair só os trechos). Aplique a hierarquia de paths definida em "Paths dos artefatos" — `*_refs` no frontmatter podem citar qualquer dos paths possíveis (novo ou legado):
+   - FEATURE-[slug].md — seções em `feature_refs`
+   - SPEC.md — seções em `spec_refs`
+   - architecture.md — seções em `arch_refs` (se existir)
+   - DESIGN.md — componentes/tokens referenciados (se existir)
 
 ---
 
@@ -97,7 +117,9 @@ Confirme que está na branch nova com `git rev-parse --abbrev-ref HEAD`.
 
 ## 4. Gerar `context.md` de implementação
 
-Crie `docs/tasks/feature-[slug]/.context/NNN-context.md` compilando todo o contexto necessário para implementar a task.
+Crie `<tasks-dir>/.context/NNN-context.md` onde `<tasks-dir>` é o diretório onde a **task vive** (`.ksdd/tasks/feature-[slug]/` no layout novo, `docs/tasks/feature-[slug]/` se a task ficou no legado). Antes do `create_file`, garanta `mkdir -p <tasks-dir>/.context/`.
+
+Compila todo o contexto necessário para implementar a task.
 
 ### 4.1 Bloco "Task em uma página"
 
@@ -245,8 +267,8 @@ Para cada `- [ ]` na seção "Critérios de aceitação" da task:
 
 ## 8. Atualizar status da task
 
-1. Edite o frontmatter da task: `status: em revisão`
-2. Atualize `docs/tasks/feature-[slug]/README.md` com o novo status
+1. Edite o frontmatter da task: `status: em revisão` (no path onde a task vive).
+2. Atualize o `README.md` de tasks **no mesmo diretório** da task (`.ksdd/tasks/feature-[slug]/README.md` ou `docs/tasks/feature-[slug]/README.md` legado).
 3. Commit: `docs(task-NNN): atualiza status para em revisão`
 
 ---
@@ -268,7 +290,7 @@ Use `gh pr create` com:
 Closes #<ISSUE_NUM>
 
 ## Feature
-docs/FEATURE-[slug].md — [nome da feature]
+.ksdd/features/FEATURE-[slug].md — [nome da feature] (ou path legado se a feature ainda não migrou)
 
 ## Critérios de aceitação
 <checklist marcada>
@@ -339,9 +361,9 @@ Build da feature [slug] concluído:
 
 ## Artefatos são read-only durante build
 
-**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` ou `docs/FEATURE-[slug].md` durante o build. Se durante a implementação ficar claro que algo está errado ou incompleto num artefato, sinalize ao usuário — não corrija automaticamente.
+**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` ou `FEATURE-[slug].md` (em qualquer um dos paths suportados — `.ksdd/specs/`, `.ksdd/features/`, raiz, `docs/`) durante o build. Se durante a implementação ficar claro que algo está errado ou incompleto num artefato, sinalize ao usuário — não corrija automaticamente.
 
-A única exceção são os arquivos de task: `status` e o `README.md` de tasks podem ser atualizados.
+A única exceção são os arquivos de task: `status` e o `README.md` de tasks podem ser atualizados (no path onde a task vive).
 
 ---
 
