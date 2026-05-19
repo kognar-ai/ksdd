@@ -16,7 +16,7 @@
 | 007 | Atualizar agents (critic/interviewer/setup-analyst) com novos paths    | backend  | P1         | S          | em revisão        | —                         |
 | 008 | Atualizar README/INSTALL/CHANGELOG + bump versão 0.6.0                 | backend  | P0         | S          | em revisão        | 001, 002, 003, 004, 005, 006, 007 |
 | 009 | Dogfood — migrar artefatos do próprio repo KSDD para .ksdd/specs/      | backend  | P0         | S          | em revisão        | 008                       |
-| 010 | QA end-to-end — validar fluxo em projeto vazio + projeto legado        | qa       | P0         | M          | para implementar  | 009                       |
+| 010 | QA end-to-end — validar fluxo em projeto vazio + projeto legado        | qa       | P0         | M          | em revisão        | 009                       |
 
 ---
 

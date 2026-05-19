@@ -1,7 +1,7 @@
 ---
 id: 010
 title: QA end-to-end — validar fluxo completo em projeto vazio + projeto legado
-status: para implementar
+status: em revisão
 feature: ksdd-folder-layout
 area: qa
 priority: P0
