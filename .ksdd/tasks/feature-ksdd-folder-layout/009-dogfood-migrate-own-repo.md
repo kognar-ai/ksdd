@@ -1,7 +1,7 @@
 ---
 id: 009
 title: Dogfood — migrar artefatos do próprio repo KSDD para .ksdd/specs/
-status: para implementar
+status: em revisão
 feature: ksdd-folder-layout
 area: backend
 priority: P0
