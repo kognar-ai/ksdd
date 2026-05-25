@@ -45,6 +45,7 @@ A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos. Para este command
 | DESIGN.md           | `.ksdd/specs/DESIGN.md` → raiz `DESIGN.md`                                   | n/a (input)                             |
 | FEATURE-[slug].md   | `.ksdd/features/FEATURE-[slug].md` → `docs/FEATURE-[slug].md` → raiz legado  | `.ksdd/features/FEATURE-[slug].md`      |
 | tasks               | `.ksdd/tasks/feature-[slug]/` → `docs/tasks/feature-[slug]/`                 | `.ksdd/tasks/feature-[slug]/`           |
+| features arquivadas | `.ksdd/archive/raw/[slug]/` (detecção de colisão de slug + leitura de IDs)   | n/a (read-only — só `/ksdd:archive` escreve) |
 
 **Fallback de leitura:** ao detectar artefato em path legado, emita warning amarelo:
 
@@ -55,7 +56,25 @@ A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos. Para este command
 
 **Escrita:** sempre nos paths default `.ksdd/features/` e `.ksdd/tasks/`. Garanta `mkdir -p .ksdd/features/` e `mkdir -p .ksdd/tasks/feature-[slug]/` antes dos `create_file`.
 
-**Numeração de tasks:** ao calcular o próximo ID, considere IDs existentes **em ambos** `.ksdd/tasks/feature-[slug]/` E `docs/tasks/feature-[slug]/` (legado) para evitar colisão.
+**Numeração de tasks:** ao calcular o próximo ID, considere IDs existentes em **três** lugares:
+1. `.ksdd/tasks/feature-*/NNN-*.md` (layout atual)
+2. `docs/tasks/feature-*/NNN-*.md` (layout legado pré-0.6.0)
+3. `.ksdd/archive/raw/*/tasks/NNN-*.md` (features arquivadas via `/ksdd:archive`)
+
+Use o **maior ID encontrado nos três paths combinados** + 1 como próximo ID. Isso evita colisão se uma feature arquivada for restaurada futuramente.
+
+## Detecção de slug arquivado
+
+Antes de gerar `FEATURE-[slug].md`, **verifique** se o slug derivado colide com uma feature arquivada:
+
+1. Após derivar o slug (passo 4 do fluxo abaixo), verifique se existe `.ksdd/archive/raw/[slug]/FEATURE-[slug].md`.
+2. Se existir, **pare** e apresente 3 opções via `ask_user_input_v0`:
+   - **(a) Escolher outro slug** — usuário sugere um slug novo; volte ao passo 4.
+   - **(b) Restaurar a feature arquivada** — instrua o usuário a rodar `/ksdd:archive --restore [slug]` antes de continuar; encerre este comando.
+   - **(c) Abortar** — encerra sem fazer nada.
+3. **Nunca** sobrescreva uma feature arquivada automaticamente — exija decisão explícita.
+
+Em projetos sem `.ksdd/archive/` (ausente é o caso normal em projetos novos), pule esta checagem silenciosamente.
 
 ## Fluxo
 
@@ -68,8 +87,8 @@ Leia **todos** os artefatos KSDD existentes (aplicando fallback definido em "Pat
 3. `view .ksdd/specs/architecture.md` (se existir; fallback raiz)
 4. `view .ksdd/specs/DESIGN.md` (se existir; fallback raiz)
 
-Se existem features prévias (em `.ksdd/features/FEATURE-*.md`, `docs/FEATURE-*.md` legado, ou `FEATURE-*.md` raiz mais legado), liste-as e leia os títulos pra evitar duplicação.
-Se existem tasks prévias (em `.ksdd/tasks/` ou `docs/tasks/` legado), verifique o maior ID existente **em ambos** pra continuar a numeração sem colisão.
+Se existem features prévias (em `.ksdd/features/FEATURE-*.md`, `docs/FEATURE-*.md` legado, ou `FEATURE-*.md` raiz mais legado), liste-as e leia os títulos pra evitar duplicação. Liste também features arquivadas em `.ksdd/archive/raw/*/FEATURE-*.md` para detectar colisão de slug (ver seção "Detecção de slug arquivado" acima).
+Se existem tasks prévias (em `.ksdd/tasks/`, `docs/tasks/` legado, ou `.ksdd/archive/raw/*/tasks/`), verifique o maior ID existente **nos três paths combinados** pra continuar a numeração sem colisão.
 
 ### 2. Sessão de perguntas (1-2 rodadas)
 

@@ -1,7 +1,7 @@
 ---
 id: 014
 title: Atualizar commands/new:feature.md — detecção de slug arquivado + numeração de IDs considerando archive
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0
