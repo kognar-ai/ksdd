@@ -1,7 +1,7 @@
 ---
 id: 011
 title: Criar commands/archive.md com todos os modos (slug, lista, --all-eligible, --restore, --dry-run)
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0
