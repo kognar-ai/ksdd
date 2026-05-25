@@ -1,7 +1,7 @@
 ---
 id: 013
 title: Verificar bin/ksdd.js distribui archive.md + archive-template.md corretamente
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0
