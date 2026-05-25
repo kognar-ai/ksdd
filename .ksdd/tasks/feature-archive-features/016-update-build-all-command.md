@@ -1,7 +1,7 @@
 ---
 id: 016
 title: Atualizar commands/build:all.md — ignorar slugs arquivados ao montar fila de features pendentes
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0

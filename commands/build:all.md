@@ -29,6 +29,7 @@ A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos:
 | FEATURE-*.md     | `.ksdd/features/` → `docs/` → raiz (legados)                                  | `.ksdd/features/FEATURE-*.md`    |
 | tasks            | `.ksdd/tasks/` → `docs/tasks/` (legado)                                       | `.ksdd/tasks/feature-*/`         |
 | BUILD-PLAN.md    | `.ksdd/build/BUILD-PLAN.md` → raiz `BUILD-PLAN.md`                            | `.ksdd/build/BUILD-PLAN.md`      |
+| features arquivadas | `.ksdd/archive/raw/[slug]/` (read-only — excluídas da fila de pendentes)   | n/a                              |
 
 **Fallback de leitura:** ao detectar artefato em path legado, emita warning amarelo:
 
@@ -75,6 +76,7 @@ Leia **todos** os artefatos KSDD (aplicando hierarquia de paths definida em "Pat
 3. `view .ksdd/specs/DESIGN.md` (fallback raiz, se existir) — componentes, tokens
 4. `view .ksdd/specs/brainstorm.md` (fallback raiz, se existir) — contexto original
 5. Verifique features existentes em `.ksdd/features/`, `docs/` legado, raiz legado; e tasks em `.ksdd/tasks/` ou `docs/tasks/` legado (pra `--resume`)
+6. **Liste features arquivadas** em `.ksdd/archive/raw/*/` — esses slugs já foram entregues e devem ser **excluídos** da fila de features pendentes a serem geradas/buildadas. Mantenha-os apenas como histórico informativo no resumo do Checkpoint 1.
 
 #### A.2 Decompor SPEC em features
 
@@ -87,6 +89,8 @@ Analise a seção 14 (Fases de Entrega) do SPEC.md. Cada **bloco coerente de fun
 - Uma fase do SPEC pode ter 2-8 features (depende da complexidade)
 - Features dentro de uma fase podem ter dependências entre si
 - Features de fases posteriores dependem da fase anterior completa
+
+**Exclusão de features arquivadas:** se um slug candidato corresponde a uma feature em `.ksdd/archive/raw/*/`, **não** inclua na fila de execução. Sinalize no resumo do Checkpoint 1 com formato `✓ [slug] (arquivada em [data extraída de ARCHIVE.md])` em linha informativa (dim/verde) — não entra no plano de build. A comparação é por slug (kebab-case do nome derivado do SPEC); falsos negativos são aceitáveis na v1.
 
 **Resultado:** Lista de features por fase com dependências:
 
