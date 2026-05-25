@@ -7,15 +7,15 @@
 
 | ID  | Título                                                                       | Área    | Prioridade | Estimativa | Status            | Depende de                  |
 |-----|-------------------------------------------------------------------------------|---------|------------|------------|-------------------|-----------------------------|
-| 011 | Criar `commands/archive.md` (slug, lista, --all-eligible, --restore, --dry-run) | backend | P0         | M          | para implementar  | —                           |
-| 012 | Criar `references/archive-template.md`                                        | backend | P0         | S          | para implementar  | —                           |
-| 013 | Verificar `bin/ksdd.js` distribui archive.md + archive-template.md            | backend | P0         | S          | para implementar  | 011, 012                    |
-| 014 | Atualizar `commands/new:feature.md` — detecção de slug arquivado + IDs        | backend | P0         | M          | para implementar  | 011                         |
-| 015 | Atualizar `commands/build:feature.md` — detecção de slug arquivado            | backend | P0         | S          | para implementar  | 011                         |
-| 016 | Atualizar `commands/build:all.md` — ignorar slugs arquivados                  | backend | P0         | S          | para implementar  | 011                         |
-| 017 | Atualizar README/INSTALL/CHANGELOG + bump 0.7.0                               | backend | P0         | S          | para implementar  | 011, 012, 013, 014, 015, 016 |
-| 018 | Dogfood — arquivar `ksdd-folder-layout` no próprio repo                       | backend | P0         | S          | para implementar  | 017                         |
-| 019 | QA end-to-end — 15 cenários (A–O) cobrindo modos + edge cases + integrações  | qa      | P0         | M          | para implementar  | 018                         |
+| 011 | Criar `commands/archive.md` (slug, lista, --all-eligible, --restore, --dry-run) | backend | P0         | M          | em revisão       | —                           |
+| 012 | Criar `references/archive-template.md`                                        | backend | P0         | S          | em revisão       | —                           |
+| 013 | Verificar `bin/ksdd.js` distribui archive.md + archive-template.md            | backend | P0         | S          | em revisão       | 011, 012                    |
+| 014 | Atualizar `commands/new:feature.md` — detecção de slug arquivado + IDs        | backend | P0         | M          | em revisão       | 011                         |
+| 015 | Atualizar `commands/build:feature.md` — detecção de slug arquivado            | backend | P0         | S          | em revisão       | 011                         |
+| 016 | Atualizar `commands/build:all.md` — ignorar slugs arquivados                  | backend | P0         | S          | em revisão       | 011                         |
+| 017 | Atualizar README/INSTALL/CHANGELOG + bump 0.7.0                               | backend | P0         | S          | em revisão       | 011, 012, 013, 014, 015, 016 |
+| 018 | Dogfood — arquivar `ksdd-folder-layout` no próprio repo                       | backend | P0         | S          | em revisão       | 017                         |
+| 019 | QA end-to-end — 15 cenários (A–O) cobrindo modos + edge cases + integrações  | qa      | P0         | M          | em revisão       | 018                         |
 
 ---
 
