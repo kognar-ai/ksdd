@@ -1,7 +1,7 @@
 ---
 id: 015
 title: Atualizar commands/build:feature.md — detecção de slug arquivado no pre-flight
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0
