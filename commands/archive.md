@@ -103,10 +103,11 @@ Use `ask_user_input_v0` para confirmação binária. Se negado, encerre sem mexe
 ### 3. Executar move
 
 1. `mkdir -p .ksdd/archive/raw/[slug]/tasks/`.
-2. Use `git mv` se a árvore for git (preserva história), senão `mv`:
-   - `FEATURE-[slug].md` → `.ksdd/archive/raw/[slug]/FEATURE-[slug].md`
-   - todo conteúdo de `.ksdd/tasks/feature-[slug]/` → `.ksdd/archive/raw/[slug]/tasks/`
-3. Verifique que diretório de origem (`.ksdd/tasks/feature-[slug]/`) ficou vazio e remova com `rmdir`.
+2. Use `git mv` se a árvore for git (preserva história), senão `mv`. **Importante:** mova o **diretório inteiro**, não `dir/*` (globs shell ignoram arquivos hidden como `.context/`):
+   - `git mv .ksdd/features/FEATURE-[slug].md .ksdd/archive/raw/[slug]/FEATURE-[slug].md`
+   - `git mv .ksdd/tasks/feature-[slug] .ksdd/archive/raw/[slug]/tasks` (renomeia o diretório — preserva `.context/`)
+3. Se houver tasks em `docs/tasks/feature-[slug]/` (layout legado), aplique o mesmo `git mv` ao path legado.
+4. Verifique que diretórios de origem foram removidos (renomeados pelo `git mv`).
 
 ### 4. Atualizar `ARCHIVE.md`
 

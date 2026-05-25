@@ -1,7 +1,7 @@
 ---
 id: 018
 title: Dogfooding — arquivar feature ksdd-folder-layout no próprio repo
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0

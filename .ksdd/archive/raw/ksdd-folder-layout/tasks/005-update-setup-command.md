@@ -1,7 +1,7 @@
 ---
 id: 005
 title: Atualizar commands/setup.md (reverse-engineering) com novo layout + detecção de legados
-status: em revisão
+status: concluída
 feature: ksdd-folder-layout
 area: backend
 priority: P0
