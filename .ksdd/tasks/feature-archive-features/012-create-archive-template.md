@@ -1,7 +1,7 @@
 ---
 id: 012
 title: Criar references/archive-template.md (template canônico para seções de ARCHIVE.md)
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0
