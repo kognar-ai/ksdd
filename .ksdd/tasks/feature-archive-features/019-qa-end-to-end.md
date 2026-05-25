@@ -1,7 +1,7 @@
 ---
 id: 019
 title: QA end-to-end — todos os modos do /ksdd:archive + edge cases + integrações
-status: para implementar
+status: em revisão
 feature: archive-features
 area: qa
 priority: P0
