@@ -1,7 +1,7 @@
 ---
 id: 017
 title: Atualizar README/INSTALL/CHANGELOG + bump versão 0.7.0
-status: para implementar
+status: em revisão
 feature: archive-features
 area: backend
 priority: P0

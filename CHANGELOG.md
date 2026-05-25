@@ -4,6 +4,23 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.7.0] - 2026-05-25
+
+### Adicionado
+
+- **`/ksdd:archive`** — novo slash command que arquiva features já implementadas, movendo `.ksdd/features/FEATURE-[slug].md` + `.ksdd/tasks/feature-[slug]/` para `.ksdd/archive/raw/[slug]/` e consolidando um resumo cronológico em `.ksdd/archive/ARCHIVE.md`. Cinco modos: individual (`[slug]`), lote (`[slug-a] [slug-b]`), massa (`--all-eligible`), reverso (`--restore [slug]`), preview (`--dry-run` — combinável). Critério de elegibilidade estrito: 100% das tasks com `status: concluída` ou `cancelada`. Operação atômica por slug; sem rollback automático em lote.
+- **`references/archive-template.md`** — template canônico do `ARCHIVE.md` com header global + estrutura de seção por feature (objetivo, tasks, critérios de aceite preservados, pointer para `raw/`). Distribuído em `~/.claude/skills/ksdd/references/` e `~/.agents/skills/ksdd/references/` via `ksdd install`.
+
+### Alterado
+
+- **`/ksdd:new:feature`** — detecta colisão de slug com features em `.ksdd/archive/raw/` e apresenta 3-way fork (escolher novo slug / restaurar / abortar). Numeração de IDs passa a considerar três paths: `.ksdd/tasks/`, `docs/tasks/` (legado) e `.ksdd/archive/raw/*/tasks/` — evita colisão pós-restore.
+- **`/ksdd:build:feature`** — nova seção 0.5 "Detecção de slug arquivado" no pre-flight com 3-way fork (consultar `ARCHIVE.md` / restaurar / abortar). Nunca restaura automaticamente.
+- **`/ksdd:build:all`** — A.1 lista features arquivadas como histórico. A.2 exclui slugs em `.ksdd/archive/raw/` da fila de execução; aparecem como linha informativa no Checkpoint 1, sem entrar no `BUILD-PLAN.md`.
+- **`bin/ksdd.js`** — adiciona `archive.md` ao array `COMMAND_FILES` (necessário porque install/uninstall não usam `copyDir` para `commands/`). Sem novas dependências runtime (mantém ADR-001).
+- **README** — adiciona `/ksdd:archive` à tabela de comandos e nova seção "Archiving delivered features" com exemplos de uso.
+
+---
+
 ## [0.6.1] - 2026-05-19
 
 ### Alterado
