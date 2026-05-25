@@ -16,6 +16,7 @@ After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`):
 | `/ksdd:build:feature` | `/prompts:ksdd-build-feature` |
 | `/ksdd:build:all` | `/prompts:ksdd-build-all` |
 | `/ksdd:setup` | `/prompts:ksdd-setup` |
+| `/ksdd:archive` | `/prompts:ksdd-archive` |
 
 The `ksdd` skill is also installed in `~/.agents/skills/ksdd/` (references + agents + `SKILL.md`) — use `$ksdd` or mention the skill in your prompt. Codex prompts are the same content as the files in `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) are flagged as *deprecated* in favor of skills, but still work for explicit `/prompts:…` invocation.
 
@@ -30,7 +31,22 @@ Restart Codex after installing. `CODEX_HOME` (default `~/.codex`) changes the pr
 /ksdd:build:feature  →  task by task                       (feature → implementation with issue, branch, PR)
 /ksdd:build:all      →  .ksdd/build/BUILD-PLAN.md         (entire SPEC → features + tasks + full implementation)
 /ksdd:setup          →  .ksdd/specs/{brainstorm,SPEC,architecture,DESIGN}.md  (existing project → reverse-engineered artifacts)
+/ksdd:archive        →  .ksdd/archive/{ARCHIVE.md, raw/[slug]/}  (delivered features → cronological summary + raw preservation)
 ```
+
+### Archiving delivered features
+
+Once a feature is shipped (all tasks `concluída` or `cancelada`), use `/ksdd:archive` to move it out of the active workspace and into a cronological log:
+
+```
+/ksdd:archive [slug]                   # archive one
+/ksdd:archive slug-a slug-b slug-c     # archive a batch
+/ksdd:archive --all-eligible           # archive every feature that passes elegibility
+/ksdd:archive --restore [slug]         # bring a feature back from the archive
+/ksdd:archive [slug] --dry-run         # preview without applying changes (combinable)
+```
+
+`.ksdd/archive/` is created on demand. `ARCHIVE.md` is a cronological index (latest at the top); `raw/[slug]/` preserves the original `FEATURE-[slug].md` + tasks for audit or restore. All other commands (`new:feature`, `build:feature`, `build:all`) detect archived slugs and refuse to overwrite them — restore is always explicit.
 
 > **Migrating from v0.5.x?** Starting in v0.6.0, KSDD uses the `.ksdd/` layout instead of scattering artifacts across the project root and `docs/`. Legacy projects keep working — each command reads from the old path if the new one doesn't exist and shows how to migrate via `git mv`. See [CHANGELOG](CHANGELOG.md#060---2026-05-19) for details.
 

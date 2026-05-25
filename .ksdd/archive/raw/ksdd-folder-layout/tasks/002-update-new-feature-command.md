@@ -1,7 +1,7 @@
 ---
 id: 002
 title: Atualizar commands/new:feature.md para .ksdd/features/ + .ksdd/tasks/
-status: em revisão
+status: concluída
 feature: ksdd-folder-layout
 area: backend
 priority: P0

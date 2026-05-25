@@ -1,7 +1,7 @@
 ---
 id: 006
 title: Atualizar templates em references/ com paths .ksdd/
-status: em revisão
+status: concluída
 feature: ksdd-folder-layout
 area: backend
 priority: P0

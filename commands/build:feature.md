@@ -45,6 +45,7 @@ Resolução de paths neste command segue esta hierarquia:
 | SPEC.md                 | `.ksdd/specs/SPEC.md` → raiz `SPEC.md`                                                |
 | architecture.md         | `.ksdd/specs/architecture.md` → raiz `architecture.md`                                |
 | DESIGN.md               | `.ksdd/specs/DESIGN.md` → raiz `DESIGN.md`                                            |
+| features arquivadas     | `.ksdd/archive/raw/[slug]/` (read-only — detecção de archive bloqueia o build)        |
 
 **Regra-chave:** o path onde a **task** vive dita onde fica seu `.context/NNN-context.md` e qual `README.md` é atualizado:
 - Task em `.ksdd/tasks/feature-[slug]/NNN-*.md` → context em `.ksdd/tasks/feature-[slug]/.context/` e README atualizado em `.ksdd/tasks/feature-[slug]/README.md`.
@@ -64,6 +65,22 @@ Rode em paralelo:
 4. Verifique Docker se o projeto usa: `docker info`. Se não responde e o projeto requer Docker, avise.
 
 Se qualquer pré-requisito **crítico** falhar (git sujo), **STOP** e reporte o que falta.
+
+---
+
+## 0.5 Detecção de slug arquivado
+
+**Antes** de tentar resolver a task (seção 1), verifique se o slug-alvo foi arquivado:
+
+1. Parse o argumento para identificar o slug da feature (slug direto, ou slug derivado do ID/path).
+2. Verifique se `.ksdd/archive/raw/[slug]/` existe.
+3. Se existir, **pare** sem mexer em nada e apresente 3 opções via `ask_user_input_v0`:
+   - **(a) Consultar `.ksdd/archive/ARCHIVE.md`** — abra a seção do slug com `view` e mostre ao usuário; encerre.
+   - **(b) Restaurar a feature arquivada** — instrua o usuário a rodar `/ksdd:archive --restore [slug]` antes de re-tentar `/ksdd:build:feature`; encerre.
+   - **(c) Abortar** — encerra sem fazer nada.
+4. **Nunca** restaure automaticamente. A reabertura é decisão consciente do usuário.
+
+Em projetos sem `.ksdd/archive/`, pule esta checagem silenciosamente. Se o argumento é um ID de task que vive em `.ksdd/archive/raw/[slug]/tasks/NNN-*.md`, o mesmo bloqueio se aplica.
 
 ---
 
@@ -383,6 +400,7 @@ A única exceção são os arquivos de task: `status` e o `README.md` de tasks p
 - ❌ Fazer merge sozinho. → PR aguarda review humano.
 - ❌ Marcar task como `concluída` antes do merge. → Status fica `em revisão` até merge confirmado.
 - ❌ Commits monolíticos com todo o diff. → Commits atômicos por subtarefa/bloco lógico.
+- ❌ Tentar implementar slug arquivado sem confirmação. → Use `/ksdd:archive --restore [slug]` explicitamente para reabrir.
 
 ---
 

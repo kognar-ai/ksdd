@@ -15,7 +15,7 @@ const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
 const CODEX_PROMPTS_DIR = path.join(CODEX_HOME, 'prompts');
 const AGENTS_SKILLS_KSDD = path.join(os.homedir(), '.agents', 'skills', 'ksdd');
 
-const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md'];
+const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md', 'archive.md'];
 
 const COLORS = process.stdout.isTTY && !process.env.NO_COLOR;
 const c = (code, s) => (COLORS ? `\x1b[${code}m${s}\x1b[0m` : s);
