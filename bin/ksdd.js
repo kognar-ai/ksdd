@@ -117,8 +117,8 @@ function pruneEmptyDirs(root) {
   } catch { /* ignore */ }
 }
 
-/** Nome do ficheiro em ~/.codex/prompts/ (apenas top-level; `:` → `-`). */
-function codexPromptBasename(commandFile) {
+// Converte 'commands/foo:bar.md' em 'ksdd-foo-bar.md'. Usado por Codex e opencode (ambos não aceitam ':' em filename de command).
+function agentPromptBasename(commandFile) {
   const stem = commandFile.replace(/\.md$/i, '').replace(/:/g, '-');
   return `ksdd-${stem}.md`;
 }
@@ -157,7 +157,7 @@ function installCodex(tracked, out) {
   for (const file of COMMAND_FILES) {
     const src = path.join(PKG_ROOT, 'commands', file);
     if (!fs.existsSync(src)) continue;
-    const name = codexPromptBasename(file);
+    const name = agentPromptBasename(file);
     const dst = path.join(CODEX_PROMPTS_DIR, name);
     copyFile(src, dst);
     tracked.push(dst);
@@ -194,7 +194,7 @@ function installOpencode(tracked, out) {
   for (const file of COMMAND_FILES) {
     const src = path.join(PKG_ROOT, 'commands', file);
     if (!fs.existsSync(src)) continue;
-    const name = codexPromptBasename(file);
+    const name = agentPromptBasename(file);
     const dst = path.join(OPENCODE_COMMANDS_DIR, name);
     copyFile(src, dst);
     tracked.push(dst);
@@ -319,7 +319,7 @@ function cmdUninstall(args) {
     }
     removePath(SKILLS_DIR);
     for (const file of COMMAND_FILES) {
-      removePath(path.join(CODEX_PROMPTS_DIR, codexPromptBasename(file)));
+      removePath(path.join(CODEX_PROMPTS_DIR, agentPromptBasename(file)));
     }
     removePath(AGENTS_SKILLS_KSDD);
     pruneEmptyDirs(path.join(os.homedir(), '.agents', 'skills'));
