@@ -73,7 +73,7 @@ function loadManifest() {
   }
 }
 
-/** Normaliza manifest legado (array `files`) para `{ targets: { claude, codex } }`. */
+/** Normaliza manifest legado (array `files`) para `{ targets: { claude, codex, opencode } }`. */
 function normalizeManifest(manifest) {
   if (!manifest) return null;
   if (manifest.targets && Array.isArray(manifest.targets.claude)) {
@@ -82,16 +82,17 @@ function normalizeManifest(manifest) {
       targets: {
         claude: manifest.targets.claude,
         codex: Array.isArray(manifest.targets.codex) ? manifest.targets.codex : [],
+        opencode: Array.isArray(manifest.targets.opencode) ? manifest.targets.opencode : [],
       },
     };
   }
   if (Array.isArray(manifest.files)) {
     return {
       ...manifest,
-      targets: { claude: manifest.files, codex: [] },
+      targets: { claude: manifest.files, codex: [], opencode: [] },
     };
   }
-  return { ...manifest, targets: { claude: [], codex: [] } };
+  return { ...manifest, targets: { claude: [], codex: [], opencode: [] } };
 }
 
 function saveManifest(manifest) {
@@ -322,12 +323,25 @@ function cmdUninstall(args) {
     }
     removePath(AGENTS_SKILLS_KSDD);
     pruneEmptyDirs(path.join(os.homedir(), '.agents', 'skills'));
+    // Fallback opencode: remove arquivos conhecidos por convenção.
+    try {
+      const entries = fs.readdirSync(OPENCODE_COMMANDS_DIR);
+      for (const name of entries) {
+        if (name.startsWith('ksdd-')) {
+          removePath(path.join(OPENCODE_COMMANDS_DIR, name));
+        }
+      }
+    } catch { /* diretório inexistente: ignore */ }
+    removePath(OPENCODE_BUNDLE_DIR);
+    pruneEmptyDirs(OPENCODE_BUNDLE_DIR);
+    pruneEmptyDirs(OPENCODE_COMMANDS_DIR);
     return;
   }
 
   const all = [
     ...(prev.targets && prev.targets.claude ? prev.targets.claude : []),
     ...(prev.targets && prev.targets.codex ? prev.targets.codex : []),
+    ...(prev.targets && prev.targets.opencode ? prev.targets.opencode : []),
   ];
   let removed = 0;
   for (const f of all) {
@@ -338,6 +352,8 @@ function cmdUninstall(args) {
   pruneEmptyDirs(path.join(CLAUDE_HOME, 'skills'));
   pruneEmptyDirs(AGENTS_SKILLS_KSDD);
   pruneEmptyDirs(path.join(os.homedir(), '.agents', 'skills'));
+  pruneEmptyDirs(OPENCODE_BUNDLE_DIR);
+  pruneEmptyDirs(OPENCODE_COMMANDS_DIR);
 
   out(green('KSDD desinstalado.') + ' ' + dim(`(${removed} arquivos removidos)`));
 }
@@ -355,8 +371,12 @@ function cmdStatus() {
   log('  pacote       : ' + dim(prev.pkgRoot));
   const cl = (prev.targets && prev.targets.claude) || [];
   const cx = (prev.targets && prev.targets.codex) || [];
+  const oc = (prev.targets && prev.targets.opencode) || [];
   log('  Claude       : ' + cl.length + ' arquivos — ' + dim(COMMANDS_DIR));
   log('  Codex        : ' + cx.length + ' arquivos — prompts ' + dim(CODEX_PROMPTS_DIR) + ' · skill ' + dim(AGENTS_SKILLS_KSDD));
+  if (oc.length > 0) {
+    log('  opencode     : ' + oc.length + ' arquivos — commands ' + dim(OPENCODE_COMMANDS_DIR) + ' · bundle ' + dim(OPENCODE_BUNDLE_DIR));
+  }
 }
 
 function cmdHelp() {
