@@ -1,7 +1,7 @@
 # Architecture — KSDD (Kognar Spec-Driven Design & Development)
 
 **Versão:** 1.0 (reverse-engineered)
-**Última atualização:** 14/05/2026
+**Última atualização:** 26/05/2026
 **Status:** Rascunho (gerado por reverse-engineering)
 **Origem:** Reverse-engineered via `/ksdd:setup` em 14/05/2026
 **Aviso:** Artefato gerado automaticamente. Revise e corrija antes de usar como contrato.
@@ -28,23 +28,24 @@ KSDD é um pacote npm que distribui **conteúdo Markdown** (commands, references
               │  ├── README.md / INSTALL.md / CHANGELOG.md / LICENSE        │
               │  └── package.json                                           │
               └───────────────────────────┬─────────────────────────────────┘
-                                          │ ksdd install [--codex]
+                                          │ ksdd install [--codex] [--opencode]
                                           ▼
-        ┌───────────────────────────────────────────────────────────────┐
-        │                                                               │
-        ▼                                                               ▼
-   ┌──────────────────────────────────┐         ┌──────────────────────────────────────┐
-   │  Claude Code (target: claude)    │         │  OpenAI Codex (target: codex)        │
-   │  ~/.claude/commands/ksdd:*.md    │         │  ~/.codex/prompts/ksdd-*.md          │
-   │  ~/.claude/skills/ksdd/          │         │  ~/.agents/skills/ksdd/SKILL.md      │
-   │    ├── references/               │         │  ~/.agents/skills/ksdd/references/   │
-   │    ├── agents/                   │         │  ~/.agents/skills/ksdd/agents/       │
-   │    └── README.md INSTALL.md      │         │  ~/.agents/skills/ksdd/README.md     │
-   │    .ksdd-manifest.json           │         │                                      │
-   └──────────────────────────────────┘         └──────────────────────────────────────┘
-                          │                                       │
-                          └───────────────┬───────────────────────┘
-                                          ▼
+        ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+        │                                                                                                     │
+        ▼                                              ▼                                                      ▼
+   ┌──────────────────────────────────┐  ┌──────────────────────────────────────┐  ┌──────────────────────────────────────┐
+   │  Claude Code (target: claude)    │  │  OpenAI Codex (target: codex)        │  │  opencode (target: opencode)         │
+   │  ~/.claude/commands/ksdd:*.md    │  │  ~/.codex/prompts/ksdd-*.md          │  │  ~/.config/opencode/commands/        │
+   │  ~/.claude/skills/ksdd/          │  │  ~/.agents/skills/ksdd/SKILL.md      │  │       ksdd-*.md                      │
+   │    ├── references/               │  │  ~/.agents/skills/ksdd/references/   │  │  ~/.config/opencode/ksdd/            │
+   │    ├── agents/                   │  │  ~/.agents/skills/ksdd/agents/       │  │    ├── references/                   │
+   │    └── README.md INSTALL.md      │  │  ~/.agents/skills/ksdd/README.md     │  │    ├── agents/                       │
+   │    .ksdd-manifest.json           │  │                                      │  │    ├── README.md INSTALL.md          │
+   │                                  │  │                                      │  │    └── AGENTS.md                     │
+   └──────────────────────────────────┘  └──────────────────────────────────────┘  └──────────────────────────────────────┘
+                          │                                  │                                       │
+                          └──────────────────────────────────┴───────────────────────────────────────┘
+                                                             ▼
                        ┌────────────────────────────────────┐
                        │  Diretório do projeto-alvo         │
                        │  .ksdd/specs/{brainstorm,SPEC,     │
@@ -103,12 +104,13 @@ Schema atual:
 
 ```json
 {
-  "version": "string (semver, ex: '0.5.0')",
+  "version": "string (semver, ex: '0.8.0')",
   "installedAt": "string (ISO-8601 timestamp)",
   "pkgRoot": "string (path absoluto do pacote npm)",
   "targets": {
-    "claude": ["string (path absoluto de arquivo instalado)", ...],
-    "codex":  ["string (path absoluto de arquivo instalado)", ...]
+    "claude":   ["string (path absoluto de arquivo instalado)", ...],
+    "codex":    ["string (path absoluto de arquivo instalado)", ...],
+    "opencode": ["string (path absoluto de arquivo instalado)", ...]
   }
 }
 ```
@@ -164,6 +166,8 @@ Não aplicável (sem servidor HTTP). API equivalente é a **superfície CLI** do
 ```
 ksdd install              # Claude apenas
 ksdd install --codex      # Claude + Codex
+ksdd install --opencode             # Claude apenas + opencode
+ksdd install --codex --opencode     # Claude + Codex + opencode
 ksdd install --postinstall  # invocado pelo npm postinstall hook
 ksdd install --quiet      # silencia stdout
 ksdd uninstall            # remove tudo rastreado no manifest
@@ -179,6 +183,8 @@ ksdd help                 # default; também --help, -h
 |----------|--------|---------|
 | `CODEX_HOME` | Override do diretório base do Codex | `~/.codex` |
 | `KSDD_WITH_CODEX=1` | Equivale a `--codex` no postinstall | unset |
+| `OPENCODE_HOME` | Override do diretório base do opencode | `~/.config/opencode` |
+| `KSDD_WITH_OPENCODE=1` | Equivale a `--opencode` no postinstall | unset |
 | `KSDD_SKIP_POSTINSTALL=1` | Pula a etapa de postinstall (útil em CI) | unset |
 | `NO_COLOR` | Desabilita ANSI escapes na saída | unset |
 
@@ -198,6 +204,7 @@ ksdd help                 # default; também --help, -h
 | `codexPromptBasename(file)` | Conversão `start.md` → `ksdd-start.md`, `new:feature.md` → `ksdd-new-feature.md` | 116 |
 | `installClaude(tracked, out)` | Instala em `~/.claude/` | 121 |
 | `installCodex(tracked, out)` | Instala em `~/.codex/` + `~/.agents/skills/ksdd/` | 150 |
+| `installOpencode(tracked, out)` | Instala em `~/.config/opencode/` + `~/.config/opencode/ksdd/` | `[verificar]` |
 
 ---
 
@@ -208,6 +215,7 @@ ksdd help                 # default; também --help, -h
 | **npm registry** | Distribuição do pacote | npm token (mantenedor) | padrão npm | gratuito (público) |
 | **Claude Code** (Anthropic CLI) | Consumidor primário dos commands | n/a (KSDD não fala com Anthropic) | n/a | usuário paga sua conta |
 | **OpenAI Codex** (CLI/IDE) | Consumidor secundário via custom prompts + skills | n/a | n/a | usuário paga sua conta |
+| **opencode** (open-source CLI) | Consumidor terciário via custom commands + bundle | n/a | n/a | usuário paga sua conta |
 | **GitHub** | Repo + issues + (futuro) Releases | conta do mantenedor | padrão GH | gratuito (repo público) |
 
 **Importante:** KSDD não faz nenhuma chamada de rede em runtime. Não há SDK Anthropic, OpenAI, GitHub embarcado. Toda interação com agentes acontece via filesystem (commands lidos pelo agente do usuário).
@@ -347,6 +355,13 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 **Confiança:** alta.
 **Consequência:** Evita colisão de namespace com outros skills/commands. Codex não suporta `:` em nomes de prompt — exige conversão.
 
+### ADR-010: Terceiro target (opencode) hardcoded antes do refator `installTarget` genérico
+
+**Evidência:** feature opencode-integration (v0.8.0) adiciona `installOpencode()` como cópia adaptada de `installCodex` em `bin/ksdd.js`, em vez de refatorar para `installTarget(targetConfig)`. Decisão e trade-off documentados em `.ksdd/features/FEATURE-opencode-integration.md` seção 1.1.
+**Decisão:** aceitar duplicação intencional `installCodex` ↔ `installOpencode` com prazo explícito — a próxima feature multi-agent (Cursor, Windsurf ou Cline) **deve** introduzir `installTarget(targetConfig)` genérico antes de adicionar o quarto target.
+**Confiança:** alta — decisão deliberada após análise de trade-off documentada em FEATURE seção 1.1.
+**Consequência:** release de opencode 2-3x mais rápido vs refator imediato; aumenta dívida técnica em ~250 linhas duplicadas (`installCodex` + `installOpencode`); o refator dobrará de tamanho quando finalmente acontecer (3 funções para refatorar em vez de 2). Trade-off aceito explicitamente.
+
 ---
 
 ## 11. Riscos Técnicos
@@ -362,6 +377,8 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 | AGPL-3.0 desencoraja adoção comercial | Médio | Média | Avaliar dual-license (AGPL + commercial) se houver demanda — confirmado fora do roadmap atual |
 | Suporte multi-agent (Cursor, Windsurf, Cline) exige n-cópias do conteúdo | Médio | Alta (no roadmap) | Refatorar `installClaude`/`installCodex` em função genérica `installTarget(targetConfig)` |
 | Conteúdo de commands desincroniza entre Claude e Codex | Alto | Baixa | Já mitigado: ambos copiam de `commands/*.md` (fonte única) |
+| Convenções de path opencode em Windows divergem de `~/.config/opencode/` | Médio | Média | Validar no QA (task 027); usar `OPENCODE_HOME` override quando necessário |
+| Duplicação `installCodex`/`installOpencode` aumenta dívida técnica | Médio | Alta (esperada) | ADR-010 documenta prazo de refator (próxima feature multi-agent) |
 
 ---
 
@@ -391,8 +408,9 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 - [x] Agent `setup-analyst`
 - [x] Flags `--artifacts`, `--depth`, `--skip-questions`
 
-### Fase 5 — Multi-agent (próximo) — **Roadmap confirmado**
-- [ ] Refator de `install*` para `installTarget(targetConfig)` genérico
+### Fase 5 — Multi-agent — **Em andamento**
+- [x] Suporte a opencode (v0.8.0, 26/05/2026)
+- [ ] Refator de `install*` para `installTarget(targetConfig)` genérico (obrigatório antes do próximo target — ADR-010)
 - [ ] Suporte a Cursor (`[verificar paths]`: `~/.cursor/` ou `.cursorrules` ou outro?)
 - [ ] Suporte a Windsurf
 - [ ] Suporte a Cline

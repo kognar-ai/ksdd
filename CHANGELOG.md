@@ -4,6 +4,31 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.8.0] - 2026-05-26
+
+### Adicionado
+
+- **Suporte ao [opencode](https://opencode.ai) como terceiro target** — `ksdd install --opencode` instala 9 slash commands em `~/.config/opencode/commands/ksdd-*.md` (basename `ksdd-start`, `ksdd-spec`, …, invocados como `/ksdd-start`, `/ksdd-spec`, etc.) e bundle completo (references, agents, `AGENTS.md`) em `~/.config/opencode/ksdd/`.
+- **Flag `--opencode` combinável com `--codex`** — `ksdd install --codex --opencode` instala os 3 targets (Claude Code + Codex + opencode) numa única invocação.
+- **Variáveis de ambiente `KSDD_WITH_OPENCODE=1`** (equivale a `--opencode` no postinstall) e `OPENCODE_HOME` (override do diretório base, default `~/.config/opencode`).
+- **Campo `targets.opencode`** no manifest `.ksdd-manifest.json` — rastreia arquivos instalados pelo target opencode para uninstall preciso.
+- **`references/opencode-AGENTS.md`** — novo template canônico distribuído como bundle em `~/.config/opencode/ksdd/AGENTS.md`. Orienta o agente opencode sobre o contexto KSDD (estrutura, fluxo, convenções) na primeira leitura.
+
+### Alterado
+
+- **Helper interno `codexPromptBasename` renomeado para `agentPromptBasename`** — compartilhado entre Codex e opencode, ambos usam basename `ksdd-*` em vez de `ksdd:*` (`:` não é aceito em filename de command nem pelo Codex nem pelo opencode).
+- **`cmdStatus`** agora exibe linha `opencode: N arquivos em …` quando há instalação ativa do target (omitida quando vazia, paridade com Codex).
+- **`cmdUninstall`** itera os 3 targets registrados no manifest; fallback (sem manifest) também remove paths opencode por convenção, garantindo limpeza completa.
+- **`KSDD_WITH_CODEX` e `KSDD_WITH_OPENCODE`** agora só disparam em modo postinstall (consistente com a doc oficial "Equivale a `--codex`/`--opencode` no postinstall"). O comportamento anterior do `KSDD_WITH_CODEX` (disparar sempre) era inconsistente com a doc e foi corrigido.
+- **README / INSTALL** — documentam os 3 targets, flags, env vars e tabela tripla de slash commands (`/ksdd:start` Claude · `/prompts:ksdd-start` Codex · `/ksdd-start` opencode).
+
+### Arquitetura
+
+- **ADR-010 registrado em `architecture.md`** — terceiro target hardcoded (cópia adaptada de `installCodex`) antes do refator `installTarget` genérico. A próxima feature multi-agent (Cursor / Windsurf / Cline) é obrigada a fazer o refator antes de adicionar o quarto target.
+- **Fase 5 do roadmap** marcada como "Em andamento" com opencode entregue como primeiro item da fase de integrações multi-agent.
+
+---
+
 ## [0.7.0] - 2026-05-25
 
 ### Adicionado

@@ -10,21 +10,40 @@ npm install -g @kognar/ksdd
 
 O `postinstall` copia automaticamente os commands pra `~/.claude/commands/` (renomeados como `ksdd:start.md`, `ksdd:spec.md`, etc.) e os assets de skill pra `~/.claude/skills/ksdd/`.
 
-**Codex (OpenAI):** para instalar também [custom prompts](https://developers.openai.com/codex/custom-prompts) em `~/.codex/prompts/` (`/prompts:ksdd-start`, …) e a skill em `~/.agents/skills/ksdd/`:
+### Targets suportados
+
+| Agente | Commands default | Bundle default | Env var (postinstall) | Env var (override de path) |
+|--------|------------------|----------------|-----------------------|----------------------------|
+| Claude Code | `~/.claude/commands/ksdd:*.md` | `~/.claude/skills/ksdd/` | — (sempre instalado) | — |
+| OpenAI Codex | `~/.codex/prompts/ksdd-*.md` | `~/.agents/skills/ksdd/` | `KSDD_WITH_CODEX=1` | `CODEX_HOME` (default `~/.codex`) |
+| opencode | `~/.config/opencode/commands/ksdd-*.md` | `~/.config/opencode/ksdd/` | `KSDD_WITH_OPENCODE=1` | `OPENCODE_HOME` (default `~/.config/opencode`) |
+
+### Instalação seletiva
 
 ```bash
-ksdd install --codex
+ksdd install                      # só Claude Code (default)
+ksdd install --codex              # Claude + Codex
+ksdd install --opencode           # Claude + opencode
+ksdd install --codex --opencode   # Claude + Codex + opencode (3 targets)
 ```
 
-Ou numa instalação npm: `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd`
+Equivalentes via npm postinstall:
+
+```bash
+KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd
+KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
+KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
+```
 
 Comandos do CLI:
 
 ```bash
-ksdd install          # reinstala / atualiza (só Claude Code)
-ksdd install --codex  # Claude + Codex (prompts + skill)
-ksdd status           # mostra estado da instalação
-ksdd uninstall        # remove arquivos copiados
+ksdd install                      # reinstala / atualiza (só Claude Code)
+ksdd install --codex              # Claude + Codex (prompts + skill)
+ksdd install --opencode           # Claude + opencode (commands + bundle)
+ksdd install --codex --opencode   # Claude + Codex + opencode
+ksdd status                       # mostra estado da instalação
+ksdd uninstall                    # remove arquivos copiados (todos os targets)
 ```
 
 Para desinstalar tudo:
@@ -32,6 +51,14 @@ Para desinstalar tudo:
 ```bash
 npm uninstall -g @kognar/ksdd
 ```
+
+`ksdd uninstall` itera os 3 targets registrados no manifest (`.ksdd-manifest.json`) e remove tudo que foi instalado. Quando o manifest não existe, faz fallback por convenção e ainda assim limpa os paths default dos 3 agentes.
+
+### Troubleshooting
+
+- **`~/.config/opencode/` não existe:** sem problema — o `ksdd install --opencode` cria a estrutura idempotentemente. Você pode instalar o opencode depois e os arquivos já estarão prontos pra serem descobertos automaticamente.
+- **`~/.codex/` não existe:** mesma lógica — `ksdd install --codex` cria os diretórios necessários.
+- **Reverter target específico:** rode `ksdd uninstall` (remove todos) e depois `ksdd install` (ou `ksdd install --codex` / `--opencode`) só com os que quer manter.
 
 ### Opção 1: Slash commands globais (recomendado)
 

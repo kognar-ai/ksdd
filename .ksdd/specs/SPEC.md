@@ -2,8 +2,8 @@
 
 > Slash commands para Claude Code e Codex que estruturam o fluxo brainstorm → spec → arquitetura → design system com checkpoints humanos entre cada fase.
 
-**Versão:** 1.0 (reverse-engineered)
-**Última atualização:** 14/05/2026
+**Versão:** 1.1 (reverse-engineered)
+**Última atualização:** 26/05/2026
 **Plataforma alvo (MVP):** CLI multiplataforma (Node.js ≥ 16) — sem UI
 **Idioma da interface:** N/A (CLI sem UI); artefatos e prompts seguem idioma da conversa — ver `references/language-policy.md`
 **Origem:** Reverse-engineered via `/ksdd:setup` em 14/05/2026
@@ -112,12 +112,13 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
 
 ```json
 {
-  "version": "0.5.0",
+  "version": "0.8.0",
   "installedAt": "ISO-8601 timestamp",
   "pkgRoot": "/path/absoluto/do/pacote/npm",
   "targets": {
     "claude": ["array de paths instalados em ~/.claude/"],
-    "codex": ["array de paths instalados em ~/.codex/ e ~/.agents/"]
+    "codex": ["array de paths instalados em ~/.codex/ e ~/.agents/"],
+    "opencode": ["array de paths instalados em ~/.config/opencode/"]
   }
 }
 ```
@@ -193,11 +194,13 @@ Comandos disponíveis (visíveis em `ksdd help`):
 |---------|-----------|
 | `ksdd install` | Instala apenas Claude Code (`~/.claude/commands/` + `~/.claude/skills/ksdd/`) |
 | `ksdd install --codex` | Instala Claude Code + Codex (prompts em `~/.codex/prompts/` + skill em `~/.agents/skills/ksdd/`) |
+| `ksdd install --opencode` | Instala Claude Code + opencode (commands em `~/.config/opencode/commands/` + bundle em `~/.config/opencode/ksdd/`) |
+| `ksdd install --codex --opencode` | Instala os 3 targets (Claude, Codex, opencode) numa só invocação |
 | `ksdd uninstall` | Remove tudo o que foi instalado, lendo o manifest |
 | `ksdd status` | Mostra versão instalada, timestamp, contagem de arquivos por alvo |
 | `ksdd help` (default) | Documentação de uso |
 
-Flags: `--quiet` / `--silent` / `--postinstall`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `CODEX_HOME`, `NO_COLOR`.
+Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `KSDD_WITH_OPENCODE`, `CODEX_HOME`, `OPENCODE_HOME`, `NO_COLOR`.
 
 ### 7.2 Slash commands (Claude Code)
 
@@ -209,9 +212,17 @@ Após `ksdd install`, ficam em `~/.claude/commands/ksdd:[name].md`. Disponíveis
 
 Após `ksdd install --codex`, ficam em `~/.codex/prompts/ksdd-[name].md` (`:` é renomeado para `-`). Invocação `/prompts:ksdd-start`, `/prompts:ksdd-spec`, etc. Conteúdo é o mesmo dos arquivos em `commands/`.
 
-### 7.4 Skill instalada (`~/.claude/skills/ksdd/` e `~/.agents/skills/ksdd/`)
+### 7.4 Slash commands (opencode)
+
+Após `ksdd install --opencode`, ficam em `~/.config/opencode/commands/ksdd-[name].md` (`:` é renomeado para `-`, mesma convenção do Codex). Invocação `/ksdd-start`, `/ksdd-spec`, `/ksdd-new-feature`, etc. Conteúdo é o mesmo dos arquivos em `commands/`.
+
+Bundle adicional em `~/.config/opencode/ksdd/` contém `references/` (templates canônicos), `agents/` (helpers de estilo), `README.md`, `INSTALL.md` e `AGENTS.md` — este último orienta o agente opencode sobre o contexto canônico do KSDD (equivalente funcional ao skill do Claude/Codex, sem o conceito formal de "skill" do opencode).
+
+### 7.5 Skill instalada (`~/.claude/skills/ksdd/`, `~/.agents/skills/ksdd/` e bundle `~/.config/opencode/ksdd/`)
 
 Bundle com `references/` (templates), `agents/` (helpers de estilo), `README.md`, `INSTALL.md`, e (Codex apenas) `SKILL.md` derivado de `references/codex-SKILL.md`.
+
+Em opencode, o bundle em `~/.config/opencode/ksdd/` é o equivalente funcional do skill — contém os mesmos `references/` e `agents/`, mais um `AGENTS.md` (derivado de `references/opencode-AGENTS.md`) que substitui o papel do `SKILL.md`. Convenção opencode não usa o termo "skill", mas o propósito é idêntico: dar ao agente o contexto canônico para invocar os commands corretamente.
 
 ---
 
@@ -222,7 +233,7 @@ Equivalentes lógicos no CLI / commands:
 | "Componente" | Onde aparece | Variantes |
 |--------------|--------------|-----------|
 | Helper de cor ANSI (`green`, `yellow`, `red`, `dim`, `bold`) | `bin/ksdd.js` saídas | TTY com cor, fallback monocromático (NO_COLOR ou não-TTY) |
-| Manifest writer/reader | install, uninstall, status | Formato atual com `targets.claude`/`targets.codex`; normaliza manifest legado (`files` array) |
+| Manifest writer/reader | install, uninstall, status | Formato atual com `targets.claude`/`targets.codex`/`targets.opencode`; normaliza manifest legado (`files` array) e preenche `targets.opencode` vazio quando ausente |
 | Copy de árvore (`copyDir`) | install Claude e install Codex | Recursivo, preserva estrutura, atualiza `tracked[]` |
 | Approval gate prompt | Final de cada slash command | 7 gates documentados em `references/approval-gates.md` |
 | Pergunta em batch (`ask_user_input_v0`) | Todos os commands de geração | Máximo 3 questions structured + texto livre |
@@ -262,6 +273,7 @@ Não aplicável (CLI). Considerações equivalentes:
 - **Falha silenciosa do postinstall** — `KSDD_SKIP_POSTINSTALL=1` ou erro durante npm install emite warning, não trava o `npm install`. Usuário pode rodar `ksdd install` manualmente depois.
 - **Idempotência do install** — re-rodar `ksdd install` lê o manifest anterior, remove arquivos rastreados, e reinstala. Sem duplicação.
 - **`install` sem `--codex` preserva instalação Codex anterior** — não deleta `~/.codex/prompts/ksdd-*` nem `~/.agents/skills/ksdd/` se existirem. Só atualiza Claude.
+- **`install` sem `--opencode` preserva instalação opencode anterior** — não deleta `~/.config/opencode/commands/ksdd-*` nem `~/.config/opencode/ksdd/` se existirem. Só atualiza Claude (ou Claude+Codex se `--codex`).
 - **`uninstall` sem manifest** — modo fallback: tenta remover paths conhecidos por convenção. Mensagem amarela avisando.
 - **Approval gates obrigatórios** — slash commands param após gerar artefato; nunca encadeiam automaticamente. Mesmo se usuário disser "pula", o comando pede confirmação explícita (`references/approval-gates.md`).
 
@@ -284,10 +296,10 @@ Implicações práticas:
 
 ### 13.1 Onboarding em projeto novo (do zero)
 
-1. Usuário roda `npm install -g @kognar/ksdd` (ou `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd` para Claude + Codex)
-2. Postinstall copia commands e skills para `~/.claude/` (e `~/.codex/` se opt-in)
-3. Reinicia o agente (Claude Code ou Codex CLI/IDE)
-4. No diretório do projeto, invoca `/ksdd:start` (ou `/prompts:ksdd-start`) com ideia bruta
+1. Usuário roda `npm install -g @kognar/ksdd` (ou `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd` para Claude + Codex, ou `KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd` para Claude + opencode)
+2. Postinstall copia commands e skills para `~/.claude/` (e `~/.codex/` / `~/.config/opencode/` se opt-in)
+3. Reinicia o agente (Claude Code, Codex CLI/IDE ou opencode)
+4. No diretório do projeto, invoca `/ksdd:start` (Claude), `/prompts:ksdd-start` (Codex) ou `/ksdd-start` (opencode) com ideia bruta
 5. Agente faz 5-8 perguntas em batch → gera `brainstorm.md` → para em Gate 1
 6. Usuário aprova → invoca `/ksdd:spec` → gera `SPEC.md` → Gate 2
 7. Opcional: `/ksdd:tech` → `architecture.md` → Gate 3
@@ -329,6 +341,14 @@ Implicações práticas:
 2. Postinstall detecta manifest anterior, remove arquivos rastreados, reinstala
 3. `ksdd status` confirma nova versão
 
+### 13.6 Adicionar opencode em instalação existente
+
+1. Usuário com KSDD já instalado (Claude + opcionalmente Codex) roda `ksdd install --opencode` (sem `--codex`)
+2. Instalador re-roda `installClaude()` (idempotente — remove arquivos rastreados via manifest e reinstala); não modifica nada do Codex
+3. `installOpencode()` roda e popula `~/.config/opencode/commands/ksdd-*.md` + bundle em `~/.config/opencode/ksdd/`
+4. Manifest passa a ter `targets.opencode` preenchido; `targets.codex` (se existia) é preservado intocado
+5. `ksdd status` confirma os 3 targets ativos (Claude, Codex, opencode) com contagens individuais
+
 ---
 
 ## 14. Fases de Entrega
@@ -362,12 +382,13 @@ Implicações práticas:
 - Agent `setup-analyst` em 4 variantes paralelas (produto, stack, código, git)
 - Flags: `--artifacts`, `--depth`, `--skip-questions`
 
-### Fase 5 — Mais agents (confirmado no roadmap) — **Próximo**
+### Fase 5 — Mais agents (confirmado no roadmap) — **Em andamento (v0.8.0)**
 
+- Suporte a opencode (entregue v0.8.0, 26/05/2026)
 - Suporte a Cursor (`~/.cursor/` `[verificar paths]`)
 - Suporte a Windsurf
 - Suporte a Cline
-- Refatoração do instalador para `targets.[agent]` genérico
+- Refatoração do instalador para `targets.[agent]` genérico (planejada para a próxima feature multi-agent — ver ADR-010 em `architecture.md`)
 
 ### Fase 6 — Integração com design tools (confirmado no roadmap) — **Próximo**
 
