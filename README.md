@@ -1,26 +1,28 @@
 # KSDD — Kognar Spec-Driven Design & Development
 
-A slash command system for **Claude Code** and **[OpenAI Codex](https://developers.openai.com/codex)** that guides products from **raw brainstorm to an implementable design system**, in four stages with mandatory human approval between each one — plus feature-level workflows for breaking specs into tasks and shipping code through quality gates and PRs.
+A slash command system for **Claude Code**, **[OpenAI Codex](https://developers.openai.com/codex)** and **[opencode](https://opencode.ai)** that guides products from **raw brainstorm to an implementable design system**, in four stages with mandatory human approval between each one — plus feature-level workflows for breaking specs into tasks and shipping code through quality gates and PRs.
 
-## Codex (CLI / IDE)
+## Codex and opencode (CLI / IDE)
 
-After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`):
+After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`) and/or `ksdd install --opencode` (or `KSDD_WITH_OPENCODE=1`):
 
-| Claude Code | Codex (custom prompts in `~/.codex/prompts/`) |
-|-------------|-----------------------------------------------|
-| `/ksdd:start` | `/prompts:ksdd-start` |
-| `/ksdd:spec` | `/prompts:ksdd-spec` |
-| `/ksdd:tech` | `/prompts:ksdd-tech` |
-| `/ksdd:design` | `/prompts:ksdd-design` |
-| `/ksdd:new:feature` | `/prompts:ksdd-new-feature` |
-| `/ksdd:build:feature` | `/prompts:ksdd-build-feature` |
-| `/ksdd:build:all` | `/prompts:ksdd-build-all` |
-| `/ksdd:setup` | `/prompts:ksdd-setup` |
-| `/ksdd:archive` | `/prompts:ksdd-archive` |
+| Claude Code | Codex (custom prompts in `~/.codex/prompts/`) | opencode (commands in `~/.config/opencode/commands/`) |
+|-------------|-----------------------------------------------|-------------------------------------------------------|
+| `/ksdd:start` | `/prompts:ksdd-start` | `/ksdd-start` |
+| `/ksdd:spec` | `/prompts:ksdd-spec` | `/ksdd-spec` |
+| `/ksdd:tech` | `/prompts:ksdd-tech` | `/ksdd-tech` |
+| `/ksdd:design` | `/prompts:ksdd-design` | `/ksdd-design` |
+| `/ksdd:new:feature` | `/prompts:ksdd-new-feature` | `/ksdd-new-feature` |
+| `/ksdd:build:feature` | `/prompts:ksdd-build-feature` | `/ksdd-build-feature` |
+| `/ksdd:build:all` | `/prompts:ksdd-build-all` | `/ksdd-build-all` |
+| `/ksdd:setup` | `/prompts:ksdd-setup` | `/ksdd-setup` |
+| `/ksdd:archive` | `/prompts:ksdd-archive` | `/ksdd-archive` |
 
-The `ksdd` skill is also installed in `~/.agents/skills/ksdd/` (references + agents + `SKILL.md`) — use `$ksdd` or mention the skill in your prompt. Codex prompts are the same content as the files in `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) are flagged as *deprecated* in favor of skills, but still work for explicit `/prompts:…` invocation.
+The `ksdd` skill is also installed in `~/.agents/skills/ksdd/` (references + agents + `SKILL.md`) for Codex — use `$ksdd` or mention the skill in your prompt. Codex prompts are the same content as the files in `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) are flagged as *deprecated* in favor of skills, but still work for explicit `/prompts:…` invocation.
 
-Restart Codex after installing. `CODEX_HOME` (default `~/.codex`) changes the prompts folder if set.
+For opencode the same content is distributed as commands in `~/.config/opencode/commands/ksdd-*.md` plus a bundle in `~/.config/opencode/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/opencode-AGENTS.md`).
+
+Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes the Codex prompts folder; `OPENCODE_HOME` (default `~/.config/opencode`) changes the opencode base folder.
 
 ```
 /ksdd:start          →  .ksdd/specs/brainstorm.md         (raw idea → refined concept)
@@ -64,21 +66,31 @@ Artifacts are cumulative: `SPEC.md` references `brainstorm.md`; `architecture.md
 npm install -g @kognar/ksdd
 ```
 
-By default this installs only **Claude Code** (`~/.claude/`). To also install **Codex**:
+By default this installs only **Claude Code** (`~/.claude/`). To also install **Codex** and/or **opencode**:
 
 ```bash
-ksdd install --codex
+ksdd install --codex              # Claude + Codex
+ksdd install --opencode           # Claude + opencode
+ksdd install --codex --opencode   # Claude + Codex + opencode (3 targets)
 ```
 
-Or in an npm install: `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd`
+Or in an npm install:
+
+```bash
+KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd
+KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
+KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
+```
 
 CLI commands:
 
 ```bash
-ksdd install          # reinstalls / updates (Claude Code only)
-ksdd install --codex  # Claude + Codex (prompts + skill)
-ksdd status           # shows installation state
-ksdd uninstall        # removes copied files
+ksdd install                      # reinstalls / updates (Claude Code only)
+ksdd install --codex              # Claude + Codex (prompts + skill)
+ksdd install --opencode           # Claude + opencode (commands + bundle)
+ksdd install --codex --opencode   # Claude + Codex + opencode
+ksdd status                       # shows installation state
+ksdd uninstall                    # removes copied files (all targets)
 ```
 
 To uninstall everything:
