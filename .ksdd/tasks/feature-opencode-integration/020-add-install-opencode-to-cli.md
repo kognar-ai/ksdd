@@ -1,7 +1,7 @@
 ---
 id: 020
 title: Adicionar installOpencode() + flag --opencode + env vars em bin/ksdd.js
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: backend
 priority: P0

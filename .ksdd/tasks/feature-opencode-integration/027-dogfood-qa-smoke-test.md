@@ -1,7 +1,7 @@
 ---
 id: 027
 title: Dogfood + QA smoke test em macOS e Linux (install/uninstall/status + /ksdd-start em opencode)
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: qa
 priority: P0

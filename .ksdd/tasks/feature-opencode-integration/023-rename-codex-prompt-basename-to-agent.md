@@ -1,7 +1,7 @@
 ---
 id: 023
 title: Renomear codexPromptBasename → agentPromptBasename (refator pequeno compartilhado)
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: backend
 priority: P1

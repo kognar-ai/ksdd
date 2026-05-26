@@ -1,7 +1,7 @@
 ---
 id: 026
 title: Atualizar README, INSTALL, CHANGELOG e bumpar package.json para 0.8.0
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: design
 priority: P0

@@ -1,7 +1,7 @@
 ---
 id: 021
 title: Estender normalizeManifest, uninstall, status, pruneEmptyDirs para targets.opencode
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: backend
 priority: P0

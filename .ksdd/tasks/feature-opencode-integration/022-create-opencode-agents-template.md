@@ -1,7 +1,7 @@
 ---
 id: 022
 title: Criar references/opencode-AGENTS.md (template novo bundlado em ~/.config/opencode/ksdd/AGENTS.md)
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: data-model
 priority: P0

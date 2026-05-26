@@ -1,7 +1,7 @@
 ---
 id: 025
 title: Atualizar SPEC.md — seções 7.1 (CLI) e 13 (fluxos) com opencode
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: design
 priority: P0

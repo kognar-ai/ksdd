@@ -1,7 +1,7 @@
 ---
 id: 024
 title: Atualizar architecture.md — ADR-010 + diagrama + roadmap Fase 5
-status: para implementar
+status: em revisão
 feature: opencode-integration
 area: design
 priority: P0
