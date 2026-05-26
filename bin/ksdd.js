@@ -15,6 +15,10 @@ const CODEX_HOME = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
 const CODEX_PROMPTS_DIR = path.join(CODEX_HOME, 'prompts');
 const AGENTS_SKILLS_KSDD = path.join(os.homedir(), '.agents', 'skills', 'ksdd');
 
+const OPENCODE_HOME = process.env.OPENCODE_HOME || path.join(os.homedir(), '.config', 'opencode');
+const OPENCODE_COMMANDS_DIR = path.join(OPENCODE_HOME, 'commands');
+const OPENCODE_BUNDLE_DIR = path.join(OPENCODE_HOME, 'ksdd');
+
 const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md', 'archive.md'];
 
 const COLORS = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -184,21 +188,69 @@ function installCodex(tracked, out) {
   }
 }
 
+function installOpencode(tracked, out) {
+  ensureDir(OPENCODE_COMMANDS_DIR);
+  for (const file of COMMAND_FILES) {
+    const src = path.join(PKG_ROOT, 'commands', file);
+    if (!fs.existsSync(src)) continue;
+    const name = codexPromptBasename(file);
+    const dst = path.join(OPENCODE_COMMANDS_DIR, name);
+    copyFile(src, dst);
+    tracked.push(dst);
+    out('  ' + green('✓') + ' opencode ' + dim('~/.config/opencode/commands/') + name);
+  }
+
+  ensureDir(OPENCODE_BUNDLE_DIR);
+  for (const sub of ['references', 'agents']) {
+    const src = path.join(PKG_ROOT, sub);
+    if (fs.existsSync(src)) {
+      copyDir(src, path.join(OPENCODE_BUNDLE_DIR, sub), tracked);
+      out('  ' + green('✓') + ' opencode ' + dim('~/.config/opencode/ksdd/') + sub + '/');
+    }
+  }
+  for (const top of ['README.md', 'INSTALL.md']) {
+    const src = path.join(PKG_ROOT, top);
+    if (fs.existsSync(src)) {
+      const dst = path.join(OPENCODE_BUNDLE_DIR, top);
+      copyFile(src, dst);
+      tracked.push(dst);
+    }
+  }
+
+  const agentsSrc = path.join(PKG_ROOT, 'references', 'opencode-AGENTS.md');
+  const agentsDst = path.join(OPENCODE_BUNDLE_DIR, 'AGENTS.md');
+  if (fs.existsSync(agentsSrc)) {
+    copyFile(agentsSrc, agentsDst);
+    tracked.push(agentsDst);
+    out('  ' + green('✓') + ' opencode ' + dim('~/.config/opencode/ksdd/') + 'AGENTS.md');
+  } else {
+    out('  ' + yellow('aviso:') + ' references/opencode-AGENTS.md ainda não existe — bundle ksdd/AGENTS.md será pulado nesta instalação');
+  }
+}
+
 function cmdInstall(args) {
   const silent = args.flags.has('quiet') || args.flags.has('silent');
   const postinstall = args.flags.has('postinstall');
-  const withCodex = args.flags.has('codex') || process.env.KSDD_WITH_CODEX === '1';
+  const withCodex = args.flags.has('codex') || (postinstall && process.env.KSDD_WITH_CODEX === '1');
+  const withOpencode = args.flags.has('opencode') || (postinstall && process.env.KSDD_WITH_OPENCODE === '1');
   const out = silent ? () => {} : log;
 
   if (postinstall && process.env.KSDD_SKIP_POSTINSTALL === '1') {
     return;
   }
 
-  out(bold('KSDD') + ' — instalando em ' + dim(CLAUDE_HOME) + (withCodex ? ' + ' + dim(CODEX_HOME) + ' + ' + dim(path.join(os.homedir(), '.agents/skills/ksdd')) : ''));
+  const targetsLabel = [dim(CLAUDE_HOME)];
+  if (withCodex) {
+    targetsLabel.push(dim(CODEX_HOME));
+    targetsLabel.push(dim(path.join(os.homedir(), '.agents/skills/ksdd')));
+  }
+  if (withOpencode) targetsLabel.push(dim(OPENCODE_HOME));
+  out(bold('KSDD') + ' — instalando em ' + targetsLabel.join(' + '));
 
   const prev = normalizeManifest(loadManifest());
   const prevClaude = (prev && prev.targets && prev.targets.claude) || [];
   const prevCodex = (prev && prev.targets && prev.targets.codex) || [];
+  const prevOpencode = (prev && prev.targets && prev.targets.opencode) || [];
 
   for (const f of prevClaude) removePath(f);
 
@@ -212,6 +264,13 @@ function cmdInstall(args) {
     installCodex(codexTracked, out);
   }
 
+  let opencodeTracked = prevOpencode;
+  if (withOpencode) {
+    for (const f of prevOpencode) removePath(f);
+    opencodeTracked = [];
+    installOpencode(opencodeTracked, out);
+  }
+
   const manifest = {
     version: require('../package.json').version,
     installedAt: new Date().toISOString(),
@@ -219,13 +278,30 @@ function cmdInstall(args) {
     targets: {
       claude: claudeTracked,
       codex: codexTracked,
+      opencode: opencodeTracked,
     },
   };
   saveManifest(manifest);
   out('');
-  let tail = green('KSDD instalado (Claude Code).') + ' Reinicie o Claude Code e use ' + bold('/ksdd:start');
+
+  const targetNames = ['Claude Code'];
+  const counts = [claudeTracked.length];
+  if (withCodex) { targetNames.push('Codex'); counts.push(codexTracked.length); }
+  if (withOpencode) { targetNames.push('opencode'); counts.push(opencodeTracked.length); }
+
+  let headline;
+  if (targetNames.length === 1) {
+    headline = green('KSDD instalado (Claude Code).');
+  } else {
+    const list = targetNames.slice(0, -1).join(', ') + ' e ' + targetNames[targetNames.length - 1];
+    headline = green('✓ KSDD instalado em ' + list + ' (' + counts.join('+') + ' arquivos).');
+  }
+  let tail = headline + ' Reinicie o Claude Code e use ' + bold('/ksdd:start');
   if (withCodex) {
     tail += '\n' + green('Integração Codex:') + ' reinicie o Codex CLI/IDE e use ' + bold('/prompts:ksdd-start') + ' (ou ' + bold('$ksdd') + ' skill em ~/.agents/skills/ksdd).';
+  }
+  if (withOpencode) {
+    tail += '\n' + green('Integração opencode:') + ' reinicie o opencode e use ' + bold('/ksdd-start') + ' (bundle em ~/.config/opencode/ksdd/).';
   }
   out(tail);
 }
