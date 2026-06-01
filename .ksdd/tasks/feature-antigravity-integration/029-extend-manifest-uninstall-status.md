@@ -1,7 +1,7 @@
 ---
 id: 029
 title: Estender normalizeManifest, uninstall, status, pruneEmptyDirs p/ targets.antigravity
-status: para implementar
+status: em revisão
 feature: antigravity-integration
 area: backend
 priority: P0

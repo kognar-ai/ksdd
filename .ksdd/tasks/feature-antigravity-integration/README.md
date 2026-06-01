@@ -8,7 +8,7 @@
 | ID  | Título                                                                            | Área       | Prioridade | Estimativa | Status           | Depende de        |
 |-----|-----------------------------------------------------------------------------------|------------|------------|------------|------------------|-------------------|
 | 028 | Adicionar `installAntigravity()` + flag `--antigravity` + env vars em `bin/ksdd.js` | backend    | P0         | M          | em revisão       | 030 · #17         |
-| 029 | Estender `normalizeManifest`/`uninstall`/`status`/`pruneEmptyDirs` p/ antigravity | backend    | P0         | S          | para implementar | 028               |
+| 029 | Estender `normalizeManifest`/`uninstall`/`status`/`pruneEmptyDirs` p/ antigravity | backend    | P0         | S          | em revisão       | 028 · #18         |
 | 030 | Criar `references/antigravity-AGENTS.md` (template bundlado)                       | data-model | P0         | S          | em revisão       | — · #19           |
 | 031 | `architecture.md` — ADR-011 + atualizar ADR-010 + diagrama + roadmap + riscos     | design     | P0         | S          | em revisão       | — · #20           |
 | 032 | `SPEC.md` — seções 7.1 (CLI) e 13 (fluxos) com Antigravity                         | design     | P0         | S          | em revisão       | — · #21           |

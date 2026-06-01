@@ -80,7 +80,7 @@ function loadManifest() {
   }
 }
 
-/** Normaliza manifest legado (array `files`) para `{ targets: { claude, codex, opencode } }`. */
+/** Normaliza manifest legado (array `files`) para `{ targets: { claude, codex, opencode, antigravity } }`. */
 function normalizeManifest(manifest) {
   if (!manifest) return null;
   if (manifest.targets && Array.isArray(manifest.targets.claude)) {
@@ -90,16 +90,17 @@ function normalizeManifest(manifest) {
         claude: manifest.targets.claude,
         codex: Array.isArray(manifest.targets.codex) ? manifest.targets.codex : [],
         opencode: Array.isArray(manifest.targets.opencode) ? manifest.targets.opencode : [],
+        antigravity: Array.isArray(manifest.targets.antigravity) ? manifest.targets.antigravity : [],
       },
     };
   }
   if (Array.isArray(manifest.files)) {
     return {
       ...manifest,
-      targets: { claude: manifest.files, codex: [], opencode: [] },
+      targets: { claude: manifest.files, codex: [], opencode: [], antigravity: [] },
     };
   }
-  return { ...manifest, targets: { claude: [], codex: [], opencode: [] } };
+  return { ...manifest, targets: { claude: [], codex: [], opencode: [], antigravity: [] } };
 }
 
 function saveManifest(manifest) {
@@ -405,6 +406,17 @@ function cmdUninstall(args) {
     removePath(OPENCODE_BUNDLE_DIR);
     pruneEmptyDirs(OPENCODE_BUNDLE_DIR);
     pruneEmptyDirs(OPENCODE_COMMANDS_DIR);
+    // Fallback Antigravity: remove skills `ksdd-*` nas duas superfícies + bundle, por convenção.
+    for (const skillsDir of [ANTIGRAVITY_CLI_SKILLS_DIR, ANTIGRAVITY_IDE_SKILLS_DIR]) {
+      try {
+        for (const name of fs.readdirSync(skillsDir)) {
+          if (name.startsWith('ksdd-')) removePath(path.join(skillsDir, name));
+        }
+      } catch { /* diretório inexistente: ignore */ }
+      pruneEmptyDirs(skillsDir);
+    }
+    removePath(ANTIGRAVITY_BUNDLE_DIR);
+    pruneEmptyDirs(ANTIGRAVITY_BUNDLE_DIR);
     return;
   }
 
@@ -412,6 +424,7 @@ function cmdUninstall(args) {
     ...(prev.targets && prev.targets.claude ? prev.targets.claude : []),
     ...(prev.targets && prev.targets.codex ? prev.targets.codex : []),
     ...(prev.targets && prev.targets.opencode ? prev.targets.opencode : []),
+    ...(prev.targets && prev.targets.antigravity ? prev.targets.antigravity : []),
   ];
   let removed = 0;
   for (const f of all) {
@@ -424,6 +437,10 @@ function cmdUninstall(args) {
   pruneEmptyDirs(path.join(os.homedir(), '.agents', 'skills'));
   pruneEmptyDirs(OPENCODE_BUNDLE_DIR);
   pruneEmptyDirs(OPENCODE_COMMANDS_DIR);
+  // Prune restrito aos subdirs KSDD do Antigravity — nunca subir para ~/.gemini/ (compartilhado com gemini-cli).
+  pruneEmptyDirs(ANTIGRAVITY_BUNDLE_DIR);
+  pruneEmptyDirs(ANTIGRAVITY_CLI_SKILLS_DIR);
+  pruneEmptyDirs(ANTIGRAVITY_IDE_SKILLS_DIR);
 
   out(green('KSDD desinstalado.') + ' ' + dim(`(${removed} arquivos removidos)`));
 }
@@ -442,10 +459,14 @@ function cmdStatus() {
   const cl = (prev.targets && prev.targets.claude) || [];
   const cx = (prev.targets && prev.targets.codex) || [];
   const oc = (prev.targets && prev.targets.opencode) || [];
+  const ag = (prev.targets && prev.targets.antigravity) || [];
   log('  Claude       : ' + cl.length + ' arquivos — ' + dim(COMMANDS_DIR));
   log('  Codex        : ' + cx.length + ' arquivos — prompts ' + dim(CODEX_PROMPTS_DIR) + ' · skill ' + dim(AGENTS_SKILLS_KSDD));
   if (oc.length > 0) {
     log('  opencode     : ' + oc.length + ' arquivos — commands ' + dim(OPENCODE_COMMANDS_DIR) + ' · bundle ' + dim(OPENCODE_BUNDLE_DIR));
+  }
+  if (ag.length > 0) {
+    log('  antigravity  : ' + ag.length + ' arquivos — skills ' + dim(ANTIGRAVITY_CLI_SKILLS_DIR) + ' + ' + dim(ANTIGRAVITY_IDE_SKILLS_DIR) + ' · bundle ' + dim(ANTIGRAVITY_BUNDLE_DIR));
   }
 }
 
