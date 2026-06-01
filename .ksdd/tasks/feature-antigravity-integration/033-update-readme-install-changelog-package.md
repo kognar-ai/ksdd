@@ -1,7 +1,7 @@
 ---
 id: 033
 title: Atualizar README + INSTALL + CHANGELOG + bump package.json para 0.9.0
-status: para implementar
+status: em revisão
 feature: antigravity-integration
 area: design
 priority: P0

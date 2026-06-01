@@ -17,14 +17,18 @@ O `postinstall` copia automaticamente os commands pra `~/.claude/commands/` (ren
 | Claude Code | `~/.claude/commands/ksdd:*.md` | `~/.claude/skills/ksdd/` | — (sempre instalado) | — |
 | OpenAI Codex | `~/.codex/prompts/ksdd-*.md` | `~/.agents/skills/ksdd/` | `KSDD_WITH_CODEX=1` | `CODEX_HOME` (default `~/.codex`) |
 | opencode | `~/.config/opencode/commands/ksdd-*.md` | `~/.config/opencode/ksdd/` | `KSDD_WITH_OPENCODE=1` | `OPENCODE_HOME` (default `~/.config/opencode`) |
+| Google Antigravity | `~/.gemini/antigravity-cli/skills/ksdd-*.md` (CLI/TUI) + `~/.gemini/antigravity/skills/ksdd-*.md` (IDE) | `~/.gemini/ksdd/` | `KSDD_WITH_ANTIGRAVITY=1` | `ANTIGRAVITY_HOME` (default `~/.gemini`) |
+
+> **Antigravity:** os commands são instalados como **skills** Markdown em duas superfícies globais (CLI/TUI e IDE) — um `.md` em `skills/` vira `/ksdd-start`. O bundle (`references/`, `agents/`, `README.md`, `INSTALL.md`, `AGENTS.md`) é compartilhado em `~/.gemini/ksdd/`. O path do IDE (`~/.gemini/antigravity/skills/`) está pendente de confirmação empírica — ver FEATURE-antigravity-integration.
 
 ### Instalação seletiva
 
 ```bash
-ksdd install                      # só Claude Code (default)
-ksdd install --codex              # Claude + Codex
-ksdd install --opencode           # Claude + opencode
-ksdd install --codex --opencode   # Claude + Codex + opencode (3 targets)
+ksdd install                                    # só Claude Code (default)
+ksdd install --codex                            # Claude + Codex
+ksdd install --opencode                         # Claude + opencode
+ksdd install --antigravity                      # Claude + Google Antigravity
+ksdd install --codex --opencode --antigravity   # Claude + Codex + opencode + Antigravity (4 targets)
 ```
 
 Equivalentes via npm postinstall:
@@ -32,7 +36,8 @@ Equivalentes via npm postinstall:
 ```bash
 KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd
 KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
-KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
+KSDD_WITH_ANTIGRAVITY=1 npm install -g @kognar/ksdd
+KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 KSDD_WITH_ANTIGRAVITY=1 npm install -g @kognar/ksdd
 ```
 
 Comandos do CLI:
@@ -41,7 +46,7 @@ Comandos do CLI:
 ksdd install                      # reinstala / atualiza (só Claude Code)
 ksdd install --codex              # Claude + Codex (prompts + skill)
 ksdd install --opencode           # Claude + opencode (commands + bundle)
-ksdd install --codex --opencode   # Claude + Codex + opencode
+ksdd install --antigravity        # Claude + Antigravity (skills CLI+IDE + bundle)
 ksdd status                       # mostra estado da instalação
 ksdd uninstall                    # remove arquivos copiados (todos os targets)
 ```
@@ -52,13 +57,14 @@ Para desinstalar tudo:
 npm uninstall -g @kognar/ksdd
 ```
 
-`ksdd uninstall` itera os 3 targets registrados no manifest (`.ksdd-manifest.json`) e remove tudo que foi instalado. Quando o manifest não existe, faz fallback por convenção e ainda assim limpa os paths default dos 3 agentes.
+`ksdd uninstall` itera os 4 targets registrados no manifest (`.ksdd-manifest.json`) e remove tudo que foi instalado. Quando o manifest não existe, faz fallback por convenção e ainda assim limpa os paths default dos 4 agentes. No caso do Antigravity, o prune é restrito aos subdirs KSDD (`antigravity-cli/skills`, `antigravity/skills`, `ksdd`) — nunca remove `~/.gemini/` em si (compartilhado com o gemini-cli e outros tools Google).
 
 ### Troubleshooting
 
 - **`~/.config/opencode/` não existe:** sem problema — o `ksdd install --opencode` cria a estrutura idempotentemente. Você pode instalar o opencode depois e os arquivos já estarão prontos pra serem descobertos automaticamente.
+- **`~/.gemini/` não existe:** mesma lógica — `ksdd install --antigravity` cria a estrutura idempotentemente; instale o Antigravity depois e as skills já estarão prontas.
 - **`~/.codex/` não existe:** mesma lógica — `ksdd install --codex` cria os diretórios necessários.
-- **Reverter target específico:** rode `ksdd uninstall` (remove todos) e depois `ksdd install` (ou `ksdd install --codex` / `--opencode`) só com os que quer manter.
+- **Reverter target específico:** rode `ksdd uninstall` (remove todos) e depois `ksdd install` (ou `ksdd install --codex` / `--opencode` / `--antigravity`) só com os que quer manter.
 
 ### Opção 1: Slash commands globais (recomendado)
 
