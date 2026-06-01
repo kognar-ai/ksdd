@@ -1,7 +1,7 @@
 ---
 id: 030
 title: Criar references/antigravity-AGENTS.md (template bundlado)
-status: para implementar
+status: em revisão
 feature: antigravity-integration
 area: data-model
 priority: P0
