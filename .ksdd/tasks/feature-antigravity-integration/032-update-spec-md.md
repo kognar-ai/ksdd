@@ -1,7 +1,7 @@
 ---
 id: 032
 title: SPEC.md — seções 7.1 (CLI) e 13 (fluxos) com Antigravity
-status: para implementar
+status: em revisão
 feature: antigravity-integration
 area: design
 priority: P0
