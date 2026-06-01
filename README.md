@@ -1,13 +1,13 @@
 # KSDD — Kognar Spec-Driven Design & Development
 
-A slash command system for **Claude Code**, **[OpenAI Codex](https://developers.openai.com/codex)** and **[opencode](https://opencode.ai)** that guides products from **raw brainstorm to an implementable design system**, in four stages with mandatory human approval between each one — plus feature-level workflows for breaking specs into tasks and shipping code through quality gates and PRs.
+A slash command system for **Claude Code**, **[OpenAI Codex](https://developers.openai.com/codex)**, **[opencode](https://opencode.ai)** and **[Google Antigravity](https://antigravity.google)** that guides products from **raw brainstorm to an implementable design system**, in four stages with mandatory human approval between each one — plus feature-level workflows for breaking specs into tasks and shipping code through quality gates and PRs.
 
-## Codex and opencode (CLI / IDE)
+## Codex, opencode and Google Antigravity (CLI / IDE)
 
-After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`) and/or `ksdd install --opencode` (or `KSDD_WITH_OPENCODE=1`):
+After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`), `ksdd install --opencode` (or `KSDD_WITH_OPENCODE=1`) and/or `ksdd install --antigravity` (or `KSDD_WITH_ANTIGRAVITY=1`):
 
-| Claude Code | Codex (custom prompts in `~/.codex/prompts/`) | opencode (commands in `~/.config/opencode/commands/`) |
-|-------------|-----------------------------------------------|-------------------------------------------------------|
+| Claude Code | Codex (prompts in `~/.codex/prompts/`) | opencode · Antigravity (`~/.config/opencode/`, `~/.gemini/`) |
+|-------------|----------------------------------------|-------------------------------------------------------------|
 | `/ksdd:start` | `/prompts:ksdd-start` | `/ksdd-start` |
 | `/ksdd:spec` | `/prompts:ksdd-spec` | `/ksdd-spec` |
 | `/ksdd:tech` | `/prompts:ksdd-tech` | `/ksdd-tech` |
@@ -22,7 +22,9 @@ The `ksdd` skill is also installed in `~/.agents/skills/ksdd/` (references + age
 
 For opencode the same content is distributed as commands in `~/.config/opencode/commands/ksdd-*.md` plus a bundle in `~/.config/opencode/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/opencode-AGENTS.md`).
 
-Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes the Codex prompts folder; `OPENCODE_HOME` (default `~/.config/opencode`) changes the opencode base folder.
+For Google Antigravity the 9 commands are installed as Markdown **skills** in two global surfaces — `~/.gemini/antigravity-cli/skills/ksdd-*.md` (CLI / TUI) and `~/.gemini/antigravity/skills/ksdd-*.md` (IDE) — plus a shared bundle in `~/.gemini/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/antigravity-AGENTS.md`). A `.md` in `skills/` becomes `/ksdd-start` and friends. _(The IDE skills path is pending empirical confirmation — see the feature spec.)_
+
+Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes the Codex prompts folder; `OPENCODE_HOME` (default `~/.config/opencode`) changes the opencode base folder; `ANTIGRAVITY_HOME` (default `~/.gemini`) changes the Antigravity base folder.
 
 ```
 /ksdd:start          →  .ksdd/specs/brainstorm.md         (raw idea → refined concept)
@@ -66,12 +68,13 @@ Artifacts are cumulative: `SPEC.md` references `brainstorm.md`; `architecture.md
 npm install -g @kognar/ksdd
 ```
 
-By default this installs only **Claude Code** (`~/.claude/`). To also install **Codex** and/or **opencode**:
+By default this installs only **Claude Code** (`~/.claude/`). To also install **Codex**, **opencode** and/or **Google Antigravity**:
 
 ```bash
-ksdd install --codex              # Claude + Codex
-ksdd install --opencode           # Claude + opencode
-ksdd install --codex --opencode   # Claude + Codex + opencode (3 targets)
+ksdd install --codex                            # Claude + Codex
+ksdd install --opencode                         # Claude + opencode
+ksdd install --antigravity                      # Claude + Google Antigravity
+ksdd install --codex --opencode --antigravity   # Claude + Codex + opencode + Antigravity (4 targets)
 ```
 
 Or in an npm install:
@@ -79,7 +82,8 @@ Or in an npm install:
 ```bash
 KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd
 KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
-KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
+KSDD_WITH_ANTIGRAVITY=1 npm install -g @kognar/ksdd
+KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 KSDD_WITH_ANTIGRAVITY=1 npm install -g @kognar/ksdd
 ```
 
 CLI commands:
@@ -88,7 +92,7 @@ CLI commands:
 ksdd install                      # reinstalls / updates (Claude Code only)
 ksdd install --codex              # Claude + Codex (prompts + skill)
 ksdd install --opencode           # Claude + opencode (commands + bundle)
-ksdd install --codex --opencode   # Claude + Codex + opencode
+ksdd install --antigravity        # Claude + Antigravity (skills CLI+IDE + bundle)
 ksdd status                       # shows installation state
 ksdd uninstall                    # removes copied files (all targets)
 ```

@@ -112,13 +112,14 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
 
 ```json
 {
-  "version": "0.8.0",
+  "version": "0.9.0",
   "installedAt": "ISO-8601 timestamp",
   "pkgRoot": "/path/absoluto/do/pacote/npm",
   "targets": {
     "claude": ["array de paths instalados em ~/.claude/"],
     "codex": ["array de paths instalados em ~/.codex/ e ~/.agents/"],
-    "opencode": ["array de paths instalados em ~/.config/opencode/"]
+    "opencode": ["array de paths instalados em ~/.config/opencode/"],
+    "antigravity": ["array de paths instalados em ~/.gemini/"]
   }
 }
 ```
@@ -196,11 +197,13 @@ Comandos disponíveis (visíveis em `ksdd help`):
 | `ksdd install --codex` | Instala Claude Code + Codex (prompts em `~/.codex/prompts/` + skill em `~/.agents/skills/ksdd/`) |
 | `ksdd install --opencode` | Instala Claude Code + opencode (commands em `~/.config/opencode/commands/` + bundle em `~/.config/opencode/ksdd/`) |
 | `ksdd install --codex --opencode` | Instala os 3 targets (Claude, Codex, opencode) numa só invocação |
+| `ksdd install --antigravity` | Instala Claude Code + Google Antigravity (skills em `~/.gemini/antigravity-cli/skills/` e `~/.gemini/antigravity/skills/` + bundle em `~/.gemini/ksdd/`) |
+| `ksdd install --codex --opencode --antigravity` | Instala os 4 targets (Claude, Codex, opencode, Antigravity) numa só invocação |
 | `ksdd uninstall` | Remove tudo o que foi instalado, lendo o manifest |
 | `ksdd status` | Mostra versão instalada, timestamp, contagem de arquivos por alvo |
 | `ksdd help` (default) | Documentação de uso |
 
-Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `KSDD_WITH_OPENCODE`, `CODEX_HOME`, `OPENCODE_HOME`, `NO_COLOR`.
+Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode` / `--antigravity`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `KSDD_WITH_OPENCODE`, `KSDD_WITH_ANTIGRAVITY`, `CODEX_HOME`, `OPENCODE_HOME`, `ANTIGRAVITY_HOME`, `NO_COLOR`.
 
 ### 7.2 Slash commands (Claude Code)
 
@@ -218,7 +221,16 @@ Após `ksdd install --opencode`, ficam em `~/.config/opencode/commands/ksdd-[nam
 
 Bundle adicional em `~/.config/opencode/ksdd/` contém `references/` (templates canônicos), `agents/` (helpers de estilo), `README.md`, `INSTALL.md` e `AGENTS.md` — este último orienta o agente opencode sobre o contexto canônico do KSDD (equivalente funcional ao skill do Claude/Codex, sem o conceito formal de "skill" do opencode).
 
-### 7.5 Skill instalada (`~/.claude/skills/ksdd/`, `~/.agents/skills/ksdd/` e bundle `~/.config/opencode/ksdd/`)
+### 7.5 Skills (Google Antigravity)
+
+Após `ksdd install --antigravity`, os 9 commands ficam disponíveis como **skills Markdown** em duas superfícies globais (`:` é renomeado para `-`, mesma convenção de Codex/opencode):
+
+- **CLI / TUI:** `~/.gemini/antigravity-cli/skills/ksdd-[name].md`
+- **IDE:** `~/.gemini/antigravity/skills/ksdd-[name].md` _(path do IDE a confirmar — ver risco em FEATURE seção 9)_
+
+Um arquivo `.md` em `skills/` vira `/ksdd-start`, `/ksdd-spec`, `/ksdd-new-feature`, etc. Conteúdo é o mesmo dos arquivos em `commands/`. Bundle compartilhado em `~/.gemini/ksdd/` contém `references/`, `agents/`, `README.md`, `INSTALL.md` e `AGENTS.md` (derivado de `references/antigravity-AGENTS.md`) — orienta o agente Antigravity sobre o contexto canônico. `ANTIGRAVITY_HOME` faz override de `~/.gemini`.
+
+### 7.6 Skill instalada (`~/.claude/skills/ksdd/`, `~/.agents/skills/ksdd/` e bundle `~/.config/opencode/ksdd/`)
 
 Bundle com `references/` (templates), `agents/` (helpers de estilo), `README.md`, `INSTALL.md`, e (Codex apenas) `SKILL.md` derivado de `references/codex-SKILL.md`.
 
@@ -296,10 +308,10 @@ Implicações práticas:
 
 ### 13.1 Onboarding em projeto novo (do zero)
 
-1. Usuário roda `npm install -g @kognar/ksdd` (ou `KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd` para Claude + Codex, ou `KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd` para Claude + opencode)
-2. Postinstall copia commands e skills para `~/.claude/` (e `~/.codex/` / `~/.config/opencode/` se opt-in)
-3. Reinicia o agente (Claude Code, Codex CLI/IDE ou opencode)
-4. No diretório do projeto, invoca `/ksdd:start` (Claude), `/prompts:ksdd-start` (Codex) ou `/ksdd-start` (opencode) com ideia bruta
+1. Usuário roda `npm install -g @kognar/ksdd` (ou com `KSDD_WITH_CODEX=1` para Claude + Codex, `KSDD_WITH_OPENCODE=1` para Claude + opencode, `KSDD_WITH_ANTIGRAVITY=1` para Claude + Google Antigravity)
+2. Postinstall copia commands e skills para `~/.claude/` (e `~/.codex/` / `~/.config/opencode/` / `~/.gemini/` se opt-in)
+3. Reinicia o agente (Claude Code, Codex CLI/IDE, opencode ou Antigravity)
+4. No diretório do projeto, invoca `/ksdd:start` (Claude), `/prompts:ksdd-start` (Codex), `/ksdd-start` (opencode ou Antigravity) com ideia bruta
 5. Agente faz 5-8 perguntas em batch → gera `brainstorm.md` → para em Gate 1
 6. Usuário aprova → invoca `/ksdd:spec` → gera `SPEC.md` → Gate 2
 7. Opcional: `/ksdd:tech` → `architecture.md` → Gate 3
@@ -349,6 +361,14 @@ Implicações práticas:
 4. Manifest passa a ter `targets.opencode` preenchido; `targets.codex` (se existia) é preservado intocado
 5. `ksdd status` confirma os 3 targets ativos (Claude, Codex, opencode) com contagens individuais
 
+### 13.7 Adicionar Google Antigravity em instalação existente
+
+1. Usuário com KSDD já instalado (Claude + opcionalmente Codex/opencode) roda `ksdd install --antigravity` (sem outras flags)
+2. Instalador re-roda `installClaude()` (idempotente); não modifica Codex nem opencode
+3. `installAntigravity()` roda e popula `~/.gemini/antigravity-cli/skills/ksdd-*.md` + `~/.gemini/antigravity/skills/ksdd-*.md` + bundle em `~/.gemini/ksdd/`
+4. Manifest passa a ter `targets.antigravity` preenchido; `targets.codex`/`targets.opencode` (se existiam) são preservados intocados
+5. `ksdd status` confirma os 4 targets ativos (Claude, Codex, opencode, Antigravity) com contagens individuais
+
 ---
 
 ## 14. Fases de Entrega
@@ -382,13 +402,14 @@ Implicações práticas:
 - Agent `setup-analyst` em 4 variantes paralelas (produto, stack, código, git)
 - Flags: `--artifacts`, `--depth`, `--skip-questions`
 
-### Fase 5 — Mais agents (confirmado no roadmap) — **Em andamento (v0.8.0)**
+### Fase 5 — Mais agents (confirmado no roadmap) — **Em andamento (v0.9.0)**
 
 - Suporte a opencode (entregue v0.8.0, 26/05/2026)
+- Suporte a Google Antigravity (entregue v0.9.0, 01/06/2026) — 4º target, CLI/TUI + IDE
 - Suporte a Cursor (`~/.cursor/` `[verificar paths]`)
 - Suporte a Windsurf
 - Suporte a Cline
-- Refatoração do instalador para `targets.[agent]` genérico (planejada para a próxima feature multi-agent — ver ADR-010 em `architecture.md`)
+- Refatoração do instalador para `installTarget(targetConfig)` genérico — feature dedicada, obrigatória antes do 5º target (ver ADR-011 em `architecture.md`)
 
 ### Fase 6 — Integração com design tools (confirmado no roadmap) — **Próximo**
 
