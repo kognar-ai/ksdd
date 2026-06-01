@@ -1,7 +1,7 @@
 ---
 id: 028
 title: Adicionar installAntigravity() + flag --antigravity + env vars em bin/ksdd.js
-status: para implementar
+status: em revisão
 feature: antigravity-integration
 area: backend
 priority: P0

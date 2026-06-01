@@ -19,6 +19,13 @@ const OPENCODE_HOME = process.env.OPENCODE_HOME || path.join(os.homedir(), '.con
 const OPENCODE_COMMANDS_DIR = path.join(OPENCODE_HOME, 'commands');
 const OPENCODE_BUNDLE_DIR = path.join(OPENCODE_HOME, 'ksdd');
 
+// Google Antigravity — quarto target. Duas superfícies globais de skills (CLI/TUI + IDE) + bundle compartilhado.
+// Path do IDE (`antigravity/skills`) marcado [verificar] — confirmar no dogfood (task 034). ADR-011 documenta a 4ª cópia.
+const ANTIGRAVITY_HOME = process.env.ANTIGRAVITY_HOME || path.join(os.homedir(), '.gemini');
+const ANTIGRAVITY_CLI_SKILLS_DIR = path.join(ANTIGRAVITY_HOME, 'antigravity-cli', 'skills');
+const ANTIGRAVITY_IDE_SKILLS_DIR = path.join(ANTIGRAVITY_HOME, 'antigravity', 'skills');
+const ANTIGRAVITY_BUNDLE_DIR = path.join(ANTIGRAVITY_HOME, 'ksdd');
+
 const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md', 'archive.md'];
 
 const COLORS = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -229,11 +236,60 @@ function installOpencode(tracked, out) {
   }
 }
 
+// Quarto target: Google Antigravity. Cópia adaptada de installOpencode (ADR-011 — duplicação intencional).
+// Instala os 9 commands como skills em DUAS superfícies globais (CLI/TUI + IDE) e bundla references/agents
+// uma única vez em ~/.gemini/ksdd/, com AGENTS.md derivado de references/antigravity-AGENTS.md.
+function installAntigravity(tracked, out) {
+  for (const [skillsDir, label, hint] of [
+    [ANTIGRAVITY_CLI_SKILLS_DIR, 'antigr-cli', '~/.gemini/antigravity-cli/skills/'],
+    [ANTIGRAVITY_IDE_SKILLS_DIR, 'antigr-ide', '~/.gemini/antigravity/skills/'],
+  ]) {
+    ensureDir(skillsDir);
+    for (const file of COMMAND_FILES) {
+      const src = path.join(PKG_ROOT, 'commands', file);
+      if (!fs.existsSync(src)) continue;
+      const name = agentPromptBasename(file);
+      const dst = path.join(skillsDir, name);
+      copyFile(src, dst);
+      tracked.push(dst);
+      out('  ' + green('✓') + ' ' + label + ' ' + dim(hint) + name);
+    }
+  }
+
+  ensureDir(ANTIGRAVITY_BUNDLE_DIR);
+  for (const sub of ['references', 'agents']) {
+    const src = path.join(PKG_ROOT, sub);
+    if (fs.existsSync(src)) {
+      copyDir(src, path.join(ANTIGRAVITY_BUNDLE_DIR, sub), tracked);
+      out('  ' + green('✓') + ' antigr    ' + dim('~/.gemini/ksdd/') + sub + '/');
+    }
+  }
+  for (const top of ['README.md', 'INSTALL.md']) {
+    const src = path.join(PKG_ROOT, top);
+    if (fs.existsSync(src)) {
+      const dst = path.join(ANTIGRAVITY_BUNDLE_DIR, top);
+      copyFile(src, dst);
+      tracked.push(dst);
+    }
+  }
+
+  const agentsSrc = path.join(PKG_ROOT, 'references', 'antigravity-AGENTS.md');
+  const agentsDst = path.join(ANTIGRAVITY_BUNDLE_DIR, 'AGENTS.md');
+  if (fs.existsSync(agentsSrc)) {
+    copyFile(agentsSrc, agentsDst);
+    tracked.push(agentsDst);
+    out('  ' + green('✓') + ' antigr    ' + dim('~/.gemini/ksdd/') + 'AGENTS.md');
+  } else {
+    out('  ' + yellow('aviso:') + ' references/antigravity-AGENTS.md ainda não existe — bundle ksdd/AGENTS.md será pulado nesta instalação');
+  }
+}
+
 function cmdInstall(args) {
   const silent = args.flags.has('quiet') || args.flags.has('silent');
   const postinstall = args.flags.has('postinstall');
   const withCodex = args.flags.has('codex') || (postinstall && process.env.KSDD_WITH_CODEX === '1');
   const withOpencode = args.flags.has('opencode') || (postinstall && process.env.KSDD_WITH_OPENCODE === '1');
+  const withAntigravity = args.flags.has('antigravity') || (postinstall && process.env.KSDD_WITH_ANTIGRAVITY === '1');
   const out = silent ? () => {} : log;
 
   if (postinstall && process.env.KSDD_SKIP_POSTINSTALL === '1') {
@@ -246,12 +302,14 @@ function cmdInstall(args) {
     targetsLabel.push(dim(path.join(os.homedir(), '.agents/skills/ksdd')));
   }
   if (withOpencode) targetsLabel.push(dim(OPENCODE_HOME));
+  if (withAntigravity) targetsLabel.push(dim(ANTIGRAVITY_HOME));
   out(bold('KSDD') + ' — instalando em ' + targetsLabel.join(' + '));
 
   const prev = normalizeManifest(loadManifest());
   const prevClaude = (prev && prev.targets && prev.targets.claude) || [];
   const prevCodex = (prev && prev.targets && prev.targets.codex) || [];
   const prevOpencode = (prev && prev.targets && prev.targets.opencode) || [];
+  const prevAntigravity = (prev && prev.targets && prev.targets.antigravity) || [];
 
   for (const f of prevClaude) removePath(f);
 
@@ -272,6 +330,13 @@ function cmdInstall(args) {
     installOpencode(opencodeTracked, out);
   }
 
+  let antigravityTracked = prevAntigravity;
+  if (withAntigravity) {
+    for (const f of prevAntigravity) removePath(f);
+    antigravityTracked = [];
+    installAntigravity(antigravityTracked, out);
+  }
+
   const manifest = {
     version: require('../package.json').version,
     installedAt: new Date().toISOString(),
@@ -280,6 +345,7 @@ function cmdInstall(args) {
       claude: claudeTracked,
       codex: codexTracked,
       opencode: opencodeTracked,
+      antigravity: antigravityTracked,
     },
   };
   saveManifest(manifest);
@@ -289,6 +355,7 @@ function cmdInstall(args) {
   const counts = [claudeTracked.length];
   if (withCodex) { targetNames.push('Codex'); counts.push(codexTracked.length); }
   if (withOpencode) { targetNames.push('opencode'); counts.push(opencodeTracked.length); }
+  if (withAntigravity) { targetNames.push('Google Antigravity'); counts.push(antigravityTracked.length); }
 
   let headline;
   if (targetNames.length === 1) {
@@ -303,6 +370,9 @@ function cmdInstall(args) {
   }
   if (withOpencode) {
     tail += '\n' + green('Integração opencode:') + ' reinicie o opencode e use ' + bold('/ksdd-start') + ' (bundle em ~/.config/opencode/ksdd/).';
+  }
+  if (withAntigravity) {
+    tail += '\n' + green('Integração Google Antigravity:') + ' reinicie o Antigravity (CLI/TUI ou IDE) e use ' + bold('/ksdd-start') + ' (bundle em ~/.gemini/ksdd/).';
   }
   out(tail);
 }
@@ -380,24 +450,32 @@ function cmdStatus() {
 }
 
 function cmdHelp() {
-  log(bold('ksdd') + ' — instalador KSDD para Claude Code e Codex\n');
+  log(bold('ksdd') + ' — instalador KSDD para Claude Code, Codex, opencode e Google Antigravity\n');
   log('Uso:');
-  log('  ksdd install           Copia commands e skills para ~/.claude/');
-  log('  ksdd install --codex   Também instala prompts em ~/.codex/prompts/ e skill em ~/.agents/skills/ksdd/');
-  log('  ksdd uninstall         Remove arquivos previamente instalados');
-  log('  ksdd status            Mostra estado da instalação');
-  log('  ksdd help              Esta mensagem');
+  log('  ksdd install               Copia commands e skills para ~/.claude/');
+  log('  ksdd install --codex       Também instala prompts em ~/.codex/prompts/ e skill em ~/.agents/skills/ksdd/');
+  log('  ksdd install --opencode    Também instala commands + bundle em ~/.config/opencode/');
+  log('  ksdd install --antigravity Também instala skills + bundle em ~/.gemini/ (CLI/TUI + IDE)');
+  log('  ksdd uninstall             Remove arquivos previamente instalados');
+  log('  ksdd status                Mostra estado da instalação');
+  log('  ksdd help                  Esta mensagem');
+  log('');
+  log('  As flags são combináveis: ksdd install --codex --opencode --antigravity');
   log('');
   log('Variáveis de ambiente:');
   log('  KSDD_SKIP_POSTINSTALL=1   Pula o postinstall do npm');
   log('  KSDD_WITH_CODEX=1         Equivale a --codex no postinstall (npm install)');
+  log('  KSDD_WITH_OPENCODE=1      Equivale a --opencode no postinstall');
+  log('  KSDD_WITH_ANTIGRAVITY=1   Equivale a --antigravity no postinstall');
   log('  CODEX_HOME                Pasta do Codex (default: ~/.codex)');
+  log('  OPENCODE_HOME             Pasta do opencode (default: ~/.config/opencode)');
+  log('  ANTIGRAVITY_HOME          Pasta do Antigravity (default: ~/.gemini)');
   log('');
   log('Flags:');
   log('  --quiet           Silencia a saída');
   log('');
-  log('Codex (após install --codex):');
-  log('  ' + dim('/prompts:ksdd-start') + ', ' + dim('/prompts:ksdd-spec') + ', ' + dim('/prompts:ksdd-setup') + ', … (ver README)');
+  log('Após install (invocação por agente):');
+  log('  Claude   ' + dim('/ksdd:start') + '   Codex ' + dim('/prompts:ksdd-start') + '   opencode/Antigravity ' + dim('/ksdd-start'));
   log('');
   log('Instalação global:');
   log('  ' + dim('npm install -g @kognar/ksdd'));
