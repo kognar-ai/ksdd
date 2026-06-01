@@ -28,7 +28,7 @@ KSDD é um pacote npm que distribui **conteúdo Markdown** (commands, references
               │  ├── README.md / INSTALL.md / CHANGELOG.md / LICENSE        │
               │  └── package.json                                           │
               └───────────────────────────┬─────────────────────────────────┘
-                                          │ ksdd install [--codex] [--opencode]
+                                          │ ksdd install [--codex] [--opencode] [--antigravity]
                                           ▼
         ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
         │                                                                                                     │
@@ -45,6 +45,13 @@ KSDD é um pacote npm que distribui **conteúdo Markdown** (commands, references
    └──────────────────────────────────┘  └──────────────────────────────────────┘  └──────────────────────────────────────┘
                           │                                  │                                       │
                           └──────────────────────────────────┴───────────────────────────────────────┘
+                                                             │
+   ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+   │  Google Antigravity (target: antigravity) — quarto target, duas superfícies globais (--antigravity)│
+   │    CLI/TUI : ~/.gemini/antigravity-cli/skills/ksdd-*.md                                            │
+   │    IDE     : ~/.gemini/antigravity/skills/ksdd-*.md   [path IDE a confirmar — ver ADR-011 / risco] │
+   │    bundle  : ~/.gemini/ksdd/{references/, agents/, README.md, INSTALL.md, AGENTS.md}  (compartilhado)│
+   └──────────────────────────────────────────────────────────────────────────────────────────────────┘
                                                              ▼
                        ┌────────────────────────────────────┐
                        │  Diretório do projeto-alvo         │
@@ -108,9 +115,10 @@ Schema atual:
   "installedAt": "string (ISO-8601 timestamp)",
   "pkgRoot": "string (path absoluto do pacote npm)",
   "targets": {
-    "claude":   ["string (path absoluto de arquivo instalado)", ...],
-    "codex":    ["string (path absoluto de arquivo instalado)", ...],
-    "opencode": ["string (path absoluto de arquivo instalado)", ...]
+    "claude":      ["string (path absoluto de arquivo instalado)", ...],
+    "codex":       ["string (path absoluto de arquivo instalado)", ...],
+    "opencode":    ["string (path absoluto de arquivo instalado)", ...],
+    "antigravity": ["string (path absoluto de arquivo instalado)", ...]
   }
 }
 ```
@@ -168,6 +176,8 @@ ksdd install              # Claude apenas
 ksdd install --codex      # Claude + Codex
 ksdd install --opencode             # Claude apenas + opencode
 ksdd install --codex --opencode     # Claude + Codex + opencode
+ksdd install --antigravity          # Claude apenas + Google Antigravity
+ksdd install --codex --opencode --antigravity  # os 4 targets
 ksdd install --postinstall  # invocado pelo npm postinstall hook
 ksdd install --quiet      # silencia stdout
 ksdd uninstall            # remove tudo rastreado no manifest
@@ -185,6 +195,8 @@ ksdd help                 # default; também --help, -h
 | `KSDD_WITH_CODEX=1` | Equivale a `--codex` no postinstall | unset |
 | `OPENCODE_HOME` | Override do diretório base do opencode | `~/.config/opencode` |
 | `KSDD_WITH_OPENCODE=1` | Equivale a `--opencode` no postinstall | unset |
+| `ANTIGRAVITY_HOME` | Override do diretório base do Antigravity | `~/.gemini` |
+| `KSDD_WITH_ANTIGRAVITY=1` | Equivale a `--antigravity` no postinstall | unset |
 | `KSDD_SKIP_POSTINSTALL=1` | Pula a etapa de postinstall (útil em CI) | unset |
 | `NO_COLOR` | Desabilita ANSI escapes na saída | unset |
 
@@ -201,10 +213,11 @@ ksdd help                 # default; também --help, -h
 | `saveManifest(m)` | Escreve manifest pretty-printed | 93 |
 | `removePath(p)` | rm recursivo idempotente | 98 |
 | `pruneEmptyDirs(root)` | Remove diretórios vazios após uninstall | 104 |
-| `codexPromptBasename(file)` | Conversão `start.md` → `ksdd-start.md`, `new:feature.md` → `ksdd-new-feature.md` | 116 |
-| `installClaude(tracked, out)` | Instala em `~/.claude/` | 121 |
-| `installCodex(tracked, out)` | Instala em `~/.codex/` + `~/.agents/skills/ksdd/` | 150 |
-| `installOpencode(tracked, out)` | Instala em `~/.config/opencode/` + `~/.config/opencode/ksdd/` | `[verificar]` |
+| `agentPromptBasename(file)` | Conversão `start.md` → `ksdd-start.md`, `new:feature.md` → `ksdd-new-feature.md` (compartilhado Codex/opencode/Antigravity) | 121 |
+| `installClaude(tracked, out)` | Instala em `~/.claude/` | 126 |
+| `installCodex(tracked, out)` | Instala em `~/.codex/` + `~/.agents/skills/ksdd/` | 155 |
+| `installOpencode(tracked, out)` | Instala em `~/.config/opencode/` + `~/.config/opencode/ksdd/` | 192 |
+| `installAntigravity(tracked, out)` | Instala em `~/.gemini/antigravity-cli/skills/` + `~/.gemini/antigravity/skills/` + bundle `~/.gemini/ksdd/` (cópia adaptada de `installOpencode` — ADR-011) | `[verificar]` |
 
 ---
 
@@ -216,6 +229,7 @@ ksdd help                 # default; também --help, -h
 | **Claude Code** (Anthropic CLI) | Consumidor primário dos commands | n/a (KSDD não fala com Anthropic) | n/a | usuário paga sua conta |
 | **OpenAI Codex** (CLI/IDE) | Consumidor secundário via custom prompts + skills | n/a | n/a | usuário paga sua conta |
 | **opencode** (open-source CLI) | Consumidor terciário via custom commands + bundle | n/a | n/a | usuário paga sua conta |
+| **Google Antigravity** (CLI/TUI + IDE) | Consumidor quaternário via skills Markdown (`~/.gemini/`) + bundle | n/a | n/a | usuário paga sua conta |
 | **GitHub** | Repo + issues + (futuro) Releases | conta do mantenedor | padrão GH | gratuito (repo público) |
 
 **Importante:** KSDD não faz nenhuma chamada de rede em runtime. Não há SDK Anthropic, OpenAI, GitHub embarcado. Toda interação com agentes acontece via filesystem (commands lidos pelo agente do usuário).
@@ -361,6 +375,14 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 **Decisão:** aceitar duplicação intencional `installCodex` ↔ `installOpencode` com prazo explícito — a próxima feature multi-agent (Cursor, Windsurf ou Cline) **deve** introduzir `installTarget(targetConfig)` genérico antes de adicionar o quarto target.
 **Confiança:** alta — decisão deliberada após análise de trade-off documentada em FEATURE seção 1.1.
 **Consequência:** release de opencode 2-3x mais rápido vs refator imediato; aumenta dívida técnica em ~250 linhas duplicadas (`installCodex` + `installOpencode`); o refator dobrará de tamanho quando finalmente acontecer (3 funções para refatorar em vez de 2). Trade-off aceito explicitamente.
+**Continuação (ver ADR-011):** o quarto target (Google Antigravity, v0.9.0) reiterou o adiamento em vez de disparar o refator. O prazo deixa de ser "próxima feature multi-agent" e passa a ser **uma feature dedicada de refator, obrigatória antes do 5º target**. ADR-011 substitui o gatilho deste ADR.
+
+### ADR-011: Quarto target (Google Antigravity) hardcoded — refator `installTarget` vira feature dedicada
+
+**Evidência:** feature antigravity-integration (v0.9.0) adiciona `installAntigravity()` como cópia adaptada de `installOpencode` em `bin/ksdd.js`, instalando os 9 commands em duas superfícies globais (`~/.gemini/antigravity-cli/skills/` e `~/.gemini/antigravity/skills/`) + bundle compartilhado `~/.gemini/ksdd/`. Decisão e trade-off em `.ksdd/features/FEATURE-antigravity-integration.md` seção 1.1.
+**Decisão:** aceitar a **quarta cópia hardcoded** para validar adoção (ecossistema Google) antes de pagar a dívida do refator. O refator `installTarget(targetConfig)` genérico deixa de ser embutido "no próximo target" e vira **feature dedicada própria**, com gatilho firme: **deve ser concluída antes de adicionar o 5º target** (Cursor/Windsurf/Cline).
+**Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (hardcoded + cobrir CLI e IDE + bump minor 0.9.0).
+**Consequência:** entrega de Antigravity rápida e sem cirurgia arquitetural; a dívida sobe para **4 funções `install*` duplicadas** (~250 linhas a mais), e o refator agora unificará 4 funções em vez de 3. Risco extra específico: o pruning no uninstall opera sob `~/.gemini/` (compartilhado com `gemini-cli` e outros tools Google) — mitigado restringindo o prune estritamente aos subdirs KSDD. Trade-off aceito explicitamente.
 
 ---
 
@@ -378,7 +400,9 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 | Suporte multi-agent (Cursor, Windsurf, Cline) exige n-cópias do conteúdo | Médio | Alta (no roadmap) | Refatorar `installClaude`/`installCodex` em função genérica `installTarget(targetConfig)` |
 | Conteúdo de commands desincroniza entre Claude e Codex | Alto | Baixa | Já mitigado: ambos copiam de `commands/*.md` (fonte única) |
 | Convenções de path opencode em Windows divergem de `~/.config/opencode/` | Médio | Média | Validar no QA (task 027); usar `OPENCODE_HOME` override quando necessário |
-| Duplicação `installCodex`/`installOpencode` aumenta dívida técnica | Médio | Alta (esperada) | ADR-010 documenta prazo de refator (próxima feature multi-agent) |
+| Duplicação `installCodex`/`installOpencode`/`installAntigravity` (4 cópias) aumenta dívida técnica | Médio | Alta (esperada) | ADR-011 fixa gatilho: refator `installTarget` vira feature dedicada antes do 5º target |
+| Path do IDE Antigravity (`~/.gemini/antigravity/skills/`) divergir do assumido | Médio | Média | Marcado `[verificar]`; confirmar no dogfood (task 034); `ANTIGRAVITY_HOME` permite override |
+| `pruneEmptyDirs` em `~/.gemini/` apagar diretório compartilhado com `gemini-cli`/outros tools Google | Alto | Média | Restringir prune estritamente aos subdirs KSDD (`antigravity-cli/skills`, `antigravity/skills`, `ksdd`) — nunca subir para `~/.gemini/` |
 
 ---
 
@@ -410,7 +434,8 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 
 ### Fase 5 — Multi-agent — **Em andamento**
 - [x] Suporte a opencode (v0.8.0, 26/05/2026)
-- [ ] Refator de `install*` para `installTarget(targetConfig)` genérico (obrigatório antes do próximo target — ADR-010)
+- [x] Suporte a Google Antigravity (v0.9.0, 01/06/2026) — 4º target, CLI/TUI + IDE (ADR-011)
+- [ ] **Refator dedicado** de `install*` para `installTarget(targetConfig)` genérico — feature própria, **obrigatória antes do 5º target** (ADR-011)
 - [ ] Suporte a Cursor (`[verificar paths]`: `~/.cursor/` ou `.cursorrules` ou outro?)
 - [ ] Suporte a Windsurf
 - [ ] Suporte a Cline

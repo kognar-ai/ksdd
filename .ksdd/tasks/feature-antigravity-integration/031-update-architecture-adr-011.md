@@ -1,7 +1,7 @@
 ---
 id: 031
 title: architecture.md — ADR-011 + atualizar ADR-010 + diagrama + roadmap Fase 5 + riscos
-status: para implementar
+status: em revisão
 feature: antigravity-integration
 area: design
 priority: P0

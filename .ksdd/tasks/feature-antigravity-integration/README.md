@@ -10,7 +10,7 @@
 | 028 | Adicionar `installAntigravity()` + flag `--antigravity` + env vars em `bin/ksdd.js` | backend    | P0         | M          | para implementar | 030               |
 | 029 | Estender `normalizeManifest`/`uninstall`/`status`/`pruneEmptyDirs` p/ antigravity | backend    | P0         | S          | para implementar | 028               |
 | 030 | Criar `references/antigravity-AGENTS.md` (template bundlado)                       | data-model | P0         | S          | em revisão       | — · #19           |
-| 031 | `architecture.md` — ADR-011 + atualizar ADR-010 + diagrama + roadmap + riscos     | design     | P0         | S          | para implementar | —                 |
+| 031 | `architecture.md` — ADR-011 + atualizar ADR-010 + diagrama + roadmap + riscos     | design     | P0         | S          | em revisão       | — · #20           |
 | 032 | `SPEC.md` — seções 7.1 (CLI) e 13 (fluxos) com Antigravity                         | design     | P0         | S          | para implementar | —                 |
 | 033 | Atualizar README + INSTALL + CHANGELOG + bump `package.json` 0.9.0                 | design     | P0         | M          | para implementar | 028, 029, 030     |
 | 034 | Dogfood + QA smoke test cross-platform + confirmar path IDE + `QA-REPORT.md`       | qa         | P0         | M          | para implementar | 028–033           |
