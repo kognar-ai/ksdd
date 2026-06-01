@@ -1,7 +1,7 @@
 ---
 id: 034
 title: Dogfood + QA smoke test cross-platform + confirmar path IDE + QA-REPORT.md
-status: para implementar
+status: em revisão
 feature: antigravity-integration
 area: qa
 priority: P0

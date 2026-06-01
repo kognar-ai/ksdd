@@ -13,7 +13,7 @@
 | 031 | `architecture.md` — ADR-011 + atualizar ADR-010 + diagrama + roadmap + riscos     | design     | P0         | S          | em revisão       | — · #20           |
 | 032 | `SPEC.md` — seções 7.1 (CLI) e 13 (fluxos) com Antigravity                         | design     | P0         | S          | em revisão       | — · #21           |
 | 033 | Atualizar README + INSTALL + CHANGELOG + bump `package.json` 0.9.0                 | design     | P0         | M          | em revisão       | 028, 029, 030 · #22 |
-| 034 | Dogfood + QA smoke test cross-platform + confirmar path IDE + `QA-REPORT.md`       | qa         | P0         | M          | para implementar | 028–033           |
+| 034 | Dogfood + QA smoke test cross-platform + confirmar path IDE + `QA-REPORT.md`       | qa         | P0         | M          | em revisão       | 028–033 · #23     |
 
 ---
 
@@ -41,4 +41,6 @@
 - Escopo "Ambos": duas superfícies globais — CLI TUI (`~/.gemini/antigravity-cli/skills/`) + IDE (`~/.gemini/antigravity/skills/`), bundle único em `~/.gemini/ksdd/`. Project-level `.agents/workflows/` fica fora da v1.
 - Path do IDE marcado `[verificar]` — confirmado empiricamente na task 034.
 
-**Próximo passo:** `/ksdd:build:feature antigravity-integration` para implementar task por task.
+**Status:** 7/7 tasks implementadas em `feat/antigravity-integration` (commits `bd870a7..`). Aguardando review do PR e merge em `main`.
+
+**QA:** ver [QA-REPORT.md](./QA-REPORT.md) — 9/9 cenários automatizáveis verdes em macOS; cenários 10-11 (`/ksdd-start` no Antigravity real), confirmação do path IDE e validação Linux/Windows ficam como gates manuais antes de `npm publish`.
