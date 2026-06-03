@@ -6,25 +6,25 @@ A slash command system for **Claude Code**, **[OpenAI Codex](https://developers.
 
 After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`), `ksdd install --opencode` (or `KSDD_WITH_OPENCODE=1`) and/or `ksdd install --antigravity` (or `KSDD_WITH_ANTIGRAVITY=1`):
 
-| Claude Code | Codex (prompts in `~/.codex/prompts/`) | opencode · Antigravity (`~/.config/opencode/`, `~/.gemini/`) |
-|-------------|----------------------------------------|-------------------------------------------------------------|
-| `/ksdd:start` | `/prompts:ksdd-start` | `/ksdd-start` |
-| `/ksdd:spec` | `/prompts:ksdd-spec` | `/ksdd-spec` |
-| `/ksdd:tech` | `/prompts:ksdd-tech` | `/ksdd-tech` |
-| `/ksdd:design` | `/prompts:ksdd-design` | `/ksdd-design` |
-| `/ksdd:new:feature` | `/prompts:ksdd-new-feature` | `/ksdd-new-feature` |
-| `/ksdd:build:feature` | `/prompts:ksdd-build-feature` | `/ksdd-build-feature` |
-| `/ksdd:build:all` | `/prompts:ksdd-build-all` | `/ksdd-build-all` |
-| `/ksdd:setup` | `/prompts:ksdd-setup` | `/ksdd-setup` |
-| `/ksdd:archive` | `/prompts:ksdd-archive` | `/ksdd-archive` |
+| Claude Code | Codex (prompts in `~/.codex/prompts/`) | opencode (`~/.config/opencode/`) | Antigravity (`~/.gemini/commands/ksdd/`) |
+|-------------|----------------------------------------|----------------------------------|------------------------------------------|
+| `/ksdd:start` | `/prompts:ksdd-start` | `/ksdd-start` | `/ksdd:start` |
+| `/ksdd:spec` | `/prompts:ksdd-spec` | `/ksdd-spec` | `/ksdd:spec` |
+| `/ksdd:tech` | `/prompts:ksdd-tech` | `/ksdd-tech` | `/ksdd:tech` |
+| `/ksdd:design` | `/prompts:ksdd-design` | `/ksdd-design` | `/ksdd:design` |
+| `/ksdd:new:feature` | `/prompts:ksdd-new-feature` | `/ksdd-new-feature` | `/ksdd:new:feature` |
+| `/ksdd:build:feature` | `/prompts:ksdd-build-feature` | `/ksdd-build-feature` | `/ksdd:build:feature` |
+| `/ksdd:build:all` | `/prompts:ksdd-build-all` | `/ksdd-build-all` | `/ksdd:build:all` |
+| `/ksdd:setup` | `/prompts:ksdd-setup` | `/ksdd-setup` | `/ksdd:setup` |
+| `/ksdd:archive` | `/prompts:ksdd-archive` | `/ksdd-archive` | `/ksdd:archive` |
 
 The `ksdd` skill is also installed in `~/.agents/skills/ksdd/` (references + agents + `SKILL.md`) for Codex — use `$ksdd` or mention the skill in your prompt. Codex prompts are the same content as the files in `commands/`; [custom prompts](https://developers.openai.com/codex/custom-prompts) are flagged as *deprecated* in favor of skills, but still work for explicit `/prompts:…` invocation.
 
 For opencode the same content is distributed as commands in `~/.config/opencode/commands/ksdd-*.md` plus a bundle in `~/.config/opencode/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/opencode-AGENTS.md`).
 
-For Google Antigravity the 9 commands are installed as Markdown **skills** in two global surfaces — `~/.gemini/antigravity-cli/skills/ksdd-*.md` (CLI / TUI) and `~/.gemini/antigravity/skills/ksdd-*.md` (IDE) — plus a shared bundle in `~/.gemini/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/antigravity-AGENTS.md`). A `.md` in `skills/` becomes `/ksdd-start` and friends. _(The IDE skills path is pending empirical confirmation — see the feature spec.)_
+For Google Antigravity the 9 commands are registered as native **TOML commands** in `~/.gemini/commands/ksdd/` (the same folder Antigravity CLI/TUI and IDE read — shared with `gemini-cli`), each pulling its body from a bundle in `~/.gemini/ksdd/` via an `@$HOME/...` include. Nested subdirs reproduce the Claude invocation (`commands/ksdd/new/feature.toml` → `/ksdd:new:feature`). This mirrors how [GSD](https://github.com/open-gsd/gsd-core) registers `~/.gemini/commands/gsd/*.toml`.
 
-Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes the Codex prompts folder; `OPENCODE_HOME` (default `~/.config/opencode`) changes the opencode base folder; `ANTIGRAVITY_HOME` (default `~/.gemini`) changes the Antigravity base folder.
+Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes the Codex prompts folder; `OPENCODE_HOME` (default `~/.config/opencode`) changes the opencode base folder; `ANTIGRAVITY_HOME` (default `~/.gemini`) changes the Gemini/Antigravity base folder.
 
 ```
 /ksdd:start          →  .ksdd/specs/brainstorm.md         (raw idea → refined concept)
@@ -92,7 +92,7 @@ CLI commands:
 ksdd install                      # reinstalls / updates (Claude Code only)
 ksdd install --codex              # Claude + Codex (prompts + skill)
 ksdd install --opencode           # Claude + opencode (commands + bundle)
-ksdd install --antigravity        # Claude + Antigravity (skills CLI+IDE + bundle)
+ksdd install --antigravity        # Claude + Antigravity (TOML commands em ~/.gemini/commands/ksdd/ + bundle)
 ksdd status                       # shows installation state
 ksdd uninstall                    # removes copied files (all targets)
 ```

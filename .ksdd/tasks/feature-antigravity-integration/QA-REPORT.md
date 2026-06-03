@@ -1,91 +1,64 @@
 # QA Report — Feature `antigravity-integration`
 
-**Data:** 01/06/2026
+**Data:** 01/06/2026 (rev. pós-dogfood 03/06/2026)
 **Branch:** `feat/antigravity-integration`
-**Versão sob teste:** KSDD v0.9.0 (tasks 028-033 implementadas, commits `bd870a7..581e388`)
-**Tester:** automação via `/ksdd:build:feature` (autor humano: Cleiton Tavares)
+**Versão sob teste:** KSDD v0.9.0
+**Tester:** automação via `/ksdd:build:feature` + dogfood do mantenedor (Cleiton Tavares)
+
+## Resumo executivo
+
+A 1ª entrega instalava `.md` planos em `~/.gemini/antigravity-cli/skills/` e `~/.gemini/antigravity/skills/`. **No dogfood real, nenhum command apareceu no Antigravity.** Root cause: essas pastas não são superfícies de registro de slash commands. Usando o **GSD** (que já funciona no Antigravity na máquina do mantenedor) como referência, o modelo correto é **TOML nativo em `~/.gemini/commands/ksdd/*.toml`** + bundle `~/.gemini/ksdd/`. O instalador foi reescrito e revalidado.
 
 ## Ambiente
 
-| Plataforma | Versão | Status |
+| Item | Valor |
+|---|---|
+| OS | macOS Darwin 25.5.0 (arm64) |
+| Node | v24.16.0 (≥ 16) |
+| gemini-cli | 0.45.0 (lê `~/.gemini/commands/*.toml`) |
+| Google Antigravity | instalado (Antigravity.app + Antigravity IDE.app) |
+| Referência de paths | GSD instalado em `~/.gemini/commands/gsd/*.toml` + `~/.gemini/get-shit-done/` — **funciona no Antigravity** |
+
+## Root cause (modelo errado → modelo correto)
+
+| | 1ª tentativa (errada) | Correção (validada) |
 |---|---|---|
-| **macOS** | Darwin 25.5.0 (arm64) | ✓ Executado |
-| **Linux** | — | `[verificar]` — sem acesso a ambiente Linux nesta sessão; replicar cenários 1-9 num `node:20` antes do publish |
-| **Windows** | — | `[verificar]` — paths sob `~/.gemini/` podem divergir; FEATURE seção 9.2 marcou como risco |
+| Onde | `~/.gemini/antigravity-cli/skills/ksdd-*.md` + `~/.gemini/antigravity/skills/ksdd-*.md` | `~/.gemini/commands/ksdd/*.toml` |
+| Formato | `.md` plano | TOML nativo Gemini (`description` + `prompt`) |
+| Corpo | inline no `.md` | bundle `~/.gemini/ksdd/commands/ksdd-*.md`, incluído via `@$HOME/...` |
+| Invocação | esperava `/ksdd-start` (não aparecia) | `/ksdd:start`, `/ksdd:new:feature` (subdirs aninhados) |
+| Evidência | — | espelha GSD (`commands/gsd/*.toml` → `/gsd:*`), comprovado na máquina |
 
-| Toolchain | Versão | Notas |
-|---|---|---|
-| Node.js | v24.16.0 | acima de `engines.node >=16` |
-| Google Antigravity | — | **não instalado neste ambiente** — bloqueia cenários 10-11 e a confirmação empírica do path IDE |
-| `gh` | autenticado (cleiton-tavares) | issues #17-23 abertas |
-
----
-
-## Cenários executados
-
-11 cenários planejados. **9 cenários** rodaram inline em sandbox isolado (`HOME` apontando para `mktemp -d`, ou `ANTIGRAVITY_HOME` override) para preservar a instalação real do usuário e nunca tocar o `~/.gemini/` real. **2 cenários** (`/ksdd-start` e `/ksdd-spec` no Antigravity real) ficaram `[verificar]` por exigirem o Antigravity instalado + sessão interativa com modelo Gemini configurado — fora do escopo do `/ksdd:build:feature` automatizado e indisponível neste ambiente.
+## Cenários executados (modelo TOML corrigido — sandbox `HOME` isolado)
 
 | # | Cenário | Status | Notas |
 |---|---|---|---|
-| 1 | Install fresh `--antigravity` solo | ✓ | 9 skills em `~/.gemini/antigravity-cli/skills/` + 9 em `~/.gemini/antigravity/skills/`; bundle completo (`references/`, `agents/`, `README.md`, `INSTALL.md`, `AGENTS.md`) em `~/.gemini/ksdd/`; `targets.antigravity` = 38 paths |
-| 2 | Install `--codex --opencode --antigravity` (4 targets) | ✓ | Ordem Claude → Codex → opencode → Antigravity respeitada; manifest com 4 arrays preenchidos `{claude:28, codex:29, opencode:29, antigravity:38}` |
-| 3 | Postinstall via env `KSDD_WITH_ANTIGRAVITY=1` | ✓ | `node bin/ksdd.js install --postinstall` com env disparou `installAntigravity()`; 9 skills criadas por superfície |
-| 4 | `ANTIGRAVITY_HOME` override explícito | ✓ | `ANTIGRAVITY_HOME=/tmp/fake-gemini-*` redirecionou todos os paths (CLI + IDE + bundle) corretamente |
-| 5 | Idempotência (install `--antigravity` 2x) | ✓ | 1ª e 2ª chamada: 38 paths idênticos no `targets.antigravity`; nenhum arquivo duplicado em `skills/` |
-| 6 | `ksdd status` com 4 targets ativos | ✓ | Header `KSDD v0.9.0`; linha `antigravity : 38 arquivos — skills … + … · bundle …` exibida; omitida quando vazia |
-| 7 | `ksdd uninstall` completo | ✓ | Remove arquivos rastreados dos 4 targets + manifest; `pruneEmptyDirs` removeu os subdirs KSDD do `~/.gemini/`; nada de lixo |
-| 8 | Uninstall fallback sem manifest | ✓ | Warning amarelo "Nada para desinstalar — manifesto não encontrado…" + fallback removeu skills `ksdd-*` nas duas superfícies + bundle por convenção |
-| 9 | Preservação em `ksdd install` sem flag | ✓ (por código) | `cmdInstall` preserva `targets.antigravity` quando `--antigravity` ausente (mesmo padrão validado de codex/opencode); não deleta `~/.gemini/` |
-| 10 | `/ksdd-start` no Antigravity real | `[verificar]` | Exige Antigravity instalado + sessão interativa com modelo Gemini — indisponível neste ambiente. Gate manual antes do `npm publish` |
-| 11 | `/ksdd-spec` em sequência | `[verificar]` | Mesma justificativa do cenário 10; depende do 10 ter rodado |
+| 1 | `install --antigravity` registra 9 TOMLs | ✓ | `commands/ksdd/{start,spec,tech,design,setup,archive}.toml` + `new/feature.toml`, `build/feature.toml`, `build/all.toml` |
+| 2 | TOML bem-formado (`description` + `prompt`) | ✓ | validado por regex de string TOML em todos os 9 |
+| 3 | include `@$HOME/.gemini/ksdd/commands/ksdd-*.md` resolve | ✓ | corpo bundlado existe no path do include |
+| 4 | nesting → invocação | ✓ | `new/feature.toml` ⇒ `/ksdd:new:feature` (igual ao Claude) |
+| 5 | `--codex --opencode --antigravity` (4 targets) | ✓ | manifest com 4 arrays |
+| 6 | idempotência (2x) | ✓ | 38 paths idênticos, sem duplicação |
+| 7 | `ANTIGRAVITY_HOME` override | ✓ | include passa a usar path absoluto do bundle |
+| 8 | `status` | ✓ | `antigravity: N arquivos — commands … · bundle …` |
+| 9 | `uninstall` (manifest) | ✓ | remove `commands/ksdd/` + bundle; **preserva `commands/gsd/`, `commands/`, `settings.json`, `~/.gemini/`** |
+| 10 | `uninstall` fallback (sem manifest) | ✓ | remove namespace `commands/ksdd/` por convenção, preserva o resto |
+| 11 | **Smoke real `/ksdd:start` no Antigravity** | `[verificar]` | **Gate do mantenedor:** limpar a instalação antiga (`ksdd uninstall`) + `ksdd install --antigravity` no formato novo, reiniciar o Antigravity e confirmar que `/ksdd:start` aparece e roda |
 
-### Cenários adicionais (safety check)
+### Safety check (o mais importante)
 
-| Safety check | Status | Notas |
-|---|---|---|
-| Uninstall preserva arquivo **não-KSDD** em `~/.gemini/` | ✓ | Setup: `~/.gemini/settings.json` (simulando config do gemini-cli) criado antes do uninstall. Após uninstall: `settings.json` **preservado** |
-| `pruneEmptyDirs` nunca sobe para `~/.gemini/` | ✓ | Após uninstall completo, `~/.gemini/` continua existindo (não foi pruned). Confirmado por execução + leitura de código (`bin/ksdd.js`: prune restrito a `antigravity-cli/skills`, `antigravity/skills`, `ksdd`) |
-| Code review (agente `code-reviewer`) | ✓ | Sem problemas críticos nem bloqueantes; escalada de prune ao pai confirmada como **impossível** (`pruneEmptyDirs` opera só dentro do root) |
+| Check | Status |
+|---|---|
+| `uninstall` preserva `~/.gemini/commands/gsd/` (namespace de outra ferramenta) | ✓ |
+| `uninstall` preserva `~/.gemini/commands/` e `~/.gemini/` | ✓ |
+| `uninstall` preserva `~/.gemini/settings.json` (config do gemini-cli) | ✓ |
+| prune nunca escala para o pai (`pruneEmptyDirs` opera só dentro do root) | ✓ (código + teste) |
 
----
+## Pendências antes do `npm publish`
 
-## Bugs encontrados
+1. **Mantenedor:** limpar os 38 arquivos da 1ª tentativa (ainda no `~/.gemini/antigravity-cli/skills/` e `~/.gemini/antigravity/skills/` — rastreados no manifest v0.9.0, `ksdd uninstall` remove com precisão) e reinstalar no formato TOML. Confirmar cenário 11.
+2. **Linux/Windows:** replicar cenários 1-10 (esperar paridade — é tudo `fs` + TOML).
 
-**Nenhum bug bloqueante.** Observações abaixo.
+## Conclusão
 
-### Observações (não-bloqueantes)
-
-1. **Path do IDE Antigravity (`~/.gemini/antigravity/skills/`) não confirmado empiricamente.** A doc oficial (antigravity.google) é JS-rendered; os paths vieram de guias da comunidade. O install cria a estrutura de qualquer forma (idempotente), mas a invocação real `/ksdd-start` no IDE precisa ser validada manualmente. Se divergir, ajustar a constante `ANTIGRAVITY_IDE_SKILLS_DIR` em `bin/ksdd.js`. Marcado `[verificar]` na FEATURE, no CHANGELOG e no architecture.md.
-
-2. **Diretórios intermediários órfãos após uninstall** (`~/.gemini/antigravity-cli/` e `~/.gemini/antigravity/` podem ficar vazios). Inofensivo e idêntico ao comportamento do opencode (`~/.config/opencode/commands/`). Mantido por paridade; melhoria opcional sugerida pelo code review (prune do pai imediato, ainda seguro).
-
-3. **`ANTIGRAVITY_HOME` sem validação de prefixo** — débito compartilhado com `CODEX_HOME`/`OPENCODE_HOME` (nenhum valida). Não é regressão desta feature.
-
----
-
-## Critérios de aceitação da task 034 (estado)
-
-- [x] `QA-REPORT.md` existe em `.ksdd/tasks/feature-antigravity-integration/QA-REPORT.md`
-- [x] Cobre 11 cenários com ✓/`[verificar]` + nota
-- [x] macOS testado (9/9 cenários automatizáveis verdes)
-- [`[verificar]`] Path IDE confirmado empiricamente — pendente (Antigravity não instalado neste ambiente)
-- [`[verificar]`] Linux — sem acesso nesta sessão
-- [`[verificar]`] Windows — sem acesso nesta sessão
-- [x] ≥ 90% dos cenários executáveis verdes — **9/9 = 100%** (10-11 não executados; não contam como verde nem vermelho)
-- [`[verificar]`] smoke `/ksdd-start` no Antigravity (cenário 10) — gate manual
-- [x] Safety check (preservação `~/.gemini/` + prune restrito) passou
-- [x] Code review sem findings bloqueantes
-
----
-
-## Recomendação
-
-A feature está **funcionalmente completa e testada para macOS** (instalador, manifest, status, uninstall, fallback, override, idempotência, safety). Antes do `npm publish`:
-
-1. **Confirmar o path do IDE e validar cenários 10-11 manualmente** — instalar o Antigravity, rodar `ksdd install --antigravity`, abrir a TUI e/ou IDE, invocar `/ksdd-start` com uma ideia simples e verificar que produz `brainstorm.md` respeitando o approval gate. Se o path do IDE divergir de `~/.gemini/antigravity/skills/`, ajustar `ANTIGRAVITY_IDE_SKILLS_DIR`.
-2. **Smoke test em Linux** (CI via Docker `node:20`) — replica cenários 1-9; esperar paridade total.
-3. **Windows continua `[verificar]`** — documentado como risco no architecture.md seção 11.
-
----
-
-**Conclusão:** ✓ Feature pronta para review humano e merge em `main`. Confirmação do path IDE + cenários 10-11 + Linux/Windows ficam como gates manuais antes do `npm publish` final.
+Modelo de registro **corrigido e revalidado em sandbox**, ancorado numa referência que comprovadamente funciona no Antigravity (GSD). Falta o gate manual do mantenedor (cenário 11) após limpar a instalação antiga e reinstalar.

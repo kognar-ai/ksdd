@@ -19,12 +19,14 @@ const OPENCODE_HOME = process.env.OPENCODE_HOME || path.join(os.homedir(), '.con
 const OPENCODE_COMMANDS_DIR = path.join(OPENCODE_HOME, 'commands');
 const OPENCODE_BUNDLE_DIR = path.join(OPENCODE_HOME, 'ksdd');
 
-// Google Antigravity — quarto target. Duas superfícies globais de skills (CLI/TUI + IDE) + bundle compartilhado.
-// Path do IDE (`antigravity/skills`) marcado [verificar] — confirmar no dogfood (task 034). ADR-011 documenta a 4ª cópia.
+// Google Antigravity / Gemini CLI — quarto target. Ambos leem slash commands do MESMO diretório:
+// ~/.gemini/commands/<ns>/*.toml (formato TOML nativo do Gemini: `description` + `prompt`). O conteúdo pesado
+// fica num bundle (~/.gemini/ksdd/) e é puxado pelo prompt via include `@$HOME/.gemini/ksdd/...`.
+// Convenção comprovada pelo GSD (~/.gemini/commands/gsd/*.toml → /gsd:*). ADR-011 documenta a 4ª cópia.
+// ANTIGRAVITY_HOME aponta o home do Gemini (default ~/.gemini), compartilhado com gemini-cli.
 const ANTIGRAVITY_HOME = process.env.ANTIGRAVITY_HOME || path.join(os.homedir(), '.gemini');
-const ANTIGRAVITY_CLI_SKILLS_DIR = path.join(ANTIGRAVITY_HOME, 'antigravity-cli', 'skills');
-const ANTIGRAVITY_IDE_SKILLS_DIR = path.join(ANTIGRAVITY_HOME, 'antigravity', 'skills');
-const ANTIGRAVITY_BUNDLE_DIR = path.join(ANTIGRAVITY_HOME, 'ksdd');
+const ANTIGRAVITY_COMMANDS_DIR = path.join(ANTIGRAVITY_HOME, 'commands', 'ksdd'); // namespace ksdd → /ksdd:...
+const ANTIGRAVITY_BUNDLE_DIR = path.join(ANTIGRAVITY_HOME, 'ksdd');               // corpos dos commands + references + agents
 
 const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md', 'archive.md'];
 
@@ -129,6 +131,30 @@ function pruneEmptyDirs(root) {
 function agentPromptBasename(commandFile) {
   const stem = commandFile.replace(/\.md$/i, '').replace(/:/g, '-');
   return `ksdd-${stem}.md`;
+}
+
+// Descrições curtas por command — viram o campo `description` do TOML lido por Gemini/Antigravity.
+const COMMAND_DESCRIPTIONS = {
+  'start.md': 'Brainstorm estruturado -> brainstorm.md (passo 1 do fluxo KSDD)',
+  'spec.md': 'brainstorm.md -> SPEC.md completo (passo 2)',
+  'tech.md': 'SPEC.md -> architecture.md (passo 3, opcional)',
+  'design.md': 'SPEC.md -> DESIGN.md no formato Google Stitch (passo 4)',
+  'new:feature.md': 'Especifica uma nova feature e quebra em tasks implementaveis',
+  'build:feature.md': 'Implementa as tasks de uma feature ponta-a-ponta (issue -> PR)',
+  'build:all.md': 'Builda o projeto inteiro a partir do SPEC.md, feature por feature',
+  'setup.md': 'Onboarding reverse-engineering de um projeto existente para KSDD',
+  'archive.md': 'Arquiva features ja implementadas em .ksdd/archive/',
+};
+
+// 'new:feature.md' -> ['new','feature']; 'start.md' -> ['start']. Os ':' viram subdirs aninhados
+// (Gemini deriva o namespace do path → /ksdd:new:feature), espelhando a invocação do Claude.
+function antigravityCommandSegments(commandFile) {
+  return commandFile.replace(/\.md$/i, '').split(':');
+}
+
+// Escapa uma string para um literal TOML básico (entre aspas duplas, single-line).
+function tomlBasicString(s) {
+  return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n') + '"';
 }
 
 function installClaude(tracked, out) {
@@ -237,32 +263,56 @@ function installOpencode(tracked, out) {
   }
 }
 
-// Quarto target: Google Antigravity. Cópia adaptada de installOpencode (ADR-011 — duplicação intencional).
-// Instala os 9 commands como skills em DUAS superfícies globais (CLI/TUI + IDE) e bundla references/agents
-// uma única vez em ~/.gemini/ksdd/, com AGENTS.md derivado de references/antigravity-AGENTS.md.
+// Quarto target: Google Antigravity / Gemini CLI. Cópia adaptada de installOpencode (ADR-011 — duplicação intencional).
+// Modelo correto (comprovado pelo GSD): registra cada command como TOML nativo em ~/.gemini/commands/ksdd/<segs>.toml
+// (`description` + `prompt`), com o corpo pesado bundlado em ~/.gemini/ksdd/commands/ e puxado via include @$HOME/...
+// O mesmo diretório ~/.gemini/commands/ é lido tanto pela CLI/TUI quanto pelo IDE do Antigravity (e pelo gemini-cli).
 function installAntigravity(tracked, out) {
-  for (const [skillsDir, label, hint] of [
-    [ANTIGRAVITY_CLI_SKILLS_DIR, 'antigr-cli', '~/.gemini/antigravity-cli/skills/'],
-    [ANTIGRAVITY_IDE_SKILLS_DIR, 'antigr-ide', '~/.gemini/antigravity/skills/'],
-  ]) {
-    ensureDir(skillsDir);
-    for (const file of COMMAND_FILES) {
-      const src = path.join(PKG_ROOT, 'commands', file);
-      if (!fs.existsSync(src)) continue;
-      const name = agentPromptBasename(file);
-      const dst = path.join(skillsDir, name);
-      copyFile(src, dst);
-      tracked.push(dst);
-      out('  ' + green('✓') + ' ' + label + ' ' + dim(hint) + name);
-    }
+  const isDefaultHome = ANTIGRAVITY_HOME === path.join(os.homedir(), '.gemini');
+  // Referência usada nos includes do prompt. `$HOME/.gemini/ksdd` mantém o TOML portátil no caso default;
+  // com ANTIGRAVITY_HOME custom, usa o caminho absoluto (o `$HOME` não apontaria pro bundle).
+  const bundleRef = isDefaultHome ? '$HOME/.gemini/ksdd' : ANTIGRAVITY_BUNDLE_DIR;
+  const bodyDir = path.join(ANTIGRAVITY_BUNDLE_DIR, 'commands');
+
+  ensureDir(ANTIGRAVITY_COMMANDS_DIR);
+  ensureDir(bodyDir);
+  for (const file of COMMAND_FILES) {
+    const src = path.join(PKG_ROOT, 'commands', file);
+    if (!fs.existsSync(src)) continue;
+
+    // 1) Corpo do command no bundle, referenciado pelo prompt via include.
+    const bodyName = agentPromptBasename(file); // ksdd-new-feature.md
+    copyFile(src, path.join(bodyDir, bodyName));
+    tracked.push(path.join(bodyDir, bodyName));
+
+    // 2) TOML nativo Gemini/Antigravity em commands/ksdd/<segs>.toml (segs aninhados → /ksdd:new:feature).
+    const segments = antigravityCommandSegments(file);
+    const tomlPath = path.join(ANTIGRAVITY_COMMANDS_DIR, ...segments) + '.toml';
+    const desc = COMMAND_DESCRIPTIONS[file] || ('Comando KSDD ' + segments.join(':'));
+    const prompt = [
+      '@' + bundleRef + '/commands/' + bodyName,
+      '',
+      'Contexto canonico: templates em ' + bundleRef + '/references/ e agents em ' + bundleRef + '/agents/ '
+        + '(ver ' + bundleRef + '/AGENTS.md). Respeite os approval gates obrigatorios.',
+      '',
+      'Argumentos do usuario: {{args}}',
+    ].join('\n');
+    const toml = 'description = ' + tomlBasicString(desc) + '\n'
+               + 'prompt = ' + tomlBasicString(prompt) + '\n';
+    ensureDir(path.dirname(tomlPath));
+    fs.writeFileSync(tomlPath, toml);
+    tracked.push(tomlPath);
+    out('  ' + green('✓') + ' antigravity ' + dim('~/.gemini/commands/ksdd/') + segments.join('/') + '.toml  '
+        + dim('/ksdd:' + segments.join(':')));
   }
 
+  // Bundle de references/agents + docs (compartilhado; referenciado pelos prompts).
   ensureDir(ANTIGRAVITY_BUNDLE_DIR);
   for (const sub of ['references', 'agents']) {
     const src = path.join(PKG_ROOT, sub);
     if (fs.existsSync(src)) {
       copyDir(src, path.join(ANTIGRAVITY_BUNDLE_DIR, sub), tracked);
-      out('  ' + green('✓') + ' antigr    ' + dim('~/.gemini/ksdd/') + sub + '/');
+      out('  ' + green('✓') + ' antigravity ' + dim('~/.gemini/ksdd/') + sub + '/');
     }
   }
   for (const top of ['README.md', 'INSTALL.md']) {
@@ -279,9 +329,9 @@ function installAntigravity(tracked, out) {
   if (fs.existsSync(agentsSrc)) {
     copyFile(agentsSrc, agentsDst);
     tracked.push(agentsDst);
-    out('  ' + green('✓') + ' antigr    ' + dim('~/.gemini/ksdd/') + 'AGENTS.md');
+    out('  ' + green('✓') + ' antigravity ' + dim('~/.gemini/ksdd/') + 'AGENTS.md');
   } else {
-    out('  ' + yellow('aviso:') + ' references/antigravity-AGENTS.md ainda não existe — bundle ksdd/AGENTS.md será pulado nesta instalação');
+    out('  ' + yellow('aviso:') + ' references/antigravity-AGENTS.md ausente — ksdd/AGENTS.md pulado');
   }
 }
 
@@ -373,7 +423,7 @@ function cmdInstall(args) {
     tail += '\n' + green('Integração opencode:') + ' reinicie o opencode e use ' + bold('/ksdd-start') + ' (bundle em ~/.config/opencode/ksdd/).';
   }
   if (withAntigravity) {
-    tail += '\n' + green('Integração Google Antigravity:') + ' reinicie o Antigravity (CLI/TUI ou IDE) e use ' + bold('/ksdd-start') + ' (bundle em ~/.gemini/ksdd/).';
+    tail += '\n' + green('Integração Google Antigravity:') + ' reinicie o Antigravity (CLI/TUI ou IDE) e use ' + bold('/ksdd:start') + ' (commands em ~/.gemini/commands/ksdd/, bundle em ~/.gemini/ksdd/).';
   }
   out(tail);
 }
@@ -406,16 +456,11 @@ function cmdUninstall(args) {
     removePath(OPENCODE_BUNDLE_DIR);
     pruneEmptyDirs(OPENCODE_BUNDLE_DIR);
     pruneEmptyDirs(OPENCODE_COMMANDS_DIR);
-    // Fallback Antigravity: remove skills `ksdd-*` nas duas superfícies + bundle, por convenção.
-    for (const skillsDir of [ANTIGRAVITY_CLI_SKILLS_DIR, ANTIGRAVITY_IDE_SKILLS_DIR]) {
-      try {
-        for (const name of fs.readdirSync(skillsDir)) {
-          if (name.startsWith('ksdd-')) removePath(path.join(skillsDir, name));
-        }
-      } catch { /* diretório inexistente: ignore */ }
-      pruneEmptyDirs(skillsDir);
-    }
+    // Fallback Antigravity: remove o namespace de commands `commands/ksdd/` + bundle, por convenção.
+    // Nunca toca em `commands/` (compartilhado com gsd e outros namespaces) nem em `~/.gemini/` em si.
+    removePath(ANTIGRAVITY_COMMANDS_DIR);
     removePath(ANTIGRAVITY_BUNDLE_DIR);
+    pruneEmptyDirs(ANTIGRAVITY_COMMANDS_DIR);
     pruneEmptyDirs(ANTIGRAVITY_BUNDLE_DIR);
     return;
   }
@@ -437,10 +482,10 @@ function cmdUninstall(args) {
   pruneEmptyDirs(path.join(os.homedir(), '.agents', 'skills'));
   pruneEmptyDirs(OPENCODE_BUNDLE_DIR);
   pruneEmptyDirs(OPENCODE_COMMANDS_DIR);
-  // Prune restrito aos subdirs KSDD do Antigravity — nunca subir para ~/.gemini/ (compartilhado com gemini-cli).
+  // Prune restrito aos subdirs KSDD do Antigravity — nunca subir para ~/.gemini/ nem mexer em ~/.gemini/commands/
+  // (compartilhado com gsd e outros namespaces). `commands/ksdd/` é nosso e some inteiro quando esvaziado.
   pruneEmptyDirs(ANTIGRAVITY_BUNDLE_DIR);
-  pruneEmptyDirs(ANTIGRAVITY_CLI_SKILLS_DIR);
-  pruneEmptyDirs(ANTIGRAVITY_IDE_SKILLS_DIR);
+  pruneEmptyDirs(ANTIGRAVITY_COMMANDS_DIR);
 
   out(green('KSDD desinstalado.') + ' ' + dim(`(${removed} arquivos removidos)`));
 }
@@ -466,7 +511,7 @@ function cmdStatus() {
     log('  opencode     : ' + oc.length + ' arquivos — commands ' + dim(OPENCODE_COMMANDS_DIR) + ' · bundle ' + dim(OPENCODE_BUNDLE_DIR));
   }
   if (ag.length > 0) {
-    log('  antigravity  : ' + ag.length + ' arquivos — skills ' + dim(ANTIGRAVITY_CLI_SKILLS_DIR) + ' + ' + dim(ANTIGRAVITY_IDE_SKILLS_DIR) + ' · bundle ' + dim(ANTIGRAVITY_BUNDLE_DIR));
+    log('  antigravity  : ' + ag.length + ' arquivos — commands ' + dim(ANTIGRAVITY_COMMANDS_DIR) + ' · bundle ' + dim(ANTIGRAVITY_BUNDLE_DIR));
   }
 }
 
@@ -476,7 +521,7 @@ function cmdHelp() {
   log('  ksdd install               Copia commands e skills para ~/.claude/');
   log('  ksdd install --codex       Também instala prompts em ~/.codex/prompts/ e skill em ~/.agents/skills/ksdd/');
   log('  ksdd install --opencode    Também instala commands + bundle em ~/.config/opencode/');
-  log('  ksdd install --antigravity Também instala skills + bundle em ~/.gemini/ (CLI/TUI + IDE)');
+  log('  ksdd install --antigravity Também instala commands TOML em ~/.gemini/commands/ksdd/ + bundle (CLI/TUI + IDE)');
   log('  ksdd uninstall             Remove arquivos previamente instalados');
   log('  ksdd status                Mostra estado da instalação');
   log('  ksdd help                  Esta mensagem');
@@ -496,7 +541,7 @@ function cmdHelp() {
   log('  --quiet           Silencia a saída');
   log('');
   log('Após install (invocação por agente):');
-  log('  Claude   ' + dim('/ksdd:start') + '   Codex ' + dim('/prompts:ksdd-start') + '   opencode/Antigravity ' + dim('/ksdd-start'));
+  log('  Claude/Antigravity ' + dim('/ksdd:start') + '   Codex ' + dim('/prompts:ksdd-start') + '   opencode ' + dim('/ksdd-start'));
   log('');
   log('Instalação global:');
   log('  ' + dim('npm install -g @kognar/ksdd'));

@@ -1,6 +1,8 @@
 # Feature: Integração com Google Antigravity (quarto target após Claude Code, Codex e opencode)
 
-> Suporte ao agente [Google Antigravity](https://antigravity.google) como quarto target de instalação do KSDD — `ksdd install --antigravity` distribui os 9 slash commands como skills Markdown em **duas superfícies globais** (CLI TUI em `~/.gemini/antigravity-cli/skills/ksdd-*.md` e IDE em `~/.gemini/antigravity/skills/ksdd-*.md`) + bundle de references/agents, mantendo o pacote zero-deps e o manifest unificado. Adicionado como quarta cópia hardcoded (`installAntigravity`), com ADR-011 registrando o adiamento consciente do refator `installTarget` genérico previsto no ADR-010.
+> Suporte ao agente [Google Antigravity](https://antigravity.google) como quarto target de instalação do KSDD — `ksdd install --antigravity` registra os 9 slash commands como **TOML nativo do Gemini** em `~/.gemini/commands/ksdd/*.toml` (mesmo diretório lido pela CLI/TUI e pelo IDE do Antigravity, compartilhado com o `gemini-cli`), com o corpo de cada command num bundle `~/.gemini/ksdd/` puxado via include `@$HOME/...`. Mantém o pacote zero-deps e o manifest unificado. Adicionado como quarta cópia hardcoded (`installAntigravity`), com ADR-011 registrando o adiamento consciente do refator `installTarget` genérico previsto no ADR-010.
+>
+> **Correção pós-dogfood (01/06/2026) — AUTORITATIVA:** a 1ª implementação mirava skills Markdown planos em `~/.gemini/antigravity-cli/skills/` e `~/.gemini/antigravity/skills/` — superfícies que **não** registram slash commands; nada aparecia no Antigravity. O modelo correto é **TOML nativo em `~/.gemini/commands/ksdd/*.toml`** (subdirs aninhados → `/ksdd:new:feature`) + bundle `~/.gemini/ksdd/` com os corpos puxados via include `@$HOME/...`, ancorado na instalação real do [GSD](https://github.com/open-gsd/gsd-core), que já funciona no Antigravity na máquina do mantenedor. A seção 2.1 (layout) e o `bin/ksdd.js` refletem o modelo corrigido; **onde os fluxos (4.x), riscos (9.x) e critérios (10) abaixo ainda mencionarem `antigravity-cli/skills`/`antigravity/skills`, vale o modelo TOML desta nota.** O target continua sendo um só (`~/.gemini/commands/` é lido pela CLI/TUI e pelo IDE), então a decisão "Ambos" é atendida por uma superfície única — não duas.
 
 **Slug:** antigravity-integration
 **Prioridade:** Alta
@@ -52,32 +54,24 @@ O `git log` da v0.8.0 (commits do opencode) mostra que a cópia hardcoded levou 
 - **Nova env var `KSDD_WITH_ANTIGRAVITY=1`** equivalente à flag, lida pelo postinstall (espelha `KSDD_WITH_CODEX` / `KSDD_WITH_OPENCODE`).
 - **Nova env var `ANTIGRAVITY_HOME`** para override do diretório base (default `~/.gemini`). Espelha `CODEX_HOME` / `OPENCODE_HOME`.
 - **Nova função `installAntigravity(tracked, out)`** em `bin/ksdd.js`, escrita como **cópia adaptada** de `installOpencode` (ADR-011 documenta a decisão de adiar de novo o refator `installTarget` genérico).
-- **Duas superfícies globais** (decisão "Ambos" — CLI TUI + IDE), ambas instaladas pelo mesmo `--antigravity`:
+- **Registro como TOML nativo do Gemini** (mesmo diretório `~/.gemini/commands/` lido pela CLI/TUI e pelo IDE do Antigravity — cobre a decisão "Ambos" numa só superfície):
   ```
   ~/.gemini/
-  ├── antigravity-cli/
-  │   └── skills/                    # CLI / TUI — um .md vira /nome
-  │       ├── ksdd-start.md
-  │       ├── ksdd-spec.md
-  │       ├── ksdd-tech.md
-  │       ├── ksdd-design.md
-  │       ├── ksdd-new-feature.md
-  │       ├── ksdd-build-feature.md
-  │       ├── ksdd-build-all.md
-  │       ├── ksdd-setup.md
-  │       └── ksdd-archive.md
-  ├── antigravity/
-  │   └── skills/                    # IDE — mesmos 9 arquivos  [verificar path no dogfood]
-  │       └── ksdd-*.md (9)
-  └── ksdd/                          # bundle auxiliar compartilhado (uma cópia só)
+  ├── commands/
+  │   └── ksdd/                      # namespace 'ksdd' (subdirs aninhados → /ksdd:new:feature)
+  │       ├── start.toml             # → /ksdd:start
+  │       ├── spec.toml · tech.toml · design.toml · setup.toml · archive.toml
+  │       ├── new/feature.toml       # → /ksdd:new:feature
+  │       └── build/feature.toml · build/all.toml
+  └── ksdd/                          # bundle (corpos + references/agents)
+      ├── commands/ksdd-*.md         # corpos dos commands (incluídos pelos TOML via @$HOME/...)
       ├── references/                # cópia de references/ do pacote
       ├── agents/                    # cópia de agents/ do pacote
-      ├── README.md                  # do pacote
-      ├── INSTALL.md                 # do pacote
-      └── AGENTS.md                  # NOVO — explica ao agente onde achar references/agents
+      ├── README.md · INSTALL.md
+      └── AGENTS.md                  # NOVO — explica onde achar commands/references/agents
   ```
-  > **Nota tática (resolver na task de instalador):** o bundle (`references/agents/README/INSTALL/AGENTS.md`) é copiado **uma vez** para `~/.gemini/ksdd/` e referenciado pelas duas superfícies de skills via `AGENTS.md`, evitando duplicação. Alternativa (bundle por superfície) é aceitável se a leitura relativa do Antigravity exigir — decisão na task com fallback documentado.
-- **Naming de commands:** reusa o helper `agentPromptBasename()` (renomeado de `codexPromptBasename` na task 023 da feature opencode) que faz `:` → `-` e prefixa `ksdd-`. Comandos ficam invocáveis como `/ksdd-start`, `/ksdd-new-feature`, etc. — mesma convenção de Codex e opencode.
+  Cada `.toml` tem `description` + `prompt`; o `prompt` faz `@$HOME/.gemini/ksdd/commands/ksdd-<nome>.md` para puxar o corpo do command e aponta os templates em `$HOME/.gemini/ksdd/references/`. Modelo comprovado pelo [GSD](https://github.com/open-gsd/gsd-core) (`~/.gemini/commands/gsd/*.toml`).
+- **Naming de commands:** subdirs aninhados sob `commands/ksdd/` reproduzem a invocação do Claude (`new/feature.toml` → `/ksdd:new:feature`). O corpo bundlado usa `agentPromptBasename()` (`ksdd-new-feature.md`) só como nome de arquivo do include.
 - **`AGENTS.md` no bundle (`~/.gemini/ksdd/AGENTS.md`)** — gerado a partir do template novo `references/antigravity-AGENTS.md`, curto (~30 linhas), que orienta o agente Antigravity sobre:
   - Onde estão os templates canônicos (`./references/`)
   - Onde estão os agents auxiliares (`./agents/`)
@@ -98,7 +92,7 @@ O `git log` da v0.8.0 (commits do opencode) mostra que a cópia hardcoded levou 
   }
   ```
   `normalizeManifest()` atualizado para tratar manifest legado sem `targets.antigravity` (cria array vazio).
-- **`ksdd uninstall`** estendido: remove tudo em `targets.antigravity`, faz `pruneEmptyDirs()` em `~/.gemini/antigravity-cli/skills/`, `~/.gemini/antigravity/skills/` e `~/.gemini/ksdd/`. Fallback por convenção (sem manifest) tenta remover paths conhecidos. **Pruning nunca sobe além desses subdirs** (`~/.gemini/` é compartilhado com `gemini-cli` e outros tools Google — risco explícito, ver seção 9.2).
+- **`ksdd uninstall`** estendido: remove tudo em `targets.antigravity`, faz `pruneEmptyDirs()` apenas em `~/.gemini/commands/ksdd/` e `~/.gemini/ksdd/`. Fallback por convenção (sem manifest) remove o namespace `commands/ksdd/` inteiro + bundle. **Nunca toca `~/.gemini/commands/` (compartilhado com `gsd` e outros namespaces) nem `~/.gemini/`** (risco explícito, ver seção 9.2).
 - **`ksdd status`** exibe nova linha `antigravity: N arquivos em ~/.gemini/` quando `targets.antigravity` é não-vazio.
 - **`ksdd install` sem `--antigravity` preserva instalação Antigravity anterior** — não deleta nada em `~/.gemini/`. Espelha o comportamento de Codex/opencode (SPEC seção 11).
 - **README + INSTALL + CHANGELOG atualizados:**
@@ -326,7 +320,7 @@ Não aplicável (CLI sem UI). Impacto em **tom da saída CLI** (SPEC seção 3):
 | Antigravity muda convenção de paths antes de release wide (produto recente) | Alto | Média | Documentar versão suportada no README; override via env |
 | Commands KSDD assumem comportamentos Claude-específicos (`view`/`create_file`, `ask_user_input_v0`) que Antigravity não tem | Médio | Média | Validar no dogfood (task QA); se algum command precisar adaptação, escopo cresce — risco aceito |
 | Duplicação `installOpencode`/`installAntigravity` (4ª cópia) aumenta dívida técnica | Médio | Alta (esperada) | ADR-011 documenta gatilho firme: refator `installTarget` vira feature dedicada antes do 5º target |
-| `pruneEmptyDirs` em `~/.gemini/` apaga diretório compartilhado com `gemini-cli`/outros tools Google | Alto | Média | Restringir pruning estritamente a `~/.gemini/antigravity-cli/skills/`, `~/.gemini/antigravity/skills/`, `~/.gemini/ksdd/` — nunca subir pra `~/.gemini/` |
+| `uninstall` apaga `~/.gemini/commands/` (compartilhado com `gsd`) ou `~/.gemini/` | Alto | Baixa | Remover/prune só o namespace `commands/ksdd/` e o bundle `ksdd/` — nunca `commands/` nem `~/.gemini/`. **Validado em QA: `commands/gsd/` preservado após uninstall.** |
 | Duas superfícies (CLI+IDE) dobram a superfície de QA e risco de divergência | Médio | Média | Mesma lógica de cópia pros dois dirs; QA cobre ambos; se IDE divergir, isolar numa sub-função |
 | Usuário sem Antigravity roda `--antigravity` e fica confuso | Baixo | Média | Cria diretórios mesmo assim (idempotente); README explica |
 | Windows: `~/.gemini/` e subpaths podem divergir | Médio | Média | `[verificar]` no dogfood; `ANTIGRAVITY_HOME` permite override |
@@ -337,7 +331,7 @@ Não aplicável (CLI sem UI). Impacto em **tom da saída CLI** (SPEC seção 3):
 
 ## 10. Critérios de Aceite
 
-- [ ] `ksdd install --antigravity` instala 9 commands em `~/.gemini/antigravity-cli/skills/ksdd-*.md` **e** `~/.gemini/antigravity/skills/ksdd-*.md` + bundle em `~/.gemini/ksdd/{references,agents,README.md,INSTALL.md,AGENTS.md}` sem warnings em macOS/Linux (Node ≥ 16).
+- [ ] `ksdd install --antigravity` registra 9 commands TOML em `~/.gemini/commands/ksdd/` (incluindo `new/feature.toml`, `build/feature.toml`, `build/all.toml` aninhados) + bundle em `~/.gemini/ksdd/{commands,references,agents,README.md,INSTALL.md,AGENTS.md}` sem warnings em macOS/Linux (Node ≥ 16); cada `/ksdd:*` aparece e invoca no Antigravity.
 - [ ] `ksdd install --codex --opencode --antigravity` instala os 4 targets de uma vez; manifest contém os 4 arrays preenchidos com paths absolutos.
 - [ ] `KSDD_WITH_ANTIGRAVITY=1 npm install -g .` (postinstall) instala Claude + Antigravity com warning yellow em caso de falha (não quebra `npm install`).
 - [ ] `KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 KSDD_WITH_ANTIGRAVITY=1 npm install -g .` instala os 4 targets.

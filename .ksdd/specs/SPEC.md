@@ -197,7 +197,7 @@ Comandos disponíveis (visíveis em `ksdd help`):
 | `ksdd install --codex` | Instala Claude Code + Codex (prompts em `~/.codex/prompts/` + skill em `~/.agents/skills/ksdd/`) |
 | `ksdd install --opencode` | Instala Claude Code + opencode (commands em `~/.config/opencode/commands/` + bundle em `~/.config/opencode/ksdd/`) |
 | `ksdd install --codex --opencode` | Instala os 3 targets (Claude, Codex, opencode) numa só invocação |
-| `ksdd install --antigravity` | Instala Claude Code + Google Antigravity (skills em `~/.gemini/antigravity-cli/skills/` e `~/.gemini/antigravity/skills/` + bundle em `~/.gemini/ksdd/`) |
+| `ksdd install --antigravity` | Instala Claude Code + Google Antigravity (TOML commands em `~/.gemini/commands/ksdd/` + bundle em `~/.gemini/ksdd/`) |
 | `ksdd install --codex --opencode --antigravity` | Instala os 4 targets (Claude, Codex, opencode, Antigravity) numa só invocação |
 | `ksdd uninstall` | Remove tudo o que foi instalado, lendo o manifest |
 | `ksdd status` | Mostra versão instalada, timestamp, contagem de arquivos por alvo |
@@ -221,14 +221,15 @@ Após `ksdd install --opencode`, ficam em `~/.config/opencode/commands/ksdd-[nam
 
 Bundle adicional em `~/.config/opencode/ksdd/` contém `references/` (templates canônicos), `agents/` (helpers de estilo), `README.md`, `INSTALL.md` e `AGENTS.md` — este último orienta o agente opencode sobre o contexto canônico do KSDD (equivalente funcional ao skill do Claude/Codex, sem o conceito formal de "skill" do opencode).
 
-### 7.5 Skills (Google Antigravity)
+### 7.5 Slash commands (Google Antigravity / Gemini CLI)
 
-Após `ksdd install --antigravity`, os 9 commands ficam disponíveis como **skills Markdown** em duas superfícies globais (`:` é renomeado para `-`, mesma convenção de Codex/opencode):
+Após `ksdd install --antigravity`, os 9 commands são registrados como **TOML nativo do Gemini** em `~/.gemini/commands/ksdd/`, com subdirs aninhados reproduzindo a invocação do Claude:
 
-- **CLI / TUI:** `~/.gemini/antigravity-cli/skills/ksdd-[name].md`
-- **IDE:** `~/.gemini/antigravity/skills/ksdd-[name].md` _(path do IDE a confirmar — ver risco em FEATURE seção 9)_
+- `~/.gemini/commands/ksdd/start.toml` → `/ksdd:start`
+- `~/.gemini/commands/ksdd/new/feature.toml` → `/ksdd:new:feature`
+- `~/.gemini/commands/ksdd/build/all.toml` → `/ksdd:build:all` (idem `spec`, `tech`, `design`, `setup`, `archive`, `build/feature`)
 
-Um arquivo `.md` em `skills/` vira `/ksdd-start`, `/ksdd-spec`, `/ksdd-new-feature`, etc. Conteúdo é o mesmo dos arquivos em `commands/`. Bundle compartilhado em `~/.gemini/ksdd/` contém `references/`, `agents/`, `README.md`, `INSTALL.md` e `AGENTS.md` (derivado de `references/antigravity-AGENTS.md`) — orienta o agente Antigravity sobre o contexto canônico. `ANTIGRAVITY_HOME` faz override de `~/.gemini`.
+A CLI/TUI e o IDE do Antigravity leem o **mesmo** diretório `~/.gemini/commands/` (compartilhado com o `gemini-cli`). Cada TOML tem `description` + `prompt`; o `prompt` puxa o corpo do command via include `@$HOME/.gemini/ksdd/commands/ksdd-[name].md`. O bundle em `~/.gemini/ksdd/` contém `commands/` (corpos), `references/`, `agents/`, `README.md`, `INSTALL.md` e `AGENTS.md` (derivado de `references/antigravity-AGENTS.md`). `ANTIGRAVITY_HOME` faz override de `~/.gemini`. Modelo comprovado pelo GSD (`~/.gemini/commands/gsd/*.toml`).
 
 ### 7.6 Skill instalada (`~/.claude/skills/ksdd/`, `~/.agents/skills/ksdd/` e bundle `~/.config/opencode/ksdd/`)
 
@@ -311,7 +312,7 @@ Implicações práticas:
 1. Usuário roda `npm install -g @kognar/ksdd` (ou com `KSDD_WITH_CODEX=1` para Claude + Codex, `KSDD_WITH_OPENCODE=1` para Claude + opencode, `KSDD_WITH_ANTIGRAVITY=1` para Claude + Google Antigravity)
 2. Postinstall copia commands e skills para `~/.claude/` (e `~/.codex/` / `~/.config/opencode/` / `~/.gemini/` se opt-in)
 3. Reinicia o agente (Claude Code, Codex CLI/IDE, opencode ou Antigravity)
-4. No diretório do projeto, invoca `/ksdd:start` (Claude), `/prompts:ksdd-start` (Codex), `/ksdd-start` (opencode ou Antigravity) com ideia bruta
+4. No diretório do projeto, invoca `/ksdd:start` (Claude ou Antigravity), `/prompts:ksdd-start` (Codex), `/ksdd-start` (opencode) com ideia bruta
 5. Agente faz 5-8 perguntas em batch → gera `brainstorm.md` → para em Gate 1
 6. Usuário aprova → invoca `/ksdd:spec` → gera `SPEC.md` → Gate 2
 7. Opcional: `/ksdd:tech` → `architecture.md` → Gate 3
@@ -365,7 +366,7 @@ Implicações práticas:
 
 1. Usuário com KSDD já instalado (Claude + opcionalmente Codex/opencode) roda `ksdd install --antigravity` (sem outras flags)
 2. Instalador re-roda `installClaude()` (idempotente); não modifica Codex nem opencode
-3. `installAntigravity()` roda e popula `~/.gemini/antigravity-cli/skills/ksdd-*.md` + `~/.gemini/antigravity/skills/ksdd-*.md` + bundle em `~/.gemini/ksdd/`
+3. `installAntigravity()` roda e popula `~/.gemini/commands/ksdd/*.toml` + bundle em `~/.gemini/ksdd/`
 4. Manifest passa a ter `targets.antigravity` preenchido; `targets.codex`/`targets.opencode` (se existiam) são preservados intocados
 5. `ksdd status` confirma os 4 targets ativos (Claude, Codex, opencode, Antigravity) com contagens individuais
 

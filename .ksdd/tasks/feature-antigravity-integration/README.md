@@ -38,8 +38,7 @@
 
 **Notas:**
 - Quarta cópia hardcoded (`installAntigravity` ← `installOpencode`), sob **ADR-011** (task 031). O refator `installTarget(targetConfig)` genérico vira feature dedicada, obrigatória **antes do 5º target**.
-- Escopo "Ambos": duas superfícies globais — CLI TUI (`~/.gemini/antigravity-cli/skills/`) + IDE (`~/.gemini/antigravity/skills/`), bundle único em `~/.gemini/ksdd/`. Project-level `.agents/workflows/` fica fora da v1.
-- Path do IDE marcado `[verificar]` — confirmado empiricamente na task 034.
+- **Correção pós-dogfood (03/06):** o registro correto é TOML nativo em `~/.gemini/commands/ksdd/*.toml` (lido pela CLI/TUI e pelo IDE) + bundle `~/.gemini/ksdd/`, ancorado no GSD. A 1ª abordagem (skills `.md` planos) não registrava commands. Project-level `.agents/workflows/` fica fora da v1.
 
 **Status:** 7/7 tasks implementadas em `feat/antigravity-integration` (commits `bd870a7..`). Aguardando review do PR e merge em `main`.
 

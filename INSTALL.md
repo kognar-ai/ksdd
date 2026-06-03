@@ -17,9 +17,9 @@ O `postinstall` copia automaticamente os commands pra `~/.claude/commands/` (ren
 | Claude Code | `~/.claude/commands/ksdd:*.md` | `~/.claude/skills/ksdd/` | — (sempre instalado) | — |
 | OpenAI Codex | `~/.codex/prompts/ksdd-*.md` | `~/.agents/skills/ksdd/` | `KSDD_WITH_CODEX=1` | `CODEX_HOME` (default `~/.codex`) |
 | opencode | `~/.config/opencode/commands/ksdd-*.md` | `~/.config/opencode/ksdd/` | `KSDD_WITH_OPENCODE=1` | `OPENCODE_HOME` (default `~/.config/opencode`) |
-| Google Antigravity | `~/.gemini/antigravity-cli/skills/ksdd-*.md` (CLI/TUI) + `~/.gemini/antigravity/skills/ksdd-*.md` (IDE) | `~/.gemini/ksdd/` | `KSDD_WITH_ANTIGRAVITY=1` | `ANTIGRAVITY_HOME` (default `~/.gemini`) |
+| Google Antigravity | `~/.gemini/commands/ksdd/*.toml` (TOML nativo) | `~/.gemini/ksdd/` | `KSDD_WITH_ANTIGRAVITY=1` | `ANTIGRAVITY_HOME` (default `~/.gemini`) |
 
-> **Antigravity:** os commands são instalados como **skills** Markdown em duas superfícies globais (CLI/TUI e IDE) — um `.md` em `skills/` vira `/ksdd-start`. O bundle (`references/`, `agents/`, `README.md`, `INSTALL.md`, `AGENTS.md`) é compartilhado em `~/.gemini/ksdd/`. O path do IDE (`~/.gemini/antigravity/skills/`) está pendente de confirmação empírica — ver FEATURE-antigravity-integration.
+> **Antigravity / Gemini CLI:** os commands são registrados como **TOML nativo** em `~/.gemini/commands/ksdd/` (mesmo diretório lido pela CLI/TUI e pelo IDE do Antigravity, compartilhado com o `gemini-cli`). Cada TOML (`description` + `prompt`) puxa o corpo do command de um bundle (`~/.gemini/ksdd/commands/ksdd-*.md`) via include `@$HOME/...`; `references/`, `agents/` e `AGENTS.md` vão no mesmo bundle. Subdirs aninhados reproduzem a invocação do Claude: `commands/ksdd/new/feature.toml` → `/ksdd:new:feature`. Mesmo modelo do [GSD](https://github.com/open-gsd/gsd-core) (`~/.gemini/commands/gsd/*.toml`).
 
 ### Instalação seletiva
 
@@ -57,7 +57,7 @@ Para desinstalar tudo:
 npm uninstall -g @kognar/ksdd
 ```
 
-`ksdd uninstall` itera os 4 targets registrados no manifest (`.ksdd-manifest.json`) e remove tudo que foi instalado. Quando o manifest não existe, faz fallback por convenção e ainda assim limpa os paths default dos 4 agentes. No caso do Antigravity, o prune é restrito aos subdirs KSDD (`antigravity-cli/skills`, `antigravity/skills`, `ksdd`) — nunca remove `~/.gemini/` em si (compartilhado com o gemini-cli e outros tools Google).
+`ksdd uninstall` itera os 4 targets registrados no manifest (`.ksdd-manifest.json`) e remove tudo que foi instalado. Quando o manifest não existe, faz fallback por convenção e ainda assim limpa os paths default dos 4 agentes. No caso do Antigravity, só o namespace `~/.gemini/commands/ksdd/` e o bundle `~/.gemini/ksdd/` são removidos — nunca `~/.gemini/commands/` (compartilhado com o `gsd` e outros namespaces) nem `~/.gemini/` em si.
 
 ### Troubleshooting
 
