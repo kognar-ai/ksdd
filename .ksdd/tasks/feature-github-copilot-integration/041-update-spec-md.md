@@ -1,7 +1,7 @@
 ---
 id: 041
 title: SPEC.md — seções 4.1, 7, 7.1, 11 e 13 com GitHub Copilot
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: design
 priority: P0

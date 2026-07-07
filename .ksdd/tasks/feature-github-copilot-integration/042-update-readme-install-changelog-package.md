@@ -1,7 +1,7 @@
 ---
 id: 042
 title: Atualizar README + INSTALL + CHANGELOG + bump package.json 0.10.0
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: design
 priority: P0

@@ -1,7 +1,7 @@
 ---
 id: 036
 title: Adicionar chat mode global + placeholder Copilot CLI ao installCopilot()
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: backend
 priority: P1

@@ -1,7 +1,7 @@
 ---
 id: 035
 title: Adicionar installCopilot() + resolveVscodeUserDir() + flag --copilot + env vars em bin/ksdd.js
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: backend
 priority: P0

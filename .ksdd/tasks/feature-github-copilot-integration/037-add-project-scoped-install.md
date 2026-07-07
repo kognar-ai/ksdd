@@ -1,7 +1,7 @@
 ---
 id: 037
 title: Adicionar modo project-scoped --project (.github/prompts + .github/chatmodes)
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: backend
 priority: P1

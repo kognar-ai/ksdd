@@ -1,7 +1,7 @@
 ---
 id: 038
 title: Estender normalizeManifest/uninstall/status/pruneEmptyDirs p/ targets.copilot
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: backend
 priority: P0

@@ -1,7 +1,7 @@
 ---
 id: 039
 title: Criar references/copilot-AGENTS.md (template + base da chat mode)
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: data-model
 priority: P0

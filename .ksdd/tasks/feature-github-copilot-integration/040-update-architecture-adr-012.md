@@ -1,7 +1,7 @@
 ---
 id: 040
 title: architecture.md — ADR-012 + atualizar ADR-011 + diagrama + roadmap + riscos
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: design
 priority: P0

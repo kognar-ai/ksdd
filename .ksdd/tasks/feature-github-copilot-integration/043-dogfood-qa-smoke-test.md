@@ -1,7 +1,7 @@
 ---
 id: 043
 title: Dogfood + QA smoke test cross-platform + confirmar paths por SO + QA-REPORT.md
-status: para implementar
+status: em revisão
 feature: github-copilot-integration
 area: qa
 priority: P0
