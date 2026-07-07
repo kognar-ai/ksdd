@@ -4,6 +4,33 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.10.0] - 2026-07-07
+
+### Adicionado
+
+- **Suporte ao [GitHub Copilot](https://github.com/features/copilot) como quinto target** — `ksdd install --copilot` instala os 9 commands como **prompt files** `ksdd-*.prompt.md` no diretório de perfil do usuário do VS Code, específico por SO: macOS `~/Library/Application Support/Code/User/prompts/`, Linux `~/.config/Code/User/prompts/`, Windows `%APPDATA%\Code\User\prompts\`. Um `.prompt.md` é invocado como `/ksdd-start`, `/ksdd-spec`, etc. no VS Code Copilot Chat.
+- **Chat mode `ksdd.chatmode.md`** instalado junto dos prompt files, mais um **bundle compartilhado** em `<vscode-user>/ksdd/` (references, agents, README, INSTALL, `AGENTS.md`) e um **placeholder de Copilot CLI** em `~/.copilot/prompts/`.
+- **Modo `--project`** — `ksdd install --copilot --project` instala em `.github/prompts/` + `.github/chatmodes/` do repositório atual em vez do perfil global, versionável junto com o projeto.
+- **Flag `--copilot` combinável** com `--codex`, `--opencode` e `--antigravity` — `ksdd install --codex --opencode --antigravity --copilot` instala os 5 targets numa única invocação.
+- **Variáveis de ambiente `KSDD_WITH_COPILOT=1`** (equivale a `--copilot` no postinstall) e `COPILOT_HOME` (override do diretório `Code/User` do VS Code — cobre Insiders e instalações portáteis).
+- **Campo `targets.copilot`** no manifest `.ksdd-manifest.json` — rastreia prompt files, chat mode, bundle e placeholder CLI para uninstall preciso.
+
+### Alterado
+
+- **`cmdStatus`** exibe linha `copilot: N arquivos em …` quando há instalação ativa (omitida quando vazia, paridade com os demais targets).
+- **`cmdUninstall`** itera os 5 targets do manifest; o prune do Copilot é restrito aos subdirs/arquivos KSDD (`prompts/ksdd-*.prompt.md`, `ksdd.chatmode.md`, bundle `ksdd/`, placeholder CLI) — nunca remove o diretório de perfil do VS Code em si.
+- **`cmdHelp`** documenta `--copilot`, `--project`, `KSDD_WITH_COPILOT` e `COPILOT_HOME`.
+- **README / INSTALL** — documentam os 5 targets, flags, env vars, tabela de invocação e os paths do Copilot por SO (prompt files + chat mode + bundle + placeholder CLI).
+
+### Arquitetura
+
+- **ADR-012 registrado em `architecture.md`** — quinto target (GitHub Copilot) hardcoded (quinta cópia adaptada no padrão dos targets anteriores). Reforça a dívida do refator `installTarget(targetConfig)` genérico prevista nos ADR-010/011.
+
+### Notas
+
+- **O GitHub Copilot CLI ainda não consome slash commands custom** (feature requests [github/copilot-cli#618](https://github.com/github/copilot-cli/issues/618) e [#1113](https://github.com/github/copilot-cli/issues/1113)) — os prompt files funcionam hoje no **VS Code Copilot Chat**; o placeholder em `~/.copilot/prompts/` já fica pronto para quando o upstream adicionar suporte.
+- Exemplo de uso via postinstall: `KSDD_WITH_COPILOT=1 npm install -g @kognar/ksdd`.
+
 ## [0.9.0] - 2026-06-01
 
 ### Adicionado
