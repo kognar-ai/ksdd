@@ -11,7 +11,7 @@
 | 057 | Bloco de pré-flight nos 11 commands + ajustar `allowed-tools`                    | backend | P0         | M          | em revisão       | 056                  |
 | 058 | Atualizar `SPEC.md` + `architecture.md` (ADR-014, env var, fluxo 13.5)           | backend | P1         | M          | em revisão       | 056, 057             |
 | 059 | README/INSTALL/CHANGELOG + `ksdd help` + bump `package.json` 0.12.0              | backend | P0         | S          | em revisão       | 056, 057, 058        |
-| 060 | Dogfood + QA smoke test (1x/sessão, offline silencioso, opt-out, 5 targets)      | qa      | P1         | M          | para implementar | 056, 057, 058, 059   |
+| 060 | Dogfood + QA smoke test (1x/sessão, offline silencioso, opt-out, 5 targets)      | qa      | P1         | M          | em revisão       | 056, 057, 058, 059   |
 
 ---
 

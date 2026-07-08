@@ -1,7 +1,7 @@
 ---
 id: 060
 title: Dogfood + QA smoke test — dispara 1x/sessão, silêncio offline, opt-out, distribuição aos 5 targets
-status: para implementar
+status: em revisão
 feature: update-health-check
 area: qa
 priority: P1
