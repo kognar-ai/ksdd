@@ -24,7 +24,7 @@ Documentar os dois commands nas docs públicas e cortar a release: README, INSTA
 ## Escopo
 - **`README.md`**: adicionar `/ksdd:new:fix` e `/ksdd:build:fix` à tabela/lista de comandos; nova seção "Corrigindo bugs" com exemplos dos modos (descrição, `#issue`, teste; `build:fix`); atualizar a contagem de commands (11) e a tabela tripla/quádrupla de invocação por target (`/ksdd:new:fix` Claude · `/prompts:ksdd-new-fix` Codex · `/ksdd-new-fix` opencode/Antigravity).
 - **`INSTALL.md`**: atualizar contagem de arquivos por target e paths se enumerados.
-- **`CHANGELOG.md`**: entrada `## [0.11.0] - 2026-XX-XX` no topo, seguindo Keep a Changelog (pt-BR), com "Adicionado" (2 commands + `references/fix-template.md` + classe `.ksdd/fixes/`), "Alterado" (`new:feature` numeração, `build:feature`/`build:all` integração, `bin/ksdd.js` `COMMAND_FILES`), "Arquitetura" (ADR-012). Espelhar o estilo da entrada `[0.7.0]` (archive).
+- **`CHANGELOG.md`**: entrada `## [0.11.0] - 2026-XX-XX` no topo, seguindo Keep a Changelog (pt-BR), com "Adicionado" (2 commands + `references/fix-template.md` + classe `.ksdd/fixes/`), "Alterado" (`new:feature` numeração, `build:feature`/`build:all` integração, `bin/ksdd.js` `COMMAND_FILES`), "Arquitetura" (ADR-013). Espelhar o estilo da entrada `[0.7.0]` (archive).
 - **`package.json`**: `version` de `0.9.0` → `0.11.0`.
 - Verificar coerência da contagem "11 commands" entre README, INSTALL e SPEC (task 042).
 

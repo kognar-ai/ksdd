@@ -17,7 +17,7 @@
 | 042 | Atualizar `SPEC.md` + `architecture.md` (ADR-013, artefatos, contagem)       | backend | P1         | M          | em revisão       | 035, 037                            |
 | 043 | README/INSTALL/CHANGELOG + bump `package.json` 0.11.0                        | backend | P0         | S          | em revisão       | 035, 036, 037, 038, 039, 040, 041, 042 |
 | 044 | Dogfood — `/ksdd:new:fix` num bug real do repo (contagem de commands)        | qa      | P1         | S          | em revisão       | 043                                 |
-| 045 | QA end-to-end — cenários A–O + 4 targets + edge cases                        | qa      | P0         | M          | em revisão       | 044                                 |
+| 045 | QA end-to-end — cenários A–O + 5 targets + edge cases                        | qa      | P0         | M          | em revisão       | 044                                 |
 
 ---
 
