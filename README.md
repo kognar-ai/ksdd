@@ -13,7 +13,9 @@ After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`), `ksdd in
 | `/ksdd:tech` | `/prompts:ksdd-tech` | `/ksdd-tech` |
 | `/ksdd:design` | `/prompts:ksdd-design` | `/ksdd-design` |
 | `/ksdd:new:feature` | `/prompts:ksdd-new-feature` | `/ksdd-new-feature` |
+| `/ksdd:new:fix` | `/prompts:ksdd-new-fix` | `/ksdd-new-fix` |
 | `/ksdd:build:feature` | `/prompts:ksdd-build-feature` | `/ksdd-build-feature` |
+| `/ksdd:build:fix` | `/prompts:ksdd-build-fix` | `/ksdd-build-fix` |
 | `/ksdd:build:all` | `/prompts:ksdd-build-all` | `/ksdd-build-all` |
 | `/ksdd:setup` | `/prompts:ksdd-setup` | `/ksdd-setup` |
 | `/ksdd:archive` | `/prompts:ksdd-archive` | `/ksdd-archive` |
@@ -22,9 +24,9 @@ The `ksdd` skill is also installed in `~/.agents/skills/ksdd/` (references + age
 
 For opencode the same content is distributed as commands in `~/.config/opencode/commands/ksdd-*.md` plus a bundle in `~/.config/opencode/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/opencode-AGENTS.md`).
 
-For Google Antigravity the 9 commands are installed as Markdown **skills** in two global surfaces — `~/.gemini/antigravity-cli/skills/ksdd-*.md` (CLI / TUI) and `~/.gemini/antigravity/skills/ksdd-*.md` (IDE) — plus a shared bundle in `~/.gemini/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/antigravity-AGENTS.md`). A `.md` in `skills/` becomes `/ksdd-start` and friends. _(The IDE skills path is pending empirical confirmation — see the feature spec.)_
+For Google Antigravity the 11 commands are installed as Markdown **skills** in two global surfaces — `~/.gemini/antigravity-cli/skills/ksdd-*.md` (CLI / TUI) and `~/.gemini/antigravity/skills/ksdd-*.md` (IDE) — plus a shared bundle in `~/.gemini/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/antigravity-AGENTS.md`). A `.md` in `skills/` becomes `/ksdd-start` and friends. _(The IDE skills path is pending empirical confirmation — see the feature spec.)_
 
-For GitHub Copilot the 9 commands are installed as **prompt files** `ksdd-*.prompt.md` in the OS-specific VS Code user profile dir, plus a chat mode `ksdd.chatmode.md`, a shared bundle in `<vscode-user>/ksdd/` (references, agents, README, INSTALL, `AGENTS.md`) and a Copilot CLI placeholder in `~/.copilot/prompts/`. A `.prompt.md` becomes `/ksdd-start` and friends in **VS Code Copilot Chat**. The per-OS prompt-file paths:
+For GitHub Copilot the 11 commands are installed as **prompt files** `ksdd-*.prompt.md` in the OS-specific VS Code user profile dir, plus a chat mode `ksdd.chatmode.md`, a shared bundle in `<vscode-user>/ksdd/` (references, agents, README, INSTALL, `AGENTS.md`) and a Copilot CLI placeholder in `~/.copilot/prompts/`. A `.prompt.md` becomes `/ksdd-start` and friends in **VS Code Copilot Chat**. The per-OS prompt-file paths:
 
 | OS | Prompt files (`ksdd-*.prompt.md`) |
 |----|-----------------------------------|
@@ -44,11 +46,26 @@ Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes t
 /ksdd:tech           →  .ksdd/specs/architecture.md       (spec → technical architecture)
 /ksdd:design         →  .ksdd/specs/DESIGN.md             (spec → Stitch-compatible design system)
 /ksdd:new:feature    →  .ksdd/features/FEATURE-[slug].md  (new feature → spec + implementable tasks)
+/ksdd:new:fix        →  .ksdd/fixes/FIX-[slug].md         (reported bug → investigation + proposed fix + tasks)
 /ksdd:build:feature  →  task by task                       (feature → implementation with issue, branch, PR)
+/ksdd:build:fix      →  task by task                       (fix → implementation, repro-first + mandatory regression test)
 /ksdd:build:all      →  .ksdd/build/BUILD-PLAN.md         (entire SPEC → features + tasks + full implementation)
 /ksdd:setup          →  .ksdd/specs/{brainstorm,SPEC,architecture,DESIGN}.md  (existing project → reverse-engineered artifacts)
 /ksdd:archive        →  .ksdd/archive/{ARCHIVE.md, raw/[slug]/}  (delivered features → cronological summary + raw preservation)
 ```
+
+### Fixing bugs
+
+When a bug is reported, `/ksdd:new:fix` investigates it (reproduction + code-aware root cause with `file:line` evidence), writes `.ksdd/fixes/FIX-[slug].md` with the proposed adjustment, and breaks it into tasks. For small, low-risk bugs it can apply the fix inline (with a regression test) after approval; anything larger goes through `/ksdd:build:fix`:
+
+```
+/ksdd:new:fix "checkout hangs when a coupon is expired"   # investigate from a description
+/ksdd:new:fix #142                                        # investigate from a GitHub issue
+/ksdd:new:fix path/to/failing.test.ts                     # investigate from a failing test
+/ksdd:build:fix [slug]                                    # implement: repro-first + mandatory regression test, PR labeled bug
+```
+
+Fixes live in `.ksdd/fixes/` (parallel to `.ksdd/features/`) and their tasks in `.ksdd/tasks/fix-[slug]/`. `/ksdd:build:fix` reproduces the bug before touching code and blocks the PR unless a regression test **fails before / passes after** the fix.
 
 ### Archiving delivered features
 

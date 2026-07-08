@@ -10,15 +10,16 @@ commands lidos pelos agentes; o CLI só copia arquivos e mantém o manifest.
 
 ```
 bin/ksdd.js          CLI (install/uninstall/status/help). ~640 linhas, zero deps.
-commands/*.md        Os 9 slash commands (start, spec, tech, design, new:feature,
-                     build:feature, build:all, setup, archive). Fonte única — todos
-                     os targets copiam daqui.
+commands/*.md        Os 11 slash commands (start, spec, tech, design, new:feature,
+                     new:fix, build:feature, build:fix, build:all, setup, archive). Fonte
+                     única — todos os targets copiam daqui.
 references/*.md       Templates canônicos + AGENTS/SKILL por target (codex-SKILL.md,
                      opencode-AGENTS.md, antigravity-AGENTS.md, copilot-AGENTS.md).
 agents/*.md          Helpers de estilo (interviewer, consolidator, critic, setup-analyst).
 .ksdd/specs/         SPEC.md, architecture.md, brainstorm.md (artefatos do próprio KSDD).
 .ksdd/features/      FEATURE-*.md (specs de feature).
-.ksdd/tasks/         feature-<slug>/NNN-*.md (tasks) + .context/ + README.md por feature.
+.ksdd/fixes/         FIX-*.md (investigações de bug via /ksdd:new:fix).
+.ksdd/tasks/         feature-<slug>/ e fix-<slug>/ NNN-*.md (tasks) + .context/ + README.md.
 .ksdd/archive/       Features arquivadas (raw/ + ARCHIVE.md). Read-only fora de /ksdd:archive.
 README.md INSTALL.md CHANGELOG.md package.json
 ```
@@ -76,6 +77,12 @@ Análogos: `CODEX_HOME`, `OPENCODE_HOME`, `ANTIGRAVITY_HOME`.
 ## Fluxo KSDD (os commands, para contexto)
 
 `start → spec → tech → design` (setup do projeto), depois `new:feature → build:feature`
-ou `build:all`; `setup` faz reverse-engineering de projeto existente; `archive` move
-features concluídas. Cada command para num **approval gate** — nunca encadeia sem
-aprovação humana (`references/approval-gates.md`).
+ou `build:all`; `new:fix → build:fix` para bugs (investiga o root cause, gera
+`.ksdd/fixes/FIX-*.md` + tasks, corrige com teste de regressão obrigatório); `setup` faz
+reverse-engineering de projeto existente; `archive` move features concluídas. Cada
+command para num **approval gate** — nunca encadeia sem aprovação humana
+(`references/approval-gates.md`, Gates 1–9).
+
+Tasks de feature e de fix compartilham **um único espaço global de IDs** (`NNN`): ao
+numerar, considere `.ksdd/tasks/feature-*/`, `.ksdd/tasks/fix-*/`, `docs/tasks/*` (legado)
+e `.ksdd/archive/raw/*/tasks/` — maior ID + 1.

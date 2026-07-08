@@ -4,6 +4,27 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.11.0] - 2026-07-08
+
+### Adicionado
+
+- **`/ksdd:new:fix`** — novo slash command que traz o fluxo spec-driven do KSDD para a **manutenção reativa (bugs)**. Investiga um bug apontado com **consciência de código** (reprodução + root cause com evidência `arquivo:linha` + blast radius), gera `.ksdd/fixes/FIX-[slug].md` com o ajuste proposto, e quebra em tasks em `.ksdd/tasks/fix-[slug]/`. Entrada flexível: descrição livre, mensagem/stack trace, teste que reproduz, issue do GitHub (`#N`/URL) ou referência a artefato KSDD. Dois checkpoints obrigatórios (FIX doc → tasks). Para bugs pequenos e de baixo risco, oferece aplicar o **fix inline** (branch + patch + teste de regressão) sem passar pelo build. Bug não reproduzível → FIX em modo "investigação incompleta" que **para** e pede dados, sem chutar root cause.
+- **`/ksdd:build:fix`** — implementa tasks de fix ponta-a-ponta na linha do `/ksdd:build:feature` (pre-flight → issue → branch → context.md → teammates → quality gates → commit → PR), com três deltas: **repro-first** (reproduz o bug antes de corrigir; para se não reproduz), **teste de regressão como quality gate obrigatório** (falha-antes/passa-depois — bloqueia o PR sem ele) e **issue/PR rotulados `bug`/`fix`**.
+- **`references/fix-template.md`** — template canônico do `FIX-[slug].md` (bug, reprodução, root cause com evidência `arquivo:linha`, blast radius, ajuste proposto, critérios de verificação, estratégia de teste de regressão). Distribuído no bundle de skill de todos os 5 targets.
+- **Nova classe de artefato `.ksdd/fixes/`** (paralela a `.ksdd/features/`) + pasta de tasks `.ksdd/tasks/fix-[slug]/`. Frontmatter de task de fix usa `fix: [slug]` + `fix_refs`; demais campos idênticos aos das feature tasks (`build:fix` reusa o parser do `build:feature`).
+- **Gate 8 (`/ksdd:new:fix`) e Gate 9 (`/ksdd:build:fix`)** documentados em `references/approval-gates.md`.
+
+### Alterado
+
+- **`bin/ksdd.js`** — `new:fix.md` e `build:fix.md` adicionados ao array `COMMAND_FILES`; os **11 commands** passam a ser distribuídos e removidos nos 5 targets (Claude, Codex, opencode, Antigravity, Copilot). Sem novas funções `install*` (commands de conteúdo — não incorre na dívida do ADR-010/011/012). Sem novas dependências runtime (mantém ADR-001).
+- **`/ksdd:new:feature`** — numeração de IDs de task passa a considerar um quarto path, `.ksdd/tasks/fix-*/` (espaço global único de IDs entre features e fixes).
+- **`/ksdd:build:feature`** — detecta slug/task de fix e redireciona para `/ksdd:build:fix`. **`/ksdd:build:all`** — `.ksdd/tasks/fix-*/` fica fora da fila de features.
+- **SPEC / architecture / README / INSTALL / CLAUDE.md** — documentam os 2 commands e a classe `.ksdd/fixes/`, e reconciliam a contagem de commands para **11** (corrige a inconsistência histórica "8 vs 9" no SPEC — dogfood via `/ksdd:new:fix`).
+
+### Arquitetura
+
+- **ADR-013 registrado em `architecture.md`** — `.ksdd/fixes/` como nova classe de artefato paralela a `.ksdd/features/`. `/ksdd:new:fix` e `/ksdd:build:fix` são commands de conteúdo (2 entradas em `COMMAND_FILES`), portanto **não** disparam o refator `installTarget(targetConfig)` genérico previsto nos ADR-010/011/012.
+
 ## [0.10.0] - 2026-07-07
 
 ### Adicionado
