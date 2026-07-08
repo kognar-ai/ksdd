@@ -213,7 +213,7 @@ Comandos disponíveis (visíveis em `ksdd help`):
 | `ksdd status` | Mostra versão instalada, timestamp, contagem de arquivos por alvo |
 | `ksdd help` (default) | Documentação de uso |
 
-Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode` / `--antigravity` / `--copilot` / `--project`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `KSDD_WITH_OPENCODE`, `KSDD_WITH_ANTIGRAVITY`, `KSDD_WITH_COPILOT`, `CODEX_HOME`, `OPENCODE_HOME`, `ANTIGRAVITY_HOME`, `COPILOT_HOME`, `NO_COLOR`.
+Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode` / `--antigravity` / `--copilot` / `--project`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `KSDD_WITH_OPENCODE`, `KSDD_WITH_ANTIGRAVITY`, `KSDD_WITH_COPILOT`, `CODEX_HOME`, `OPENCODE_HOME`, `ANTIGRAVITY_HOME`, `COPILOT_HOME`, `KSDD_SKIP_UPDATE_CHECK`, `NO_COLOR`.
 
 ### 7.2 Slash commands (Claude Code)
 
@@ -314,6 +314,7 @@ Não aplicável (CLI). Considerações equivalentes:
 - **`--project` grava em `.github/` do repo só com flag explícita** — o modo project-scoped (`.github/prompts/` + `.github/chatmodes/`) do diretório de trabalho atual só é ativado com `--copilot --project`; o default nunca escreve fora de `~/`.
 - **`uninstall` sem manifest** — modo fallback: tenta remover paths conhecidos por convenção. Mensagem amarela avisando.
 - **Approval gates obrigatórios** — slash commands param após gerar artefato; nunca encadeiam automaticamente. Mesmo se usuário disser "pula", o comando pede confirmação explícita (`references/approval-gates.md`).
+- **Health check de update (uma vez por sessão, v0.12.0)** — na primeira invocação de qualquer slash command numa conversa, o **agente** compara a versão instalada (manifest `version`) com a última publicada no npm e, se houver versão nova, emite **um** aviso discreto sugerindo `npm install -g @kognar/ksdd@latest`. É **não-bloqueante** (offline / erro / `npm` ausente → silêncio, o command segue), não repete na mesma conversa, e respeita o opt-out `KSDD_SKIP_UPDATE_CHECK`. Quem checa é o agente, não a CLI — o `bin/ksdd.js` permanece offline (ver `references/update-check.md` e architecture ADR-014).
 
 ---
 
@@ -327,6 +328,7 @@ Implicações práticas:
 - Sem CTA de upgrade em lugar nenhum
 - README documenta limitações de uso (AGPL) na seção "Licença e contribuição"
 - CONTRIBUTING.md exige que contribuições sejam relicenciadas como AGPL-3.0 também (copyleft forte)
+- O health check de update (seção 11, v0.12.0) **não é telemetria** — ele apenas **lê** a versão pública no registry npm a partir da máquina do usuário; nada é enviado a servidores KSDD/Kognar
 
 ---
 
@@ -378,6 +380,8 @@ Implicações práticas:
 1. `npm install -g @kognar/ksdd@latest`
 2. Postinstall detecta manifest anterior, remove arquivos rastreados, reinstala
 3. `ksdd status` confirma nova versão
+
+> A partir da v0.12.0, o usuário é **lembrado** de atualizar sem precisar checar por fora: na primeira invocação de um command numa conversa, o agente avisa se há versão nova (health check não-bloqueante — ver seção 11 e `references/update-check.md`).
 
 ### 13.6 Adicionar opencode em instalação existente
 

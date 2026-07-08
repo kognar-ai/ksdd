@@ -215,6 +215,7 @@ ksdd help                 # default; também --help, -h
 | `COPILOT_HOME` | Override do diretório `Code/User` do VS Code (Copilot) | OS-específico (ver `resolveVscodeUserDir`) |
 | `KSDD_WITH_COPILOT=1` | Equivale a `--copilot` no postinstall | unset |
 | `KSDD_SKIP_POSTINSTALL=1` | Pula a etapa de postinstall (útil em CI) | unset |
+| `KSDD_SKIP_UPDATE_CHECK=1` | Desliga o health check de update nos slash commands (honrado pelo agente, não pela CLI) | unset |
 | `NO_COLOR` | Desabilita ANSI escapes na saída | unset |
 
 ### 4.3 Funções internas (não exportadas — uso interno do CLI)
@@ -259,7 +260,7 @@ Os arquivos em `commands/*.md` são copiados para cada target (Claude: `ksdd:*.m
 | **Google Antigravity** (CLI/TUI + IDE) | Consumidor quaternário via skills Markdown (`~/.gemini/`) + bundle | n/a | n/a | usuário paga sua conta |
 | **GitHub** | Repo + issues + (futuro) Releases | conta do mantenedor | padrão GH | gratuito (repo público) |
 
-**Importante:** KSDD não faz nenhuma chamada de rede em runtime. Não há SDK Anthropic, OpenAI, GitHub embarcado. Toda interação com agentes acontece via filesystem (commands lidos pelo agente do usuário).
+**Importante:** a **CLI** (`bin/ksdd.js`) não faz nenhuma chamada de rede em runtime. Não há SDK Anthropic, OpenAI, GitHub embarcado. Toda interação com agentes acontece via filesystem (commands lidos pelo agente do usuário). **Exceção documentada (v0.12.0, ADR-014):** o **agente** — não a CLI — passa a **ler** a versão publicada no registry npm ao seguir `references/update-check.md` (health check de update). É leitura pública, não-bloqueante e opt-out (`KSDD_SKIP_UPDATE_CHECK`); a CLI permanece offline.
 
 ---
 
@@ -426,6 +427,13 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 **Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (par de commands + namespace `.ksdd/fixes/` + bump minor 0.11.0).
 **Consequência:** o KSDD passa a cobrir o terceiro momento do ciclo de vida (manutenção reativa) sem tocar a arquitetura de instalação — a superfície de slash commands sobe de 9 para 11, mas a contagem de funções `install*` permanece em 5. A rastreabilidade de bug vira artefato versionável (`FIX-[slug].md`). Custo: `new:feature` e `new:fix` passam a varrer `.ksdd/tasks/fix-*/` além de `feature-*` para manter o espaço global de IDs; arquivar fixes via `/ksdd:archive` fica como item futuro (hoje o archive cobre só features).
 
+### ADR-014: Health check de update é agent-driven — a CLI permanece offline
+
+**Evidência:** feature update-health-check (v0.12.0) adiciona `references/update-check.md` (procedimento canônico) e um bloco de pré-flight nos 11 commands (`commands/*.md`). A checagem é executada pelo **agente** que roda o command: ele lê a versão instalada do manifest (`version`) e consulta a última publicada via `npm view @kognar/ksdd version` (primário) ou `web_fetch` no registry (fallback). O `bin/ksdd.js` **não** recebe nenhuma chamada de rede. Decisão e trade-off em `.ksdd/features/FEATURE-update-health-check.md` seções 2 e 7.
+**Decisão:** manter o princípio "a CLI não fala com a rede" (ADR-001/003) **intacto** — quem checa updates é o agente, não o instalador. A checagem é **sessão-only** (uma vez por conversa, sem persistir estado no manifest — não há campo `lastUpdateCheckAt`), **não-bloqueante** (qualquer erro/offline → silêncio, o command segue) e desligável via `KSDD_SKIP_UPDATE_CHECK`. `references/update-check.md` é distribuído aos 5 targets pelo `copyDir(references/...)` existente, **sem** função `install*` nova nem entrada em `COMMAND_FILES` — mesma classe de mudança do ADR-013 (conteúdo, não instalador). O gatilho do ADR-012 (refator `installTarget` antes do 6º target) permanece **intocado**.
+**Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (sessão-only + agent-driven + prioridade Alta / bump minor 0.12.0).
+**Consequência:** o usuário passa a ser lembrado de atualizar sem que o KSDD adicione telemetria nem rede à CLI — a única rede tocada é uma **leitura** do registry público npm, feita pelo agente, a partir da máquina do usuário. A afirmação da seção 5 ("nenhuma chamada de rede em runtime") passa a valer estritamente para a **CLI**; o agente lê o registry ao seguir o procedimento. Alternativas adiadas (FEATURE seção 2.2): throttle diário persistido (`lastUpdateCheckAt`) e exibição de update no `ksdd status` (introduziria rede na CLI — recusado por ora).
+
 ---
 
 ## 11. Riscos Técnicos
@@ -494,6 +502,12 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 - [x] Fix inline opcional (bugs pequenos) + teste de regressão como gate obrigatório no `build:fix`
 - [x] Superfície de slash commands 9 → 11; bump minor v0.11.0
 - [ ] **Futuro:** arquivar fixes via `/ksdd:archive` (hoje o archive cobre só `.ksdd/features/`)
+
+### Fase 5.6 — Health check de update (v0.12.0) — **Em andamento**
+- [x] `references/update-check.md` — procedimento canônico agent-driven (ADR-014)
+- [x] Pré-flight de update-check nos 11 commands + `allowed-tools` com `Bash`
+- [x] Opt-out `KSDD_SKIP_UPDATE_CHECK`; CLI permanece offline (ADR-014)
+- [ ] **Futuro:** throttle diário persistido (`lastUpdateCheckAt`) + update visível no `ksdd status` (FEATURE seção 2.2)
 
 ### Fase 6 — Integração design tools — **Roadmap confirmado**
 - [ ] Exportador `DESIGN.md` → Figma (via plugin ou JSON intermediário)
