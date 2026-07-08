@@ -22,7 +22,7 @@ O `postinstall` copia automaticamente os commands pra `~/.claude/commands/` (ren
 
 > **Antigravity:** os commands são instalados como **skills** Markdown em duas superfícies globais (CLI/TUI e IDE) — um `.md` em `skills/` vira `/ksdd-start`. O bundle (`references/`, `agents/`, `README.md`, `INSTALL.md`, `AGENTS.md`) é compartilhado em `~/.gemini/ksdd/`. O path do IDE (`~/.gemini/antigravity/skills/`) está pendente de confirmação empírica — ver FEATURE-antigravity-integration.
 
-> **GitHub Copilot:** os 9 commands são instalados como **prompt files** `ksdd-*.prompt.md` no diretório de perfil do usuário do VS Code (`<vscode-user>` = `Code/User`), específico por SO:
+> **GitHub Copilot:** os 11 commands são instalados como **prompt files** `ksdd-*.prompt.md` no diretório de perfil do usuário do VS Code (`<vscode-user>` = `Code/User`), específico por SO:
 >
 > | SO | Prompt files (`<vscode-user>/prompts/`) |
 > |----|------------------------------------------|

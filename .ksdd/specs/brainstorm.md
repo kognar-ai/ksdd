@@ -25,7 +25,7 @@ Quem sofre: product designers, founders solo, devs e agências que usam Claude C
 
 ## 3. Solução proposta
 
-KSDD é um pacote npm (`@kognar/ksdd`) que instala 8 slash commands em `~/.claude/commands/` e custom prompts em `~/.codex/prompts/`. Cada comando lê o output do anterior, faz uma rodada de perguntas estruturadas para preencher lacunas, gera o artefato no formato canônico e **para antes de avançar** para o próximo. O humano valida, ajusta com edição cirúrgica, e só então roda o próximo comando.
+KSDD é um pacote npm (`@kognar/ksdd`) que instala 11 slash commands em `~/.claude/commands/` e custom prompts em `~/.codex/prompts/`. Cada comando lê o output do anterior, faz uma rodada de perguntas estruturadas para preencher lacunas, gera o artefato no formato canônico e **para antes de avançar** para o próximo. O humano valida, ajusta com edição cirúrgica, e só então roda o próximo comando.
 
 Os artefatos são acumulativos: `SPEC.md` referencia `brainstorm.md`; `architecture.md` e `DESIGN.md` referenciam ambos. Cada documento é um "contrato" que o próximo respeita. Agentes auxiliares (`interviewer`, `consolidator`, `critic`, `setup-analyst`) garantem qualidade, e `references/` contém os templates canônicos imutáveis.
 

@@ -32,6 +32,8 @@ Siga `references/language-policy.md` — `context.md`, comentários em issues/PR
 
 Se ambíguo (mais de um match — incl. mesmo ID em paths novo e legado), **pare e peça desambiguação** — não adivinhe.
 
+**Slug/task de fix (bug):** se o argumento resolve para uma correção — `.ksdd/fixes/FIX-[slug].md` ou tasks em `.ksdd/tasks/fix-[slug]/` — **não** builde por aqui. Fixes têm fluxo próprio (repro-first + teste de regressão obrigatório). Oriente o usuário a rodar `/ksdd:build:fix [slug]`.
+
 ---
 
 ## Paths dos artefatos (KSDD v0.6.0+)

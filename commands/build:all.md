@@ -30,6 +30,7 @@ A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos:
 | tasks            | `.ksdd/tasks/` → `docs/tasks/` (legado)                                       | `.ksdd/tasks/feature-*/`         |
 | BUILD-PLAN.md    | `.ksdd/build/BUILD-PLAN.md` → raiz `BUILD-PLAN.md`                            | `.ksdd/build/BUILD-PLAN.md`      |
 | features arquivadas | `.ksdd/archive/raw/[slug]/` (read-only — excluídas da fila de pendentes)   | n/a                              |
+| fixes (bugs)     | `.ksdd/fixes/` + `.ksdd/tasks/fix-*/` (read-only aqui — via `/ksdd:new:fix` / `/ksdd:build:fix`) | n/a — fora da fila de features |
 
 **Fallback de leitura:** ao detectar artefato em path legado, emita warning amarelo:
 

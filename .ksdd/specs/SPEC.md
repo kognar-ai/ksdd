@@ -25,7 +25,7 @@ Trabalhar com agentes de IA (Claude Code, OpenAI Codex) em projetos de produto s
 
 Pacote npm distribuído como `@kognar/ksdd` que:
 
-- Instala 8 slash commands em `~/.claude/commands/` (Claude Code) e/ou `~/.codex/prompts/` (Codex)
+- Instala 11 slash commands em `~/.claude/commands/` (Claude Code) e/ou `~/.codex/prompts/` (Codex)
 - Cada comando lê o artefato anterior, faz **uma rodada de perguntas em batch** (máx 8), gera o artefato no formato canônico e **para no checkpoint de aprovação**
 - Os artefatos são acumulativos e versionáveis no repo (Markdown puro)
 - O artefato final (`DESIGN.md`) segue o formato Google Stitch — interoperável com v0, Lovable, Pencil, Cursor
@@ -112,7 +112,7 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
 
 ```json
 {
-  "version": "0.9.0",
+  "version": "0.11.0",
   "installedAt": "ISO-8601 timestamp",
   "pkgRoot": "/path/absoluto/do/pacote/npm",
   "targets": {
@@ -136,8 +136,10 @@ A partir da v0.6.0, todos os artefatos vivem em `.ksdd/`. Projetos legados (pré
 | `architecture.md` | `.ksdd/specs/architecture.md` | raiz `architecture.md` | `/ksdd:tech` | 2000-5000 palavras |
 | `DESIGN.md` | `.ksdd/specs/DESIGN.md` | raiz `DESIGN.md` | `/ksdd:design` | YAML + 1500-3500 palavras |
 | `FEATURE-[slug].md` | `.ksdd/features/FEATURE-[slug].md` | `docs/FEATURE-[slug].md` (ou raiz mais legado) | `/ksdd:new:feature` | 1500-4000 palavras (1 por feature) |
+| `FIX-[slug].md` | `.ksdd/fixes/FIX-[slug].md` | — (novo em v0.11.0) | `/ksdd:new:fix` | 1000-3000 palavras (1 por bug) |
 | `BUILD-PLAN.md` | `.ksdd/build/BUILD-PLAN.md` | raiz `BUILD-PLAN.md` | `/ksdd:build:all` | mapa de execução completo |
 | tasks `NNN-*.md` | `.ksdd/tasks/feature-[slug]/` | `docs/tasks/feature-[slug]/` | `/ksdd:new:feature` | task individual com frontmatter |
+| tasks `NNN-*.md` | `.ksdd/tasks/fix-[slug]/` | — (novo em v0.11.0) | `/ksdd:new:fix` | task individual com frontmatter (`fix:`; 1-3 por fix) |
 | context `NNN-context.md` | `.ksdd/tasks/feature-[slug]/.context/` | `docs/tasks/feature-[slug]/.context/` | `/ksdd:build:feature` | contexto compilado de implementação |
 
 Cada artefato tem campo `Status:` (Rascunho / Aprovado) que é o sinal explícito de checkpoint cumprido.
@@ -158,6 +160,10 @@ brainstorm.md  ──referenciado por──▶  SPEC.md
                                                                   └─ todos consumidos por ──▶  docs/FEATURE-[slug].md
                                                                                                   │
                                                                                                   └─ consumido por ──▶  build:feature / build:all → docs/tasks/
+
+.ksdd/fixes/FIX-[slug].md (manutenção; consulta SPEC.md / architecture.md)
+        │
+        └─ consumido por ──▶  build:fix → .ksdd/tasks/fix-[slug]/
 ```
 
 ---
@@ -213,7 +219,7 @@ Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode` / `--
 
 Após `ksdd install`, ficam em `~/.claude/commands/ksdd:[name].md`. Disponíveis:
 
-`ksdd:start`, `ksdd:spec`, `ksdd:tech`, `ksdd:design`, `ksdd:new:feature`, `ksdd:build:feature`, `ksdd:build:all`, `ksdd:setup`.
+`ksdd:start`, `ksdd:spec`, `ksdd:tech`, `ksdd:design`, `ksdd:new:feature`, `ksdd:new:fix`, `ksdd:build:feature`, `ksdd:build:fix`, `ksdd:build:all`, `ksdd:setup`, `ksdd:archive`.
 
 ### 7.3 Custom prompts (Codex)
 
@@ -227,7 +233,7 @@ Bundle adicional em `~/.config/opencode/ksdd/` contém `references/` (templates 
 
 ### 7.5 Skills (Google Antigravity)
 
-Após `ksdd install --antigravity`, os 9 commands ficam disponíveis como **skills Markdown** em duas superfícies globais (`:` é renomeado para `-`, mesma convenção de Codex/opencode):
+Após `ksdd install --antigravity`, os 11 commands ficam disponíveis como **skills Markdown** em duas superfícies globais (`:` é renomeado para `-`, mesma convenção de Codex/opencode):
 
 - **CLI / TUI:** `~/.gemini/antigravity-cli/skills/ksdd-[name].md`
 - **IDE:** `~/.gemini/antigravity/skills/ksdd-[name].md` _(path do IDE a confirmar — ver risco em FEATURE seção 9)_
@@ -244,7 +250,7 @@ Em Antigravity e Copilot, os bundles equivalentes vivem em `~/.gemini/ksdd/` e `
 
 ### 7.7 Prompt files (GitHub Copilot)
 
-Após `ksdd install --copilot`, os 9 commands ficam como **prompt files** `ksdd-[name].prompt.md` no diretório de perfil do usuário do VS Code (`:` é renomeado para `-`, mesma convenção de Codex/opencode/Antigravity; o sufixo `.prompt.md` é exigido pelo Copilot). O path é **OS-específico**: `~/Library/Application Support/Code/User/prompts/` no macOS, `~/.config/Code/User/prompts/` no Linux, `%APPDATA%\Code\User\prompts\` no Windows. `COPILOT_HOME` faz override do diretório `Code/User` (cobre VS Code Insiders, instalações portáteis e paths não-padrão).
+Após `ksdd install --copilot`, os 11 commands ficam como **prompt files** `ksdd-[name].prompt.md` no diretório de perfil do usuário do VS Code (`:` é renomeado para `-`, mesma convenção de Codex/opencode/Antigravity; o sufixo `.prompt.md` é exigido pelo Copilot). O path é **OS-específico**: `~/Library/Application Support/Code/User/prompts/` no macOS, `~/.config/Code/User/prompts/` no Linux, `%APPDATA%\Code\User\prompts\` no Windows. `COPILOT_HOME` faz override do diretório `Code/User` (cobre VS Code Insiders, instalações portáteis e paths não-padrão).
 
 Um arquivo `.prompt.md` vira `/ksdd-start`, `/ksdd-spec`, `/ksdd-new-feature`, etc., invocáveis no Copilot Chat do VS Code. Conteúdo é o mesmo dos arquivos em `commands/`. Uma **chat mode** `ksdd.chatmode.md` (contexto canônico, derivada de `references/copilot-AGENTS.md`) acompanha no mesmo diretório de perfil.
 
@@ -397,6 +403,15 @@ Implicações práticas:
 4. Manifest passa a ter `targets.copilot` preenchido; `targets.codex`/`targets.opencode`/`targets.antigravity` (se existiam) são preservados intocados
 5. `ksdd status` confirma os 5 targets ativos (Claude, Codex, opencode, Antigravity, Copilot) com contagens individuais
 
+### 13.9 Correção de bug isolada
+
+1. Usuário com bug reportado roda `/ksdd:new:fix [descrição | #issue | teste]`
+2. Lê SPEC + architecture + FEATURE/FIX correlatos e **investiga o codebase** (reprodução + root cause com evidência `arquivo:linha`)
+3. Gera `.ksdd/fixes/FIX-[slug].md` com diagnóstico + ajuste proposto → Gate 8 (checkpoint do FIX doc)
+4. Aprovado → quebra em tasks em `.ksdd/tasks/fix-[slug]/NNN-*.md` (sempre com uma task/critério de teste de regressão) → Checkpoint 2
+5. Bugs pequenos (1 arquivo, sem schema/API/auth): oferece aplicar o fix **inline** (branch + patch + teste de regressão + diff, sem commit automático)
+6. Caso contrário → `/ksdd:build:fix [slug]`: repro-first → issue/branch/context.md → implementação via teammates → quality gates com **teste de regressão obrigatório** (falha-antes/passa-depois) → PR rotulado `bug` (sem merge) → Gate 9
+
 ---
 
 ## 14. Fases de Entrega
@@ -439,6 +454,13 @@ Implicações práticas:
 - Suporte a Windsurf
 - Suporte a Cline
 - Refatoração do instalador para `installTarget(targetConfig)` genérico — feature dedicada, obrigatória antes do 5º target (ver ADR-011 em `architecture.md`)
+
+### Fase 5.5 — Manutenção reativa: comandos de fix (v0.11.0, 08/07/2026) — **Entregue**
+
+- Commands: `new:fix` (investigação code-aware de bug → `FIX-[slug].md`) e `build:fix` (implementação repro-first com teste de regressão obrigatório)
+- Nova classe de artefato `.ksdd/fixes/FIX-[slug].md` + tasks em `.ksdd/tasks/fix-[slug]/`
+- Template `references/fix-template.md`; Gates 8 e 9 em `references/approval-gates.md`
+- Total de slash commands sobe de 9 para 11 (ADR-013 em `architecture.md`)
 
 ### Fase 6 — Integração com design tools (confirmado no roadmap) — **Próximo**
 
