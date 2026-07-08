@@ -1,7 +1,7 @@
 ---
 id: 057
 title: Adicionar bloco de pré-flight de update-check nos 11 commands + ajustar allowed-tools
-status: para implementar
+status: em revisão
 feature: update-health-check
 area: backend
 priority: P0
