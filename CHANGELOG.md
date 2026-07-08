@@ -4,6 +4,26 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.12.0] - 2026-07-08
+
+### Adicionado
+
+- **Health check de update (`references/update-check.md`)** — na primeira invocação de qualquer slash command KSDD numa conversa, o **agente** compara a versão instalada (campo `version` do `.ksdd-manifest.json`) com a última publicada no npm (`npm view @kognar/ksdd version`, com fallback de `web_fetch` no registry) e, se houver versão nova, emite **um** aviso discreto sugerindo `npm install -g @kognar/ksdd@latest`. É **uma vez por sessão de chat** (não repete na mesma conversa), **não-bloqueante** (offline / erro / `npm` ausente → silêncio; o command segue idêntico ao comportamento anterior) e **não é telemetria** (apenas leitura do registry público; nada é enviado a servidores KSDD/Kognar).
+- **Opt-out `KSDD_SKIP_UPDATE_CHECK=1`** — desliga o health check por completo. Documentado em `ksdd help`, README, INSTALL, SPEC e architecture.
+
+### Alterado
+
+- **Os 11 slash commands (`commands/*.md`)** ganham um bloco de pré-flight no topo que dispara o health check via `references/update-check.md`; o `allowed-tools` de `start`/`spec`/`tech`/`design`/`new:feature` passa a incluir `Bash` (para `npm view`). Os demais já tinham `Bash`.
+- **SPEC / architecture** — documentam o comportamento (SPEC seção 11, fluxo 13.5, env var em 7.1, nota "não é telemetria" na seção 12) e a nova ADR-014.
+
+### Arquitetura
+
+- **ADR-014 registrado em `architecture.md`** — a checagem de update é **agent-driven**: quem consulta o registry é o agente que roda o command, não a CLI. O `bin/ksdd.js` permanece **100% offline** (ADR-001/003 preservados). A checagem é sessão-only (sem persistir estado no manifest) e o `references/update-check.md` é distribuído aos 5 targets pelo `copyDir(references/)` existente — **sem** função `install*` nova nem entrada em `COMMAND_FILES` (mesma classe do ADR-013). O gatilho do ADR-012 (refator `installTarget` antes do 6º target) permanece intocado.
+
+### Nota
+
+- A feature entra em vigor a partir da publicação da `0.12.0` no npm: até lá, instalações já atualizadas não encontram versão mais nova (comportamento esperado — silêncio total).
+
 ## [0.11.0] - 2026-07-08
 
 ### Adicionado

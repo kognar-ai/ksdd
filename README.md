@@ -137,6 +137,10 @@ To uninstall everything:
 npm uninstall -g @kognar/ksdd
 ```
 
+### Updates
+
+KSDD checks for a newer version the first time you run any `/ksdd:*` command in a conversation: if one is available, the agent shows a one-line notice suggesting `npm install -g @kognar/ksdd@latest`, then continues normally. The check runs **once per chat session**, is **non-blocking** (offline or on any error it stays silent), and is **not telemetry** — it only reads the public npm registry from your machine; nothing is sent to KSDD/Kognar servers. The agent performs the check, not the CLI, so `bin/ksdd.js` stays fully offline. Disable it with `KSDD_SKIP_UPDATE_CHECK=1`.
+
 ### Manual (Claude Code)
 
 Place the `ksdd/` folder in `~/.claude/skills/ksdd/` or at the project root in `.claude/skills/ksdd/`.

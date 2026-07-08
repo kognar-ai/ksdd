@@ -69,6 +69,10 @@ ksdd status                       # mostra estado da instalação
 ksdd uninstall                    # remove arquivos copiados (todos os targets)
 ```
 
+Checagem de update (v0.12.0):
+
+Na primeira invocação de um command KSDD numa conversa, o agente avisa se há versão nova (compara o `version` do manifest com o npm) e sugere `npm install -g @kognar/ksdd@latest`. É não-bloqueante e roda uma vez por sessão. Para desligar: `KSDD_SKIP_UPDATE_CHECK=1`.
+
 Para desinstalar tudo:
 
 ```bash

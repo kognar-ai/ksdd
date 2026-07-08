@@ -651,6 +651,7 @@ function cmdHelp() {
   log('');
   log('Variáveis de ambiente:');
   log('  KSDD_SKIP_POSTINSTALL=1   Pula o postinstall do npm');
+  log('  KSDD_SKIP_UPDATE_CHECK=1  Desliga o health check de update nos slash commands');
   log('  KSDD_WITH_CODEX=1         Equivale a --codex no postinstall (npm install)');
   log('  KSDD_WITH_OPENCODE=1      Equivale a --opencode no postinstall');
   log('  KSDD_WITH_ANTIGRAVITY=1   Equivale a --antigravity no postinstall');
