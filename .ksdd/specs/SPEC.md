@@ -119,7 +119,8 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
     "claude": ["array de paths instalados em ~/.claude/"],
     "codex": ["array de paths instalados em ~/.codex/ e ~/.agents/"],
     "opencode": ["array de paths instalados em ~/.config/opencode/"],
-    "antigravity": ["array de paths instalados em ~/.gemini/"]
+    "antigravity": ["array de paths instalados em ~/.gemini/"],
+    "copilot": ["array de paths instalados no perfil VS Code + .github/ + ~/.copilot/"]
   }
 }
 ```
@@ -199,11 +200,14 @@ Comandos disponíveis (visíveis em `ksdd help`):
 | `ksdd install --codex --opencode` | Instala os 3 targets (Claude, Codex, opencode) numa só invocação |
 | `ksdd install --antigravity` | Instala Claude Code + Google Antigravity (skills em `~/.gemini/antigravity-cli/skills/` e `~/.gemini/antigravity/skills/` + bundle em `~/.gemini/ksdd/`) |
 | `ksdd install --codex --opencode --antigravity` | Instala os 4 targets (Claude, Codex, opencode, Antigravity) numa só invocação |
+| `ksdd install --copilot` | Instala Claude Code + GitHub Copilot (prompt files no perfil do VS Code + chat mode + bundle + placeholder CLI) |
+| `ksdd install --copilot --project` | Instala prompt files em `.github/prompts/` do repo atual (versionável no projeto) |
+| `ksdd install --codex --opencode --antigravity --copilot` | Instala os 5 targets numa só invocação |
 | `ksdd uninstall` | Remove tudo o que foi instalado, lendo o manifest |
 | `ksdd status` | Mostra versão instalada, timestamp, contagem de arquivos por alvo |
 | `ksdd help` (default) | Documentação de uso |
 
-Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode` / `--antigravity`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `KSDD_WITH_OPENCODE`, `KSDD_WITH_ANTIGRAVITY`, `CODEX_HOME`, `OPENCODE_HOME`, `ANTIGRAVITY_HOME`, `NO_COLOR`.
+Flags: `--quiet` / `--silent` / `--postinstall` / `--codex` / `--opencode` / `--antigravity` / `--copilot` / `--project`. Env vars: `KSDD_SKIP_POSTINSTALL`, `KSDD_WITH_CODEX`, `KSDD_WITH_OPENCODE`, `KSDD_WITH_ANTIGRAVITY`, `KSDD_WITH_COPILOT`, `CODEX_HOME`, `OPENCODE_HOME`, `ANTIGRAVITY_HOME`, `COPILOT_HOME`, `NO_COLOR`.
 
 ### 7.2 Slash commands (Claude Code)
 
@@ -235,6 +239,20 @@ Um arquivo `.md` em `skills/` vira `/ksdd-start`, `/ksdd-spec`, `/ksdd-new-featu
 Bundle com `references/` (templates), `agents/` (helpers de estilo), `README.md`, `INSTALL.md`, e (Codex apenas) `SKILL.md` derivado de `references/codex-SKILL.md`.
 
 Em opencode, o bundle em `~/.config/opencode/ksdd/` é o equivalente funcional do skill — contém os mesmos `references/` e `agents/`, mais um `AGENTS.md` (derivado de `references/opencode-AGENTS.md`) que substitui o papel do `SKILL.md`. Convenção opencode não usa o termo "skill", mas o propósito é idêntico: dar ao agente o contexto canônico para invocar os commands corretamente.
+
+Em Antigravity e Copilot, os bundles equivalentes vivem em `~/.gemini/ksdd/` e `<vscode-user>/ksdd/` respectivamente (mesma estrutura `references/` + `agents/` + `AGENTS.md`).
+
+### 7.7 Prompt files (GitHub Copilot)
+
+Após `ksdd install --copilot`, os 9 commands ficam como **prompt files** `ksdd-[name].prompt.md` no diretório de perfil do usuário do VS Code (`:` é renomeado para `-`, mesma convenção de Codex/opencode/Antigravity; o sufixo `.prompt.md` é exigido pelo Copilot). O path é **OS-específico**: `~/Library/Application Support/Code/User/prompts/` no macOS, `~/.config/Code/User/prompts/` no Linux, `%APPDATA%\Code\User\prompts\` no Windows. `COPILOT_HOME` faz override do diretório `Code/User` (cobre VS Code Insiders, instalações portáteis e paths não-padrão).
+
+Um arquivo `.prompt.md` vira `/ksdd-start`, `/ksdd-spec`, `/ksdd-new-feature`, etc., invocáveis no Copilot Chat do VS Code. Conteúdo é o mesmo dos arquivos em `commands/`. Uma **chat mode** `ksdd.chatmode.md` (contexto canônico, derivada de `references/copilot-AGENTS.md`) acompanha no mesmo diretório de perfil.
+
+O modo `--project` (só válido junto de `--copilot`) grava em `.github/prompts/` e `.github/chatmodes/` do repo-alvo (diretório de trabalho atual) em vez do perfil global — habilita o modelo project-scoped nativo do Copilot, versionável no projeto.
+
+Um placeholder é instalado no Copilot CLI (`~/.copilot/prompts/ksdd-*.prompt.md`) — o CLI ainda **não** consome comandos custom ([copilot-cli#618](https://github.com/github/copilot-cli/issues/618), [#1113](https://github.com/github/copilot-cli/issues/1113)), mas a superfície fica pronta para quando o suporte upstream existir.
+
+Bundle compartilhado em `<vscode-user>/ksdd/` contém `references/`, `agents/`, `README.md`, `INSTALL.md` e `AGENTS.md` (derivado de `references/copilot-AGENTS.md`) — orienta o agente Copilot sobre o contexto canônico. A novidade técnica vs os outros targets é a **resolução de path por SO** (`resolveVscodeUserDir()`), que não existia nos diretórios globais fixos de Codex/opencode/Antigravity.
 
 ---
 
@@ -286,6 +304,8 @@ Não aplicável (CLI). Considerações equivalentes:
 - **Idempotência do install** — re-rodar `ksdd install` lê o manifest anterior, remove arquivos rastreados, e reinstala. Sem duplicação.
 - **`install` sem `--codex` preserva instalação Codex anterior** — não deleta `~/.codex/prompts/ksdd-*` nem `~/.agents/skills/ksdd/` se existirem. Só atualiza Claude.
 - **`install` sem `--opencode` preserva instalação opencode anterior** — não deleta `~/.config/opencode/commands/ksdd-*` nem `~/.config/opencode/ksdd/` se existirem. Só atualiza Claude (ou Claude+Codex se `--codex`).
+- **`install` sem `--copilot` preserva instalação Copilot anterior** — não deleta prompt files KSDD já instalados no perfil do VS Code. Espelha Codex/opencode/Antigravity.
+- **`--project` grava em `.github/` do repo só com flag explícita** — o modo project-scoped (`.github/prompts/` + `.github/chatmodes/`) do diretório de trabalho atual só é ativado com `--copilot --project`; o default nunca escreve fora de `~/`.
 - **`uninstall` sem manifest** — modo fallback: tenta remover paths conhecidos por convenção. Mensagem amarela avisando.
 - **Approval gates obrigatórios** — slash commands param após gerar artefato; nunca encadeiam automaticamente. Mesmo se usuário disser "pula", o comando pede confirmação explícita (`references/approval-gates.md`).
 
@@ -308,10 +328,10 @@ Implicações práticas:
 
 ### 13.1 Onboarding em projeto novo (do zero)
 
-1. Usuário roda `npm install -g @kognar/ksdd` (ou com `KSDD_WITH_CODEX=1` para Claude + Codex, `KSDD_WITH_OPENCODE=1` para Claude + opencode, `KSDD_WITH_ANTIGRAVITY=1` para Claude + Google Antigravity)
-2. Postinstall copia commands e skills para `~/.claude/` (e `~/.codex/` / `~/.config/opencode/` / `~/.gemini/` se opt-in)
-3. Reinicia o agente (Claude Code, Codex CLI/IDE, opencode ou Antigravity)
-4. No diretório do projeto, invoca `/ksdd:start` (Claude), `/prompts:ksdd-start` (Codex), `/ksdd-start` (opencode ou Antigravity) com ideia bruta
+1. Usuário roda `npm install -g @kognar/ksdd` (ou com `KSDD_WITH_CODEX=1` para Claude + Codex, `KSDD_WITH_OPENCODE=1` para Claude + opencode, `KSDD_WITH_ANTIGRAVITY=1` para Claude + Google Antigravity, `KSDD_WITH_COPILOT=1` para Claude + GitHub Copilot)
+2. Postinstall copia commands e skills para `~/.claude/` (e `~/.codex/` / `~/.config/opencode/` / `~/.gemini/` / perfil VS Code se opt-in)
+3. Reinicia o agente (Claude Code, Codex CLI/IDE, opencode, Antigravity ou VS Code Copilot)
+4. No diretório do projeto, invoca `/ksdd:start` (Claude), `/prompts:ksdd-start` (Codex), `/ksdd-start` (opencode, Antigravity ou Copilot Chat) com ideia bruta
 5. Agente faz 5-8 perguntas em batch → gera `brainstorm.md` → para em Gate 1
 6. Usuário aprova → invoca `/ksdd:spec` → gera `SPEC.md` → Gate 2
 7. Opcional: `/ksdd:tech` → `architecture.md` → Gate 3
@@ -369,6 +389,14 @@ Implicações práticas:
 4. Manifest passa a ter `targets.antigravity` preenchido; `targets.codex`/`targets.opencode` (se existiam) são preservados intocados
 5. `ksdd status` confirma os 4 targets ativos (Claude, Codex, opencode, Antigravity) com contagens individuais
 
+### 13.8 Adicionar GitHub Copilot em instalação existente
+
+1. Usuário com KSDD já instalado (Claude + opcionalmente Codex/opencode/Antigravity) roda `ksdd install --copilot` (sem outras flags)
+2. Instalador re-roda `installClaude()` (idempotente); não modifica Codex, opencode nem Antigravity
+3. `installCopilot()` roda e popula `<vscode-user>/prompts/ksdd-*.prompt.md` + `ksdd.chatmode.md` + bundle em `<vscode-user>/ksdd/` (path resolvido por SO ou `COPILOT_HOME`)
+4. Manifest passa a ter `targets.copilot` preenchido; `targets.codex`/`targets.opencode`/`targets.antigravity` (se existiam) são preservados intocados
+5. `ksdd status` confirma os 5 targets ativos (Claude, Codex, opencode, Antigravity, Copilot) com contagens individuais
+
 ---
 
 ## 14. Fases de Entrega
@@ -402,10 +430,11 @@ Implicações práticas:
 - Agent `setup-analyst` em 4 variantes paralelas (produto, stack, código, git)
 - Flags: `--artifacts`, `--depth`, `--skip-questions`
 
-### Fase 5 — Mais agents (confirmado no roadmap) — **Em andamento (v0.9.0)**
+### Fase 5 — Mais agents (confirmado no roadmap) — **Em andamento (v0.10.0)**
 
 - Suporte a opencode (entregue v0.8.0, 26/05/2026)
 - Suporte a Google Antigravity (entregue v0.9.0, 01/06/2026) — 4º target, CLI/TUI + IDE
+- Suporte a GitHub Copilot (entregue v0.10.0, 07/07/2026) — 5º target, prompt files VS Code + chat mode + project + CLI placeholder
 - Suporte a Cursor (`~/.cursor/` `[verificar paths]`)
 - Suporte a Windsurf
 - Suporte a Cline
@@ -435,7 +464,7 @@ Implicações práticas:
 | Issues abertas + resolvidas/mês | `[a definir]` |
 | PRs externos aceitos (sinal de comunidade) | `[a definir]` |
 | Número de projetos com `ksdd:setup` documentados publicamente | `[a definir]` |
-| Cobertura de agents suportados | 2 hoje (Claude, Codex) → 5 no roadmap (Cursor, Windsurf, Cline) |
+| Cobertura de agents suportados | 5 hoje (Claude, Codex, opencode, Antigravity, Copilot) → +3 no roadmap (Cursor, Windsurf, Cline) |
 
 ---
 

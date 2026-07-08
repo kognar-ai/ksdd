@@ -1,7 +1,7 @@
 {
   "name": "@kognar/ksdd",
-  "version": "0.9.0",
-  "description": "KSDD — Kognar Spec-Driven Design & Development. Slash commands para Claude Code, OpenAI Codex, opencode e Google Antigravity que guiam do brainstorm bruto até design system implementável.",
+  "version": "0.10.0",
+  "description": "KSDD — Kognar Spec-Driven Design & Development. Slash commands para Claude Code, OpenAI Codex, opencode, Google Antigravity e GitHub Copilot que guiam do brainstorm bruto até design system implementável.",
   "keywords": [
     "claude-code",
     "claude",
@@ -10,6 +10,8 @@
     "opencode",
     "antigravity",
     "google-antigravity",
+    "copilot",
+    "github-copilot",
     "slash-commands",
     "spec-driven",
     "design-system",

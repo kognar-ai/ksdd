@@ -1,13 +1,13 @@
 # KSDD — Kognar Spec-Driven Design & Development
 
-A slash command system for **Claude Code**, **[OpenAI Codex](https://developers.openai.com/codex)**, **[opencode](https://opencode.ai)** and **[Google Antigravity](https://antigravity.google)** that guides products from **raw brainstorm to an implementable design system**, in four stages with mandatory human approval between each one — plus feature-level workflows for breaking specs into tasks and shipping code through quality gates and PRs.
+A slash command system for **Claude Code**, **[OpenAI Codex](https://developers.openai.com/codex)**, **[opencode](https://opencode.ai)**, **[Google Antigravity](https://antigravity.google)** and **[GitHub Copilot](https://github.com/features/copilot)** that guides products from **raw brainstorm to an implementable design system**, in four stages with mandatory human approval between each one — plus feature-level workflows for breaking specs into tasks and shipping code through quality gates and PRs.
 
-## Codex, opencode and Google Antigravity (CLI / IDE)
+## Codex, opencode, Google Antigravity and GitHub Copilot (CLI / IDE)
 
-After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`), `ksdd install --opencode` (or `KSDD_WITH_OPENCODE=1`) and/or `ksdd install --antigravity` (or `KSDD_WITH_ANTIGRAVITY=1`):
+After `ksdd install --codex` (or `KSDD_WITH_CODEX=1` on `npm install`), `ksdd install --opencode` (or `KSDD_WITH_OPENCODE=1`), `ksdd install --antigravity` (or `KSDD_WITH_ANTIGRAVITY=1`) and/or `ksdd install --copilot` (or `KSDD_WITH_COPILOT=1`):
 
-| Claude Code | Codex (prompts in `~/.codex/prompts/`) | opencode · Antigravity (`~/.config/opencode/`, `~/.gemini/`) |
-|-------------|----------------------------------------|-------------------------------------------------------------|
+| Claude Code | Codex (prompts in `~/.codex/prompts/`) | opencode · Antigravity · Copilot (`~/.config/opencode/`, `~/.gemini/`, VS Code Copilot Chat) |
+|-------------|----------------------------------------|----------------------------------------------------------------------------------------------|
 | `/ksdd:start` | `/prompts:ksdd-start` | `/ksdd-start` |
 | `/ksdd:spec` | `/prompts:ksdd-spec` | `/ksdd-spec` |
 | `/ksdd:tech` | `/prompts:ksdd-tech` | `/ksdd-tech` |
@@ -24,7 +24,19 @@ For opencode the same content is distributed as commands in `~/.config/opencode/
 
 For Google Antigravity the 9 commands are installed as Markdown **skills** in two global surfaces — `~/.gemini/antigravity-cli/skills/ksdd-*.md` (CLI / TUI) and `~/.gemini/antigravity/skills/ksdd-*.md` (IDE) — plus a shared bundle in `~/.gemini/ksdd/` (references, agents, and `AGENTS.md` adapted from `references/antigravity-AGENTS.md`). A `.md` in `skills/` becomes `/ksdd-start` and friends. _(The IDE skills path is pending empirical confirmation — see the feature spec.)_
 
-Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes the Codex prompts folder; `OPENCODE_HOME` (default `~/.config/opencode`) changes the opencode base folder; `ANTIGRAVITY_HOME` (default `~/.gemini`) changes the Antigravity base folder.
+For GitHub Copilot the 9 commands are installed as **prompt files** `ksdd-*.prompt.md` in the OS-specific VS Code user profile dir, plus a chat mode `ksdd.chatmode.md`, a shared bundle in `<vscode-user>/ksdd/` (references, agents, README, INSTALL, `AGENTS.md`) and a Copilot CLI placeholder in `~/.copilot/prompts/`. A `.prompt.md` becomes `/ksdd-start` and friends in **VS Code Copilot Chat**. The per-OS prompt-file paths:
+
+| OS | Prompt files (`ksdd-*.prompt.md`) |
+|----|-----------------------------------|
+| macOS | `~/Library/Application Support/Code/User/prompts/` |
+| Linux | `~/.config/Code/User/prompts/` |
+| Windows | `%APPDATA%\Code\User\prompts\` |
+
+`ksdd install --copilot --project` installs into `.github/prompts/` + `.github/chatmodes/` of the current repo instead of the global profile, so the commands travel with the repository.
+
+> **Note:** the GitHub Copilot **CLI** does not yet consume custom slash commands ([github/copilot-cli#618](https://github.com/github/copilot-cli/issues/618), [#1113](https://github.com/github/copilot-cli/issues/1113)); the prompt files work today in **VS Code Copilot Chat**, and the `~/.copilot/prompts/` placeholder is ready for when upstream adds support.
+
+Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes the Codex prompts folder; `OPENCODE_HOME` (default `~/.config/opencode`) changes the opencode base folder; `ANTIGRAVITY_HOME` (default `~/.gemini`) changes the Antigravity base folder; `COPILOT_HOME` overrides the VS Code `Code/User` dir (covers Insiders / portable installs).
 
 ```
 /ksdd:start          →  .ksdd/specs/brainstorm.md         (raw idea → refined concept)
@@ -68,13 +80,15 @@ Artifacts are cumulative: `SPEC.md` references `brainstorm.md`; `architecture.md
 npm install -g @kognar/ksdd
 ```
 
-By default this installs only **Claude Code** (`~/.claude/`). To also install **Codex**, **opencode** and/or **Google Antigravity**:
+By default this installs only **Claude Code** (`~/.claude/`). To also install **Codex**, **opencode**, **Google Antigravity** and/or **GitHub Copilot**:
 
 ```bash
-ksdd install --codex                            # Claude + Codex
-ksdd install --opencode                         # Claude + opencode
-ksdd install --antigravity                      # Claude + Google Antigravity
-ksdd install --codex --opencode --antigravity   # Claude + Codex + opencode + Antigravity (4 targets)
+ksdd install --codex                                       # Claude + Codex
+ksdd install --opencode                                    # Claude + opencode
+ksdd install --antigravity                                 # Claude + Google Antigravity
+ksdd install --copilot                                     # Claude + GitHub Copilot (prompt files + chat mode)
+ksdd install --copilot --project                           # Copilot into .github/ of the current repo
+ksdd install --codex --opencode --antigravity --copilot    # Claude + Codex + opencode + Antigravity + Copilot (5 targets)
 ```
 
 Or in an npm install:
@@ -83,7 +97,8 @@ Or in an npm install:
 KSDD_WITH_CODEX=1 npm install -g @kognar/ksdd
 KSDD_WITH_OPENCODE=1 npm install -g @kognar/ksdd
 KSDD_WITH_ANTIGRAVITY=1 npm install -g @kognar/ksdd
-KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 KSDD_WITH_ANTIGRAVITY=1 npm install -g @kognar/ksdd
+KSDD_WITH_COPILOT=1 npm install -g @kognar/ksdd
+KSDD_WITH_CODEX=1 KSDD_WITH_OPENCODE=1 KSDD_WITH_ANTIGRAVITY=1 KSDD_WITH_COPILOT=1 npm install -g @kognar/ksdd
 ```
 
 CLI commands:
@@ -93,6 +108,8 @@ ksdd install                      # reinstalls / updates (Claude Code only)
 ksdd install --codex              # Claude + Codex (prompts + skill)
 ksdd install --opencode           # Claude + opencode (commands + bundle)
 ksdd install --antigravity        # Claude + Antigravity (skills CLI+IDE + bundle)
+ksdd install --copilot            # Claude + Copilot (prompt files + chat mode + bundle)
+ksdd install --copilot --project  # Copilot into .github/prompts + .github/chatmodes of the repo
 ksdd status                       # shows installation state
 ksdd uninstall                    # removes copied files (all targets)
 ```

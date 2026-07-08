@@ -28,7 +28,7 @@ KSDD é um pacote npm que distribui **conteúdo Markdown** (commands, references
               │  ├── README.md / INSTALL.md / CHANGELOG.md / LICENSE        │
               │  └── package.json                                           │
               └───────────────────────────┬─────────────────────────────────┘
-                                          │ ksdd install [--codex] [--opencode] [--antigravity]
+                                          │ ksdd install [--codex] [--opencode] [--antigravity] [--copilot]
                                           ▼
         ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
         │                                                                                                     │
@@ -51,6 +51,14 @@ KSDD é um pacote npm que distribui **conteúdo Markdown** (commands, references
    │    CLI/TUI : ~/.gemini/antigravity-cli/skills/ksdd-*.md                                            │
    │    IDE     : ~/.gemini/antigravity/skills/ksdd-*.md   [path IDE a confirmar — ver ADR-011 / risco] │
    │    bundle  : ~/.gemini/ksdd/{references/, agents/, README.md, INSTALL.md, AGENTS.md}  (compartilhado)│
+   └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+   ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+   │  GitHub Copilot (target: copilot) — quinto target, path de perfil VS Code por SO (--copilot) — ADR-012│
+   │    prompts : <vscode-user>/prompts/ksdd-*.prompt.md   (global, por SO via resolveVscodeUserDir)    │
+   │    chatmode: <vscode-user>/prompts/ksdd.chatmode.md                                                │
+   │    bundle  : <vscode-user>/ksdd/{references/, agents/, README.md, INSTALL.md, AGENTS.md}           │
+   │    project : <cwd>/.github/prompts/ + chatmodes/     (opt-in --project)                            │
+   │    CLI      : ~/.copilot/prompts/ksdd-*.prompt.md     (placeholder — copilot-cli#618/#1113)        │
    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
                                                              ▼
                        ┌────────────────────────────────────┐
@@ -118,7 +126,8 @@ Schema atual:
     "claude":      ["string (path absoluto de arquivo instalado)", ...],
     "codex":       ["string (path absoluto de arquivo instalado)", ...],
     "opencode":    ["string (path absoluto de arquivo instalado)", ...],
-    "antigravity": ["string (path absoluto de arquivo instalado)", ...]
+    "antigravity": ["string (path absoluto de arquivo instalado)", ...],
+    "copilot":     ["string (path absoluto de arquivo instalado)", ...]
   }
 }
 ```
@@ -127,6 +136,7 @@ Schema atual:
 
 - Formato antigo: `{ ..., files: ["path", ...] }` → migrado em runtime para `{ targets: { claude: files, codex: [] } }`
 - Formato sem `files` nem `targets`: criado como `{ targets: { claude: [], codex: [] } }`
+- Manifest sem `targets.copilot` (pré-0.10.0): `normalizeManifest()` cria array vazio para `copilot` ao ler
 
 ### 3.2 Frontmatter de slash command (commands/*.md)
 
@@ -178,6 +188,9 @@ ksdd install --opencode             # Claude apenas + opencode
 ksdd install --codex --opencode     # Claude + Codex + opencode
 ksdd install --antigravity          # Claude apenas + Google Antigravity
 ksdd install --codex --opencode --antigravity  # os 4 targets
+ksdd install --copilot              # Claude apenas + GitHub Copilot (perfil VS Code)
+ksdd install --copilot --project    # Claude + Copilot em .github/ do repo-alvo
+ksdd install --codex --opencode --antigravity --copilot  # os 5 targets
 ksdd install --postinstall  # invocado pelo npm postinstall hook
 ksdd install --quiet      # silencia stdout
 ksdd uninstall            # remove tudo rastreado no manifest
@@ -197,6 +210,8 @@ ksdd help                 # default; também --help, -h
 | `KSDD_WITH_OPENCODE=1` | Equivale a `--opencode` no postinstall | unset |
 | `ANTIGRAVITY_HOME` | Override do diretório base do Antigravity | `~/.gemini` |
 | `KSDD_WITH_ANTIGRAVITY=1` | Equivale a `--antigravity` no postinstall | unset |
+| `COPILOT_HOME` | Override do diretório `Code/User` do VS Code (Copilot) | OS-específico (ver `resolveVscodeUserDir`) |
+| `KSDD_WITH_COPILOT=1` | Equivale a `--copilot` no postinstall | unset |
 | `KSDD_SKIP_POSTINSTALL=1` | Pula a etapa de postinstall (útil em CI) | unset |
 | `NO_COLOR` | Desabilita ANSI escapes na saída | unset |
 
@@ -218,6 +233,8 @@ ksdd help                 # default; também --help, -h
 | `installCodex(tracked, out)` | Instala em `~/.codex/` + `~/.agents/skills/ksdd/` | 155 |
 | `installOpencode(tracked, out)` | Instala em `~/.config/opencode/` + `~/.config/opencode/ksdd/` | 192 |
 | `installAntigravity(tracked, out)` | Instala em `~/.gemini/antigravity-cli/skills/` + `~/.gemini/antigravity/skills/` + bundle `~/.gemini/ksdd/` (cópia adaptada de `installOpencode` — ADR-011) | `[verificar]` |
+| `installCopilot(tracked, out, opts)` | Instala prompt files no perfil VS Code por SO + chat mode + bundle `<vscode-user>/ksdd/` + placeholder CLI `~/.copilot/` + modo `--project` (`.github/`) (cópia adaptada de `installAntigravity` — ADR-012) | `[verificar]` |
+| `resolveVscodeUserDir()` | Resolve o `Code/User` por SO (macOS/Linux/Windows) com override `COPILOT_HOME` | `[verificar]` |
 
 ---
 
@@ -383,6 +400,14 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 **Decisão:** aceitar a **quarta cópia hardcoded** para validar adoção (ecossistema Google) antes de pagar a dívida do refator. O refator `installTarget(targetConfig)` genérico deixa de ser embutido "no próximo target" e vira **feature dedicada própria**, com gatilho firme: **deve ser concluída antes de adicionar o 5º target** (Cursor/Windsurf/Cline).
 **Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (hardcoded + cobrir CLI e IDE + bump minor 0.9.0).
 **Consequência:** entrega de Antigravity rápida e sem cirurgia arquitetural; a dívida sobe para **4 funções `install*` duplicadas** (~250 linhas a mais), e o refator agora unificará 4 funções em vez de 3. Risco extra específico: o pruning no uninstall opera sob `~/.gemini/` (compartilhado com `gemini-cli` e outros tools Google) — mitigado restringindo o prune estritamente aos subdirs KSDD. Trade-off aceito explicitamente.
+**Continuação (ver ADR-012):** o quinto target (GitHub Copilot, v0.10.0) não honrou o gatilho "feature dedicada de refator antes do 5º target" — o adiamento foi conscientemente repetido mais uma vez para capturar o maior público. ADR-012 substitui o gatilho deste ADR por um mais firme: o refator `installTarget` genérico vira **inescapável antes do 6º target**.
+
+### ADR-012: Quinto target (GitHub Copilot) hardcoded — refator `installTarget` vira pré-requisito inescapável antes do 6º target
+
+**Evidência:** feature github-copilot-integration (v0.10.0) adiciona `installCopilot()` como cópia adaptada de `installAntigravity` em `bin/ksdd.js`, distribuindo os 9 commands como prompt files (`ksdd-*.prompt.md`) no diretório de perfil do usuário do VS Code, resolvido por SO (via `resolveVscodeUserDir()`), mais chat mode (`ksdd.chatmode.md`), modo project-scoped em `.github/` (opt-in `--project`) e um placeholder do Copilot CLI em `~/.copilot/`. Decisão e trade-off em `.ksdd/features/FEATURE-github-copilot-integration.md` seção 1.1.
+**Decisão:** aceitar a **quinta cópia hardcoded** para capturar o maior público (GitHub Copilot) antes de pagar a dívida do refator. O gatilho do ADR-011 ("feature dedicada de refator antes do 5º target") foi conscientemente **não** honrado; ADR-012 o substitui por um gatilho mais firme: o refator `installTarget(targetConfig)` genérico é agora **inescapável antes do 6º target** (Cursor/Windsurf/Cline).
+**Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (hardcoded + 4 superfícies + prioridade Alta / bump minor 0.10.0).
+**Consequência:** entrega rápida do target de maior alcance; a dívida sobe para **5 funções `install*` duplicadas** (~250 linhas a mais), e o refator agora unificará 5 funções. Riscos novos específicos deste target: resolução de path por SO (`resolveVscodeUserDir()`) e pruning sob o diretório `User/` compartilhado do VS Code (nunca prunar o próprio `User/`). Trade-off aceito explicitamente.
 
 ---
 
@@ -403,6 +428,9 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 | Duplicação `installCodex`/`installOpencode`/`installAntigravity` (4 cópias) aumenta dívida técnica | Médio | Alta (esperada) | ADR-011 fixa gatilho: refator `installTarget` vira feature dedicada antes do 5º target |
 | Path do IDE Antigravity (`~/.gemini/antigravity/skills/`) divergir do assumido | Médio | Média | Marcado `[verificar]`; confirmar no dogfood (task 034); `ANTIGRAVITY_HOME` permite override |
 | `pruneEmptyDirs` em `~/.gemini/` apagar diretório compartilhado com `gemini-cli`/outros tools Google | Alto | Média | Restringir prune estritamente aos subdirs KSDD (`antigravity-cli/skills`, `antigravity/skills`, `ksdd`) — nunca subir para `~/.gemini/` |
+| Path de perfil do VS Code por SO divergir do assumido (macOS/Windows/Insiders) | Alto | Média | `resolveVscodeUserDir()` resolve por SO + `COPILOT_HOME` override; confirmar cada SO no dogfood antes do release |
+| `pruneEmptyDirs` sob `<vscode-user>/` apagar config do VS Code (diretório `User/` compartilhado) | Alto | Média | Prune restrito aos subdirs `prompts/`/`ksdd/` (e `.github/prompts\|chatmodes/`, `~/.copilot/prompts/`) e só se vazios — nunca prunar o próprio `User/` |
+| Quinta cópia hardcoded (`installAntigravity`→`installCopilot`) aumenta dívida técnica (5 cópias `install*`) | Médio | Alta (esperada) | ADR-012 fixa gatilho firme: refator `installTarget` inescapável antes do 6º target |
 
 ---
 
@@ -435,7 +463,8 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 ### Fase 5 — Multi-agent — **Em andamento**
 - [x] Suporte a opencode (v0.8.0, 26/05/2026)
 - [x] Suporte a Google Antigravity (v0.9.0, 01/06/2026) — 4º target, CLI/TUI + IDE (ADR-011)
-- [ ] **Refator dedicado** de `install*` para `installTarget(targetConfig)` genérico — feature própria, **obrigatória antes do 5º target** (ADR-011)
+- [x] Suporte a GitHub Copilot (v0.10.0, 07/07/2026) — 5º target, prompt files VS Code + chat mode + project + CLI placeholder (ADR-012)
+- [ ] **Refator dedicado** de `install*` para `installTarget(targetConfig)` genérico — feature própria, **obrigatória antes do 6º target** (ADR-012)
 - [ ] Suporte a Cursor (`[verificar paths]`: `~/.cursor/` ou `.cursorrules` ou outro?)
 - [ ] Suporte a Windsurf
 - [ ] Suporte a Cline

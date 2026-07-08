@@ -26,6 +26,22 @@ const ANTIGRAVITY_CLI_SKILLS_DIR = path.join(ANTIGRAVITY_HOME, 'antigravity-cli'
 const ANTIGRAVITY_IDE_SKILLS_DIR = path.join(ANTIGRAVITY_HOME, 'antigravity', 'skills');
 const ANTIGRAVITY_BUNDLE_DIR = path.join(ANTIGRAVITY_HOME, 'ksdd');
 
+// GitHub Copilot — quinto target (ADR-012). Prompt files (*.prompt.md) no perfil global do VS Code
+// (path por SO via resolveVscodeUserDir), chat mode, modo project-scoped (.github/) e placeholder Copilot CLI (~/.copilot).
+// COPILOT_HOME faz override do diretório <...>/Code/User do VS Code (cobre Insiders/portátil).
+const COPILOT_CLI_DIR = path.join(os.homedir(), '.copilot');
+
+// Resolve o diretório de perfil do usuário do VS Code por SO (onde vivem os prompt files globais).
+function resolveVscodeUserDir() {
+  if (process.env.COPILOT_HOME) return process.env.COPILOT_HOME;
+  const home = os.homedir();
+  switch (process.platform) {
+    case 'darwin': return path.join(home, 'Library', 'Application Support', 'Code', 'User');
+    case 'win32':  return path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'Code', 'User');
+    default:       return path.join(home, '.config', 'Code', 'User');
+  }
+}
+
 const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md', 'archive.md'];
 
 const COLORS = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -80,7 +96,7 @@ function loadManifest() {
   }
 }
 
-/** Normaliza manifest legado (array `files`) para `{ targets: { claude, codex, opencode, antigravity } }`. */
+/** Normaliza manifest legado (array `files`) para `{ targets: { claude, codex, opencode, antigravity, copilot } }`. */
 function normalizeManifest(manifest) {
   if (!manifest) return null;
   if (manifest.targets && Array.isArray(manifest.targets.claude)) {
@@ -91,16 +107,17 @@ function normalizeManifest(manifest) {
         codex: Array.isArray(manifest.targets.codex) ? manifest.targets.codex : [],
         opencode: Array.isArray(manifest.targets.opencode) ? manifest.targets.opencode : [],
         antigravity: Array.isArray(manifest.targets.antigravity) ? manifest.targets.antigravity : [],
+        copilot: Array.isArray(manifest.targets.copilot) ? manifest.targets.copilot : [],
       },
     };
   }
   if (Array.isArray(manifest.files)) {
     return {
       ...manifest,
-      targets: { claude: manifest.files, codex: [], opencode: [], antigravity: [] },
+      targets: { claude: manifest.files, codex: [], opencode: [], antigravity: [], copilot: [] },
     };
   }
-  return { ...manifest, targets: { claude: [], codex: [], opencode: [], antigravity: [] } };
+  return { ...manifest, targets: { claude: [], codex: [], opencode: [], antigravity: [], copilot: [] } };
 }
 
 function saveManifest(manifest) {
@@ -129,6 +146,11 @@ function pruneEmptyDirs(root) {
 function agentPromptBasename(commandFile) {
   const stem = commandFile.replace(/\.md$/i, '').replace(/:/g, '-');
   return `ksdd-${stem}.md`;
+}
+
+// Copilot exige sufixo `.prompt.md`. Reusa agentPromptBasename e troca a extensão. Ex: 'new:feature.md' -> 'ksdd-new-feature.prompt.md'.
+function copilotPromptBasename(commandFile) {
+  return agentPromptBasename(commandFile).replace(/\.md$/i, '.prompt.md');
 }
 
 function installClaude(tracked, out) {
@@ -285,12 +307,112 @@ function installAntigravity(tracked, out) {
   }
 }
 
+// Quinto target: GitHub Copilot. Cópia adaptada de installAntigravity (ADR-012 — duplicação intencional).
+// Modo global (default): prompt files (*.prompt.md) + chat mode no perfil do VS Code, bundle em <vscode-user>/ksdd/
+// e placeholder no Copilot CLI (~/.copilot/prompts/). Modo project (opts.project): grava só em .github/ do repo atual.
+function installCopilot(tracked, out, opts) {
+  opts = opts || {};
+
+  if (opts.project) {
+    const base = path.join(process.cwd(), '.github');
+    const promptsDir = path.join(base, 'prompts');
+    ensureDir(promptsDir);
+    for (const file of COMMAND_FILES) {
+      const src = path.join(PKG_ROOT, 'commands', file);
+      if (!fs.existsSync(src)) continue;
+      const name = copilotPromptBasename(file);
+      const dst = path.join(promptsDir, name);
+      copyFile(src, dst);
+      tracked.push(dst);
+      out('  ' + green('✓') + ' copilot  ' + dim('.github/prompts/') + name);
+    }
+
+    const chatSrc = path.join(PKG_ROOT, 'references', 'copilot-AGENTS.md');
+    const chatDst = path.join(base, 'chatmodes', 'ksdd.chatmode.md');
+    if (fs.existsSync(chatSrc)) {
+      copyFile(chatSrc, chatDst);
+      tracked.push(chatDst);
+      out('  ' + green('✓') + ' copilot  ' + dim('.github/chatmodes/') + 'ksdd.chatmode.md');
+    } else {
+      out('  ' + yellow('aviso:') + ' references/copilot-AGENTS.md ainda não existe — .github/chatmodes/ksdd.chatmode.md será pulado nesta instalação');
+    }
+    return;
+  }
+
+  const userDir = resolveVscodeUserDir();
+  const promptsDir = path.join(userDir, 'prompts');
+  ensureDir(promptsDir);
+  for (const file of COMMAND_FILES) {
+    const src = path.join(PKG_ROOT, 'commands', file);
+    if (!fs.existsSync(src)) continue;
+    const name = copilotPromptBasename(file);
+    const dst = path.join(promptsDir, name);
+    copyFile(src, dst);
+    tracked.push(dst);
+    out('  ' + green('✓') + ' copilot  ' + dim('<vscode-user>/prompts/') + name);
+  }
+
+  const chatSrc = path.join(PKG_ROOT, 'references', 'copilot-AGENTS.md');
+  const chatDst = path.join(promptsDir, 'ksdd.chatmode.md');
+  if (fs.existsSync(chatSrc)) {
+    copyFile(chatSrc, chatDst);
+    tracked.push(chatDst);
+    out('  ' + green('✓') + ' copilot  ' + dim('<vscode-user>/prompts/') + 'ksdd.chatmode.md');
+  } else {
+    out('  ' + yellow('aviso:') + ' references/copilot-AGENTS.md ainda não existe — chat mode ksdd.chatmode.md será pulado nesta instalação');
+  }
+
+  const bundleDir = path.join(userDir, 'ksdd');
+  ensureDir(bundleDir);
+  for (const sub of ['references', 'agents']) {
+    const src = path.join(PKG_ROOT, sub);
+    if (fs.existsSync(src)) {
+      copyDir(src, path.join(bundleDir, sub), tracked);
+      out('  ' + green('✓') + ' copilot  ' + dim('<vscode-user>/ksdd/') + sub + '/');
+    }
+  }
+  for (const top of ['README.md', 'INSTALL.md']) {
+    const src = path.join(PKG_ROOT, top);
+    if (fs.existsSync(src)) {
+      const dst = path.join(bundleDir, top);
+      copyFile(src, dst);
+      tracked.push(dst);
+    }
+  }
+
+  const agentsSrc = path.join(PKG_ROOT, 'references', 'copilot-AGENTS.md');
+  const agentsDst = path.join(bundleDir, 'AGENTS.md');
+  if (fs.existsSync(agentsSrc)) {
+    copyFile(agentsSrc, agentsDst);
+    tracked.push(agentsDst);
+    out('  ' + green('✓') + ' copilot  ' + dim('<vscode-user>/ksdd/') + 'AGENTS.md');
+  } else {
+    out('  ' + yellow('aviso:') + ' references/copilot-AGENTS.md ainda não existe — bundle ksdd/AGENTS.md será pulado nesta instalação');
+  }
+
+  // Placeholder Copilot CLI: o CLI ainda não consome comandos custom (copilot-cli#618/#1113), mas
+  // deixamos os prompt files prontos em ~/.copilot/prompts/ para quando o suporte chegar.
+  const cliPromptsDir = path.join(COPILOT_CLI_DIR, 'prompts');
+  ensureDir(cliPromptsDir);
+  for (const file of COMMAND_FILES) {
+    const src = path.join(PKG_ROOT, 'commands', file);
+    if (!fs.existsSync(src)) continue;
+    const name = copilotPromptBasename(file);
+    const dst = path.join(cliPromptsDir, name);
+    copyFile(src, dst);
+    tracked.push(dst);
+  }
+  out('  ' + green('✓') + ' copilot  ' + dim('~/.copilot/prompts/') + '(placeholder CLI — Copilot CLI ainda não consome comandos custom: copilot-cli#618/#1113)');
+}
+
 function cmdInstall(args) {
   const silent = args.flags.has('quiet') || args.flags.has('silent');
   const postinstall = args.flags.has('postinstall');
   const withCodex = args.flags.has('codex') || (postinstall && process.env.KSDD_WITH_CODEX === '1');
   const withOpencode = args.flags.has('opencode') || (postinstall && process.env.KSDD_WITH_OPENCODE === '1');
   const withAntigravity = args.flags.has('antigravity') || (postinstall && process.env.KSDD_WITH_ANTIGRAVITY === '1');
+  const withCopilot = args.flags.has('copilot') || (postinstall && process.env.KSDD_WITH_COPILOT === '1');
+  const projectMode = args.flags.has('project');
   const out = silent ? () => {} : log;
 
   if (postinstall && process.env.KSDD_SKIP_POSTINSTALL === '1') {
@@ -304,6 +426,7 @@ function cmdInstall(args) {
   }
   if (withOpencode) targetsLabel.push(dim(OPENCODE_HOME));
   if (withAntigravity) targetsLabel.push(dim(ANTIGRAVITY_HOME));
+  if (withCopilot) targetsLabel.push(dim(projectMode ? path.join(process.cwd(), '.github') : resolveVscodeUserDir()));
   out(bold('KSDD') + ' — instalando em ' + targetsLabel.join(' + '));
 
   const prev = normalizeManifest(loadManifest());
@@ -311,6 +434,7 @@ function cmdInstall(args) {
   const prevCodex = (prev && prev.targets && prev.targets.codex) || [];
   const prevOpencode = (prev && prev.targets && prev.targets.opencode) || [];
   const prevAntigravity = (prev && prev.targets && prev.targets.antigravity) || [];
+  const prevCopilot = (prev && prev.targets && prev.targets.copilot) || [];
 
   for (const f of prevClaude) removePath(f);
 
@@ -338,6 +462,13 @@ function cmdInstall(args) {
     installAntigravity(antigravityTracked, out);
   }
 
+  let copilotTracked = prevCopilot;
+  if (withCopilot) {
+    for (const f of prevCopilot) removePath(f);
+    copilotTracked = [];
+    installCopilot(copilotTracked, out, { project: projectMode });
+  }
+
   const manifest = {
     version: require('../package.json').version,
     installedAt: new Date().toISOString(),
@@ -347,6 +478,7 @@ function cmdInstall(args) {
       codex: codexTracked,
       opencode: opencodeTracked,
       antigravity: antigravityTracked,
+      copilot: copilotTracked,
     },
   };
   saveManifest(manifest);
@@ -357,6 +489,7 @@ function cmdInstall(args) {
   if (withCodex) { targetNames.push('Codex'); counts.push(codexTracked.length); }
   if (withOpencode) { targetNames.push('opencode'); counts.push(opencodeTracked.length); }
   if (withAntigravity) { targetNames.push('Google Antigravity'); counts.push(antigravityTracked.length); }
+  if (withCopilot) { targetNames.push('GitHub Copilot'); counts.push(copilotTracked.length); }
 
   let headline;
   if (targetNames.length === 1) {
@@ -374,6 +507,9 @@ function cmdInstall(args) {
   }
   if (withAntigravity) {
     tail += '\n' + green('Integração Google Antigravity:') + ' reinicie o Antigravity (CLI/TUI ou IDE) e use ' + bold('/ksdd-start') + ' (bundle em ~/.gemini/ksdd/).';
+  }
+  if (withCopilot) {
+    tail += '\n' + green('Integração GitHub Copilot:') + ' abra o VS Code, use os prompt files como ' + bold('/ksdd-start') + ' no Copilot Chat' + (projectMode ? ' (instalado em .github/ do projeto).' : ' (perfil global; bundle em <vscode-user>/ksdd/).');
   }
   out(tail);
 }
@@ -417,6 +553,24 @@ function cmdUninstall(args) {
     }
     removePath(ANTIGRAVITY_BUNDLE_DIR);
     pruneEmptyDirs(ANTIGRAVITY_BUNDLE_DIR);
+    // Fallback Copilot: remove prompt files/chat mode `ksdd-*` + bundle por convenção (path por SO).
+    const copilotUserDir = resolveVscodeUserDir();
+    const copilotPromptsDir = path.join(copilotUserDir, 'prompts');
+    try {
+      for (const name of fs.readdirSync(copilotPromptsDir)) {
+        if (name.startsWith('ksdd-') || name === 'ksdd.chatmode.md') removePath(path.join(copilotPromptsDir, name));
+      }
+    } catch { /* inexistente: ignore */ }
+    removePath(path.join(copilotUserDir, 'ksdd'));
+    pruneEmptyDirs(path.join(copilotUserDir, 'ksdd'));
+    pruneEmptyDirs(copilotPromptsDir);
+    const copilotCliPrompts = path.join(COPILOT_CLI_DIR, 'prompts');
+    try {
+      for (const name of fs.readdirSync(copilotCliPrompts)) {
+        if (name.startsWith('ksdd-')) removePath(path.join(copilotCliPrompts, name));
+      }
+    } catch { /* inexistente: ignore */ }
+    pruneEmptyDirs(copilotCliPrompts);
     return;
   }
 
@@ -425,6 +579,7 @@ function cmdUninstall(args) {
     ...(prev.targets && prev.targets.codex ? prev.targets.codex : []),
     ...(prev.targets && prev.targets.opencode ? prev.targets.opencode : []),
     ...(prev.targets && prev.targets.antigravity ? prev.targets.antigravity : []),
+    ...(prev.targets && prev.targets.copilot ? prev.targets.copilot : []),
   ];
   let removed = 0;
   for (const f of all) {
@@ -441,6 +596,11 @@ function cmdUninstall(args) {
   pruneEmptyDirs(ANTIGRAVITY_BUNDLE_DIR);
   pruneEmptyDirs(ANTIGRAVITY_CLI_SKILLS_DIR);
   pruneEmptyDirs(ANTIGRAVITY_IDE_SKILLS_DIR);
+  // Prune Copilot restrito aos subdirs KSDD — nunca subir para <vscode-user>/ (config do VS Code) nem ~/.copilot/ raiz.
+  const copilotUserDir = resolveVscodeUserDir();
+  pruneEmptyDirs(path.join(copilotUserDir, 'ksdd'));
+  pruneEmptyDirs(path.join(copilotUserDir, 'prompts'));
+  pruneEmptyDirs(path.join(COPILOT_CLI_DIR, 'prompts'));
 
   out(green('KSDD desinstalado.') + ' ' + dim(`(${removed} arquivos removidos)`));
 }
@@ -460,6 +620,7 @@ function cmdStatus() {
   const cx = (prev.targets && prev.targets.codex) || [];
   const oc = (prev.targets && prev.targets.opencode) || [];
   const ag = (prev.targets && prev.targets.antigravity) || [];
+  const cp = (prev.targets && prev.targets.copilot) || [];
   log('  Claude       : ' + cl.length + ' arquivos — ' + dim(COMMANDS_DIR));
   log('  Codex        : ' + cx.length + ' arquivos — prompts ' + dim(CODEX_PROMPTS_DIR) + ' · skill ' + dim(AGENTS_SKILLS_KSDD));
   if (oc.length > 0) {
@@ -468,35 +629,43 @@ function cmdStatus() {
   if (ag.length > 0) {
     log('  antigravity  : ' + ag.length + ' arquivos — skills ' + dim(ANTIGRAVITY_CLI_SKILLS_DIR) + ' + ' + dim(ANTIGRAVITY_IDE_SKILLS_DIR) + ' · bundle ' + dim(ANTIGRAVITY_BUNDLE_DIR));
   }
+  if (cp.length > 0) {
+    log('  copilot      : ' + cp.length + ' arquivos — prompts ' + dim(path.join(resolveVscodeUserDir(), 'prompts')) + ' · bundle ' + dim(path.join(resolveVscodeUserDir(), 'ksdd')));
+  }
 }
 
 function cmdHelp() {
-  log(bold('ksdd') + ' — instalador KSDD para Claude Code, Codex, opencode e Google Antigravity\n');
+  log(bold('ksdd') + ' — instalador KSDD para Claude Code, Codex, opencode, Google Antigravity e GitHub Copilot\n');
   log('Uso:');
   log('  ksdd install               Copia commands e skills para ~/.claude/');
   log('  ksdd install --codex       Também instala prompts em ~/.codex/prompts/ e skill em ~/.agents/skills/ksdd/');
   log('  ksdd install --opencode    Também instala commands + bundle em ~/.config/opencode/');
   log('  ksdd install --antigravity Também instala skills + bundle em ~/.gemini/ (CLI/TUI + IDE)');
+  log('  ksdd install --copilot     Também instala prompt files no perfil do VS Code (+ chat mode, bundle, placeholder CLI)');
+  log('  ksdd install --copilot --project   Instala prompt files em .github/prompts/ do repo atual');
   log('  ksdd uninstall             Remove arquivos previamente instalados');
   log('  ksdd status                Mostra estado da instalação');
   log('  ksdd help                  Esta mensagem');
   log('');
-  log('  As flags são combináveis: ksdd install --codex --opencode --antigravity');
+  log('  As flags são combináveis: ksdd install --codex --opencode --antigravity --copilot');
   log('');
   log('Variáveis de ambiente:');
   log('  KSDD_SKIP_POSTINSTALL=1   Pula o postinstall do npm');
   log('  KSDD_WITH_CODEX=1         Equivale a --codex no postinstall (npm install)');
   log('  KSDD_WITH_OPENCODE=1      Equivale a --opencode no postinstall');
   log('  KSDD_WITH_ANTIGRAVITY=1   Equivale a --antigravity no postinstall');
+  log('  KSDD_WITH_COPILOT=1       Equivale a --copilot no postinstall');
   log('  CODEX_HOME                Pasta do Codex (default: ~/.codex)');
   log('  OPENCODE_HOME             Pasta do opencode (default: ~/.config/opencode)');
   log('  ANTIGRAVITY_HOME          Pasta do Antigravity (default: ~/.gemini)');
+  log('  COPILOT_HOME              Pasta User do VS Code (default por SO: ~/.config/Code/User etc.)');
   log('');
   log('Flags:');
   log('  --quiet           Silencia a saída');
   log('');
   log('Após install (invocação por agente):');
-  log('  Claude   ' + dim('/ksdd:start') + '   Codex ' + dim('/prompts:ksdd-start') + '   opencode/Antigravity ' + dim('/ksdd-start'));
+  log('  Claude   ' + dim('/ksdd:start') + '   Codex ' + dim('/prompts:ksdd-start') + '   opencode/Antigravity ' + dim('/ksdd-start') + '   Copilot ' + dim('/ksdd-start') + ' (Copilot Chat)');
+  log('  ' + dim('Nota: o Copilot CLI ainda não consome comandos custom (copilot-cli#618/#1113); os prompt files funcionam no VS Code Copilot Chat.'));
   log('');
   log('Instalação global:');
   log('  ' + dim('npm install -g @kognar/ksdd'));
