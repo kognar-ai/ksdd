@@ -42,7 +42,7 @@ function resolveVscodeUserDir() {
   }
 }
 
-const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'build:feature.md', 'build:all.md', 'setup.md', 'archive.md'];
+const COMMAND_FILES = ['start.md', 'spec.md', 'tech.md', 'design.md', 'new:feature.md', 'new:fix.md', 'build:feature.md', 'build:fix.md', 'build:all.md', 'setup.md', 'archive.md'];
 
 const COLORS = process.stdout.isTTY && !process.env.NO_COLOR;
 const c = (code, s) => (COLORS ? `\x1b[${code}m${s}\x1b[0m` : s);
