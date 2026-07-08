@@ -1,7 +1,7 @@
 ---
 id: 059
 title: Atualizar README/INSTALL/CHANGELOG + ksdd help + bump package.json para 0.12.0
-status: para implementar
+status: em revisão
 feature: update-health-check
 area: backend
 priority: P0
