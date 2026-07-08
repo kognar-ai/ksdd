@@ -7,7 +7,7 @@
 
 | ID  | Título                                                                          | Área    | Prioridade | Estimativa | Status           | Depende de           |
 |-----|----------------------------------------------------------------------------------|---------|------------|------------|------------------|----------------------|
-| 056 | Criar `references/update-check.md` (procedimento canônico da checagem)           | backend | P0         | M          | para implementar | —                    |
+| 056 | Criar `references/update-check.md` (procedimento canônico da checagem)           | backend | P0         | M          | em revisão       | —                    |
 | 057 | Bloco de pré-flight nos 11 commands + ajustar `allowed-tools`                    | backend | P0         | M          | para implementar | 056                  |
 | 058 | Atualizar `SPEC.md` + `architecture.md` (ADR-014, env var, fluxo 13.5)           | backend | P1         | M          | para implementar | 056, 057             |
 | 059 | README/INSTALL/CHANGELOG + `ksdd help` + bump `package.json` 0.12.0              | backend | P0         | S          | para implementar | 056, 057, 058        |

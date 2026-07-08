@@ -1,7 +1,7 @@
 ---
 id: 056
 title: Criar references/update-check.md (procedimento canônico da checagem de update)
-status: para implementar
+status: em revisão
 feature: update-health-check
 area: backend
 priority: P0
