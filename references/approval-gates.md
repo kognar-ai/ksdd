@@ -70,6 +70,32 @@ O build completo tem **checkpoints em cascata**:
 
 **`--resume`:** Detecta estado existente (features/tasks com status misto) e retoma da próxima task incompleta.
 
+### Gate 8 — Após `/ksdd:new:fix`
+
+O `/ksdd:new:fix` tem **dois checkpoints internos**:
+
+1. **Checkpoint do FIX doc:** Após gerar `.ksdd/fixes/FIX-[slug].md`, antes de quebrar em tasks. O usuário aprova o root cause (com evidência `arquivo:linha`), o ajuste proposto e o blast radius do ajuste.
+2. **Checkpoint das tasks:** Após gerar `.ksdd/tasks/fix-[slug]/`, apresentando os dois caminhos de implementação — fix inline (bug pequeno, baixo risco) ou `/ksdd:build:fix` (para o resto).
+
+**Pré-condição:** `.ksdd/specs/SPEC.md` (fallback raiz `SPEC.md`) é recomendado; o codebase deve estar acessível para a investigação code-aware. `architecture.md` e `DESIGN.md` são opcionais mas ajudam a localizar os componentes afetados.
+
+**Caso especial — bug não reproduzível:** Se o command não consegue reproduzir o bug nem localizar o root cause com confiança, gera o `FIX-[slug].md` em modo "investigação incompleta" (o que foi tentado, hipóteses candidatas, e o que falta — logs, versão, passos, ambiente) e **para**: não avança para as tasks nem oferece o fix inline até os dados faltantes chegarem. Nunca propõe ajuste sobre diagnóstico chutado.
+
+### Gate 9 — Durante `/ksdd:build:fix`
+
+O build de fix tem **checkpoints por task**, no mesmo molde do `/ksdd:build:feature`, com o gate que é a alma de qualquer correção — o teste de regressão:
+
+1. **Pre-flight:** Git limpo, dependências disponíveis, detecção de slug arquivado. Falhou? STOP imediato.
+2. **Repro-first:** Antes de corrigir, reproduz o bug (roda o teste/fluxo que falha) para confirmar o diagnóstico do `FIX-[slug].md`. Repro não confirma o bug? Para e sinaliza que o FIX doc pode estar errado — não corrige às cegas.
+3. **Antes de cada task:** Mostra qual task será implementada, confirma com o usuário.
+4. **Quality gates por task — teste de regressão obrigatório:** Build, testes, lint, type-check, code review, security audit (se auth/PII) e, acima de tudo, um teste de regressão que **falha na base atual e passa após o ajuste** (falha-antes/passa-depois demonstrado). Sem esse teste, o gate bloqueia — aqui não é opcional como em features.
+5. **Validação de critérios:** Cada critério de verificação do `FIX-[slug].md` demonstrado com evidência.
+6. **PR aberto:** Label `bug` (não `feature`); o corpo referencia o `FIX-[slug].md`, o root cause e a evidência de regressão. Não faz merge — aguarda review humano.
+
+**Pré-condição:** o FIX deve existir e estar aprovado em `.ksdd/fixes/FIX-[slug].md`. Tasks devem existir em `.ksdd/tasks/fix-[slug]/`. `SPEC.md` recomendado (`.ksdd/specs/` ou raiz). Dependencies (`depends_on`) da task devem ter `status: concluída`.
+
+**O que NÃO conta como aprovação:** PR aberto não encerra o fix — o merge aguarda review humano. Quality gates verdes **sem** o teste de regressão que falha-antes/passa-depois também não liberam o PR: sem essa garantia, o gate bloqueia e o fix não sai.
+
 ## Como fazer o checkpoint
 
 Após gerar o arquivo, **sempre** termine com uma versão deste prompt:
