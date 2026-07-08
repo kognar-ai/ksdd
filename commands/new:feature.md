@@ -56,12 +56,15 @@ A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos. Para este command
 
 **Escrita:** sempre nos paths default `.ksdd/features/` e `.ksdd/tasks/`. Garanta `mkdir -p .ksdd/features/` e `mkdir -p .ksdd/tasks/feature-[slug]/` antes dos `create_file`.
 
-**Numeração de tasks:** ao calcular o próximo ID, considere IDs existentes em **três** lugares:
+**Numeração de tasks:** ao calcular o próximo ID, considere IDs existentes em **quatro** lugares:
 1. `.ksdd/tasks/feature-*/NNN-*.md` (layout atual)
-2. `docs/tasks/feature-*/NNN-*.md` (layout legado pré-0.6.0)
-3. `.ksdd/archive/raw/*/tasks/NNN-*.md` (features arquivadas via `/ksdd:archive`)
+2. `.ksdd/tasks/fix-*/NNN-*.md` (tasks de fixes geradas por `/ksdd:new:fix` — mesmo espaço global de IDs)
+3. `docs/tasks/feature-*/NNN-*.md` (layout legado pré-0.6.0)
+4. `.ksdd/archive/raw/*/tasks/NNN-*.md` (features arquivadas via `/ksdd:archive`)
 
-Use o **maior ID encontrado nos três paths combinados** + 1 como próximo ID. Isso evita colisão se uma feature arquivada for restaurada futuramente.
+Use o **maior ID encontrado nos quatro paths combinados** + 1 como próximo ID. Isso evita colisão entre features, fixes e features arquivadas restauradas.
+
+> **Fronteira de namespaces:** features vivem em `.ksdd/features/` + `.ksdd/tasks/feature-*/`; fixes (bugs) vivem em `.ksdd/fixes/` + `.ksdd/tasks/fix-*/` (via `/ksdd:new:fix`). Bug ≠ feature — mas os IDs de task são de um único espaço global compartilhado.
 
 ## Detecção de slug arquivado
 
@@ -88,7 +91,7 @@ Leia **todos** os artefatos KSDD existentes (aplicando fallback definido em "Pat
 4. `view .ksdd/specs/DESIGN.md` (se existir; fallback raiz)
 
 Se existem features prévias (em `.ksdd/features/FEATURE-*.md`, `docs/FEATURE-*.md` legado, ou `FEATURE-*.md` raiz mais legado), liste-as e leia os títulos pra evitar duplicação. Liste também features arquivadas em `.ksdd/archive/raw/*/FEATURE-*.md` para detectar colisão de slug (ver seção "Detecção de slug arquivado" acima).
-Se existem tasks prévias (em `.ksdd/tasks/`, `docs/tasks/` legado, ou `.ksdd/archive/raw/*/tasks/`), verifique o maior ID existente **nos três paths combinados** pra continuar a numeração sem colisão.
+Se existem tasks prévias (em `.ksdd/tasks/feature-*/`, `.ksdd/tasks/fix-*/`, `docs/tasks/` legado, ou `.ksdd/archive/raw/*/tasks/`), verifique o maior ID existente **nos quatro paths combinados** pra continuar a numeração sem colisão.
 
 ### 2. Sessão de perguntas (1-2 rodadas)
 
@@ -155,7 +158,7 @@ Após aprovação do FEATURE spec (ou se `--tasks-only` com FEATURE existente):
 
 **b) Gere os arquivos** em `.ksdd/tasks/feature-[slug]/` com nomenclatura `NNN-slug-curto.md` (ID com 3 dígitos zero-padded, slug em kebab-case sem acentos). Antes do primeiro `create_file`, garanta `mkdir -p .ksdd/tasks/feature-[slug]/`.
 
-Se já existem tasks no projeto (em `.ksdd/tasks/` ou `docs/tasks/` legado), continue a numeração a partir do **maior ID encontrado nos dois paths combinados** — não colida.
+Se já existem tasks no projeto (em `.ksdd/tasks/feature-*/`, `.ksdd/tasks/fix-*/` ou `docs/tasks/` legado), continue a numeração a partir do **maior ID encontrado** (regra dos quatro paths acima) — não colida.
 
 **c) Formato obrigatório de cada task:**
 
