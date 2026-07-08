@@ -1,7 +1,7 @@
 ---
 id: 058
 title: Atualizar SPEC.md + architecture.md (ADR-014, env var, fluxo 13.5, integrações)
-status: para implementar
+status: em revisão
 feature: update-health-check
 area: backend
 priority: P1
