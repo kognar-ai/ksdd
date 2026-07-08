@@ -1,7 +1,7 @@
 ---
 id: 038
 title: Adicionar new:fix.md e build:fix.md a COMMAND_FILES em bin/ksdd.js + verificar distribuição/uninstall
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P0
@@ -20,7 +20,7 @@ arch_refs:
 # 038 — Wiring de `COMMAND_FILES` no instalador
 
 ## Objetivo
-Adicionar `new:fix.md` e `build:fix.md` ao array `COMMAND_FILES` em `bin/ksdd.js` para que os dois commands sejam distribuídos e removidos corretamente nos 4 targets (Claude, Codex, opencode, Antigravity).
+Adicionar `new:fix.md` e `build:fix.md` ao array `COMMAND_FILES` em `bin/ksdd.js` para que os dois commands sejam distribuídos e removidos corretamente nos 5 targets (Claude, Codex, opencode, Antigravity).
 
 ## Escopo
 - Editar `bin/ksdd.js:29` (`COMMAND_FILES`) adicionando `'new:fix.md'` e `'build:fix.md'` — inserir junto do namespace `new:`/`build:` para leitura clara (ex.: após `'new:feature.md'` e após `'build:all.md'`).

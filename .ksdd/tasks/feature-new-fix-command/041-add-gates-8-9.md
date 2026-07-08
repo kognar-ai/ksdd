@@ -1,7 +1,7 @@
 ---
 id: 041
 title: Adicionar Gate 8 (new:fix) e Gate 9 (build:fix) em references/approval-gates.md
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P1

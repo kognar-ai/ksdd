@@ -7,17 +7,17 @@
 
 | ID  | Título                                                                     | Área    | Prioridade | Estimativa | Status           | Depende de                          |
 |-----|-----------------------------------------------------------------------------|---------|------------|------------|------------------|-------------------------------------|
-| 035 | Criar `commands/new:fix.md` (investigação code-aware, FIX doc, tasks, inline) | backend | P0         | L          | para implementar | —                                   |
-| 036 | Criar `references/fix-template.md` (template canônico do FIX doc)            | backend | P0         | M          | para implementar | —                                   |
-| 037 | Criar `commands/build:fix.md` (repro-first, gate de regressão, PR bug)       | backend | P0         | L          | para implementar | 035                                 |
-| 038 | `bin/ksdd.js` — `COMMAND_FILES` + distribuição/uninstall nos 4 targets       | backend | P0         | S          | para implementar | 035, 037                            |
-| 039 | Atualizar `commands/new:feature.md` — numeração considera `fix-*`            | backend | P1         | S          | para implementar | 035                                 |
-| 040 | Atualizar `build:feature` (redireciona fix) + `build:all` (exclui fix tasks) | backend | P2         | S          | para implementar | 035, 037                            |
-| 041 | Gate 8 (`new:fix`) + Gate 9 (`build:fix`) em `references/approval-gates.md`  | backend | P1         | S          | para implementar | 035, 037                            |
-| 042 | Atualizar `SPEC.md` + `architecture.md` (ADR-012, artefatos, contagem)       | backend | P1         | M          | para implementar | 035, 037                            |
-| 043 | README/INSTALL/CHANGELOG + bump `package.json` 0.10.0                        | backend | P0         | S          | para implementar | 035, 036, 037, 038, 039, 040, 041, 042 |
-| 044 | Dogfood — `/ksdd:new:fix` num bug real do repo (contagem de commands)        | qa      | P1         | S          | para implementar | 043                                 |
-| 045 | QA end-to-end — cenários A–O + 4 targets + edge cases                        | qa      | P0         | M          | para implementar | 044                                 |
+| 035 | Criar `commands/new:fix.md` (investigação code-aware, FIX doc, tasks, inline) | backend | P0         | L          | em revisão       | —                                   |
+| 036 | Criar `references/fix-template.md` (template canônico do FIX doc)            | backend | P0         | M          | em revisão       | —                                   |
+| 037 | Criar `commands/build:fix.md` (repro-first, gate de regressão, PR bug)       | backend | P0         | L          | em revisão       | 035                                 |
+| 038 | `bin/ksdd.js` — `COMMAND_FILES` + distribuição/uninstall nos 5 targets       | backend | P0         | S          | em revisão       | 035, 037                            |
+| 039 | Atualizar `commands/new:feature.md` — numeração considera `fix-*`            | backend | P1         | S          | em revisão       | 035                                 |
+| 040 | Atualizar `build:feature` (redireciona fix) + `build:all` (exclui fix tasks) | backend | P2         | S          | em revisão       | 035, 037                            |
+| 041 | Gate 8 (`new:fix`) + Gate 9 (`build:fix`) em `references/approval-gates.md`  | backend | P1         | S          | em revisão       | 035, 037                            |
+| 042 | Atualizar `SPEC.md` + `architecture.md` (ADR-013, artefatos, contagem)       | backend | P1         | M          | em revisão       | 035, 037                            |
+| 043 | README/INSTALL/CHANGELOG + bump `package.json` 0.11.0                        | backend | P0         | S          | em revisão       | 035, 036, 037, 038, 039, 040, 041, 042 |
+| 044 | Dogfood — `/ksdd:new:fix` num bug real do repo (contagem de commands)        | qa      | P1         | S          | em revisão       | 043                                 |
+| 045 | QA end-to-end — cenários A–O + 4 targets + edge cases                        | qa      | P0         | M          | em revisão       | 044                                 |
 
 ---
 

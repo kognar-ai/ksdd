@@ -1,7 +1,7 @@
 ---
 id: 039
 title: Atualizar commands/new:feature.md — numeração de IDs considera .ksdd/tasks/fix-*/
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P1

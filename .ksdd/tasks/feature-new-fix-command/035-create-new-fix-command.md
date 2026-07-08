@@ -1,7 +1,7 @@
 ---
 id: 035
 title: Criar commands/new:fix.md (investigação code-aware, FIX doc, tasks, fix inline opcional)
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P0

@@ -1,7 +1,7 @@
 ---
 id: 042
-title: Atualizar SPEC.md e architecture.md (ADR-012 .ksdd/fixes/, artefatos, superfícies, roadmap, contagem)
-status: para implementar
+title: Atualizar SPEC.md e architecture.md (ADR-013 .ksdd/fixes/, artefatos, superfícies, roadmap, contagem)
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P1
@@ -34,7 +34,7 @@ Refletir a nova classe de artefato `.ksdd/fixes/` e os dois commands nos artefat
 - **Seção 14** (fases de entrega): registrar a entrega dos commands de fix.
 
 ## Escopo — architecture.md (`.ksdd/specs/architecture.md`)
-- **Nova ADR-012** — `.ksdd/fixes/` como classe de artefato paralela a `.ksdd/features/`; `new:fix`/`build:fix` como commands de conteúdo (2 entradas em `COMMAND_FILES`, sem função `install*` nova → **não** dispara o refator ADR-010/011). Registrar a decisão do fix inline opcional + gate de regressão obrigatório.
+- **Nova ADR-013** — `.ksdd/fixes/` como classe de artefato paralela a `.ksdd/features/`; `new:fix`/`build:fix` como commands de conteúdo (2 entradas em `COMMAND_FILES`, sem função `install*` nova → **não** dispara o refator ADR-010/011). Registrar a decisão do fix inline opcional + gate de regressão obrigatório.
 - **Seção 3** (schemas): documentar `fix: [slug]` como contexto de frontmatter de task e `fix_refs`.
 - **Seção 4** (CLI surface): adicionar os 2 slash commands.
 - **Seção 12** (roadmap): marcar a entrega; registrar "arquivar fixes" como item futuro.
@@ -48,7 +48,7 @@ Refletir a nova classe de artefato `.ksdd/fixes/` e os dois commands nos artefat
 - [ ] SPEC 7.2 lista `ksdd:new:fix` e `ksdd:build:fix`.
 - [ ] SPEC 4.2 e 4.4 incluem `.ksdd/fixes/FIX-[slug].md` e `.ksdd/tasks/fix-[slug]/`.
 - [ ] Contagem de commands reconciliada para 11 em todas as ocorrências.
-- [ ] architecture tem ADR-012 registrando `.ksdd/fixes/` + decisão de não disparar refator ADR-010/011.
+- [ ] architecture tem ADR-013 registrando `.ksdd/fixes/` + decisão de não disparar refator ADR-010/011.
 - [ ] architecture seção 3 documenta `fix:`/`fix_refs`; seção 4 lista os commands; roadmap atualizado.
 - [ ] Edições cirúrgicas (`str_replace`) preservando o resto dos documentos.
 

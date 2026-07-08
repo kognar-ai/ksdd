@@ -47,7 +47,7 @@ Quando um bug é reportado (usuário, cliente, CI vermelho, stack trace em produ
 
 ### 2.1 O que entra (v1)
 
-- **Novo slash command `/ksdd:new:fix`** distribuído em `commands/new:fix.md`, instalado nos 4 targets via `ksdd install [--codex] [--opencode] [--antigravity]` (`~/.claude/commands/ksdd:new:fix.md`, `~/.codex/prompts/ksdd-new-fix.md`, `~/.config/opencode/commands/ksdd-new-fix.md`, `~/.gemini/**/skills/ksdd-new-fix.md`). Responsável por:
+- **Novo slash command `/ksdd:new:fix`** distribuído em `commands/new:fix.md`, instalado nos 5 targets via `ksdd install [--codex] [--opencode] [--antigravity] [--copilot]` (`~/.claude/commands/ksdd:new:fix.md`, `~/.codex/prompts/ksdd-new-fix.md`, `~/.config/opencode/commands/ksdd-new-fix.md`, `~/.gemini/**/skills/ksdd-new-fix.md`, e prompt file `ksdd-new-fix.prompt.md` no perfil VS Code do Copilot). Responsável por:
   - **Absorver contexto do projeto** — lê `SPEC.md`, `architecture.md`, `DESIGN.md` (com fallback de path, igual aos demais commands) e as FEATURE/FIX specs relevantes ao bug.
   - **Coletar o bug reportado** a partir de entrada flexível (`$ARGUMENTS` + rodada de perguntas): descrição livre, mensagem de erro / stack trace, nome de um teste que reproduz, referência a issue do GitHub (`#123` ou URL — leitura best-effort via `gh` se disponível), ou referência a artefato KSDD (feature/task/ADR relacionado).
   - **Investigar com consciência de código (code-aware)** — este é o diferencial vs `/ksdd:new:feature`, que fica na altitude de produto. O `new:fix` **lê o codebase** (`Grep`/`Glob`/`Read`) para: reproduzir o bug, localizar a causa raiz com evidência (`arquivo:linha`), mapear componentes afetados e estimar o blast radius do ajuste.
@@ -56,7 +56,7 @@ Quando um bug é reportado (usuário, cliente, CI vermelho, stack trace em produ
   - **Quebrar em tasks implementáveis** em `.ksdd/tasks/fix-[slug]/NNN-*.md` (granularidade menor que features — tipicamente 1 a 3 tasks) + `README.md` índice. Uma das tasks/critérios é **sempre** o teste de regressão.
   - **Checkpoint 2 (tasks)** — resumo das tasks e próximos passos.
   - **Fix inline opcional (bugs pequenos)** — após a aprovação das tasks, para bugs de **blast radius pequeno e baixo risco**, o command oferece (opt-in explícito) aplicar o ajuste direto: cria branch, aplica o patch, escreve o teste de regressão, roda a verificação local e reporta o diff — sem passar pelo `/ksdd:build:fix`. Para qualquer coisa não-trivial, recomenda `/ksdd:build:fix`. O caminho escolhido é registrado no `FIX-[slug].md`.
-- **Novo slash command `/ksdd:build:fix`** distribuído em `commands/build:fix.md`, instalado nos 4 targets. Implementa tasks de fix ponta-a-ponta, na mesma linha do `/ksdd:build:feature` (pre-flight → issue → branch → context.md → execução via teammates → quality gates → commit → PR), com três adaptações específicas de bug:
+- **Novo slash command `/ksdd:build:fix`** distribuído em `commands/build:fix.md`, instalado nos 5 targets. Implementa tasks de fix ponta-a-ponta, na mesma linha do `/ksdd:build:feature` (pre-flight → issue → branch → context.md → execução via teammates → quality gates → commit → PR), com três adaptações específicas de bug:
   - **Repro-first:** antes de corrigir, reproduz o bug (roda o teste/fluxo que falha) para confirmar o diagnóstico do `FIX-[slug].md`.
   - **Teste de regressão como quality gate obrigatório:** o fix só passa se existir um teste que **falha na base atual** e **passa após o ajuste**. Sem esse teste, o gate bloqueia (não é opcional como em features).
   - **Issue/PR rotulados como bug:** labels `bug`/`fix` (não `feature`); o corpo referencia o `FIX-[slug].md`, o root cause e a evidência de regressão.
@@ -68,10 +68,10 @@ Quando um bug é reportado (usuário, cliente, CI vermelho, stack trace em produ
 - **Gate 8 (`/ksdd:new:fix`) e Gate 9 (`/ksdd:build:fix`)** adicionados em `references/approval-gates.md`.
 - **Wiring no instalador:** adicionar `new:fix.md` e `build:fix.md` ao array `COMMAND_FILES` em `bin/ksdd.js` (é hardcoded — ver CHANGELOG 0.7.0 / ADR-001). Sem novas funções `install*` — são commands de conteúdo, não duplicam a superfície de instalação (não incorrem na dívida do ADR-010/011).
 - **Coordenação com commands existentes:** `new:feature` (numeração), `build:feature` (redireciona slug de fix para `build:fix`), `build:all` (fix tasks ficam fora da fila de features).
-- **Atualização de docs públicas** — README (tabela de comandos + seção "Corrigindo bugs"), INSTALL (contagem/paths), CHANGELOG `[0.10.0]`, bump `package.json` para `0.10.0`.
-- **Atualização de artefatos KSDD** — SPEC (seção 7.2 lista os 2 commands novos; 4.2 tabela de artefatos; contagem de commands reconciliada) e architecture (ADR-012 registrando `.ksdd/fixes/` como nova classe de artefato + superfície CLI + roadmap).
+- **Atualização de docs públicas** — README (tabela de comandos + seção "Corrigindo bugs"), INSTALL (contagem/paths), CHANGELOG `[0.11.0]`, bump `package.json` para `0.11.0`.
+- **Atualização de artefatos KSDD** — SPEC (seção 7.2 lista os 2 commands novos; 4.2 tabela de artefatos; contagem de commands reconciliada) e architecture (ADR-013 registrando `.ksdd/fixes/` como nova classe de artefato + superfície CLI + roadmap).
 - **Dogfooding** — investigar e corrigir um bug real do próprio repo KSDD via o fluxo (ver seção 4.6).
-- **Bump de versão** para `0.10.0` (semver minor — 2 commands novos, retrocompatível).
+- **Bump de versão** para `0.11.0` (semver minor — 2 commands novos, retrocompatível).
 
 ### 2.2 O que fica pra depois
 
@@ -205,8 +205,8 @@ KSDD é CLI sem UI — substituído por **Impacto em superfícies de interação
 | `references/approval-gates.md` | Adiciona Gate 8 (`new:fix`) e Gate 9 (`build:fix`) | após Gate 7 | Documentar os checkpoints dos novos commands |
 | Documentação: `README.md` / `INSTALL.md` | Lista os 2 commands + nova seção "Corrigindo bugs" | seção de comandos | Discovery |
 | `.ksdd/specs/SPEC.md` | Seção 7.2 lista os commands; 4.2 lista `.ksdd/fixes/`; contagem reconciliada (11 commands) | seções 4.2, 7.2, 14 | Manter o SPEC como contrato fiel |
-| `.ksdd/specs/architecture.md` | ADR-012 (`.ksdd/fixes/`); tabela de artefatos; roadmap | seções 3, 10, 12 | Registrar a nova classe de artefato e a decisão |
-| `CHANGELOG.md` / `package.json` | Entrada `[0.10.0]` + bump | topo / `version` | Convenção do projeto |
+| `.ksdd/specs/architecture.md` | ADR-013 (`.ksdd/fixes/`); tabela de artefatos; roadmap | seções 3, 10, 12 | Registrar a nova classe de artefato e a decisão |
+| `CHANGELOG.md` / `package.json` | Entrada `[0.11.0]` + bump | topo / `version` | Convenção do projeto |
 
 ### 5.2 Superfícies novas
 
@@ -300,7 +300,7 @@ KSDD não tem API HTTP (architecture.md seção 4). "API equivalente" = superfí
 | `ksdd uninstall` | Remove os novos arquivos via manifest (automático — sem código novo) |
 | `ksdd status` | Conta os 2 novos commands por target |
 
-**ADRs respeitados:** ADR-001 (zero deps), ADR-003 (offline/filesystem), ADR-007 (cópia), ADR-009 (prefixo `ksdd:`/`ksdd-`). **Novo:** ADR-012 registra `.ksdd/fixes/` como classe de artefato (paralela a `.ksdd/features/`). **Não** dispara o refator do ADR-010/011 (nenhuma função `install*` nova).
+**ADRs respeitados:** ADR-001 (zero deps), ADR-003 (offline/filesystem), ADR-007 (cópia), ADR-009 (prefixo `ksdd:`/`ksdd-`). **Novo:** ADR-013 registra `.ksdd/fixes/` como classe de artefato (paralela a `.ksdd/features/`). **Não** dispara o refator do ADR-010/011 (nenhuma função `install*` nova).
 
 ---
 
@@ -344,7 +344,7 @@ Nenhum. Convenções de cor da SPEC 3.2 cobrem todos os casos.
 | Técnica | Convenção de slug kebab-case (`commands/new:feature.md`) | resolvida | Baixo — mesma validação |
 | Técnica | `COMMAND_FILES` hardcoded em `bin/ksdd.js` | resolvida (conhecida) | Alto — sem edição, commands não são distribuídos |
 | Externa | `gh` CLI para leitura de issue (best-effort) | opcional | Baixo — fluxo funciona com entrada livre se ausente |
-| Negócio | Aprovação do mantenedor sobre o par de commands + bump 0.10.0 | pendente — confirmar no checkpoint | Baixo — afeta release, não código |
+| Negócio | Aprovação do mantenedor sobre o par de commands + bump 0.11.0 | pendente — confirmar no checkpoint | Baixo — afeta release, não código |
 
 ### 9.2 Riscos
 
@@ -354,7 +354,7 @@ Nenhum. Convenções de cor da SPEC 3.2 cobrem todos os casos.
 | Fix inline aplicado a bug que não era tão pequeno → bypass de quality gates | Alto | Média | Opt-in explícito + heurística estrita (1 arquivo, sem schema/API/auth) + teste de regressão obrigatório mesmo inline + recusa e recomenda `build:fix` se cresce (fluxo 4.2) |
 | Ambiguidade "bug ou feature?" leva a usar o command errado | Médio | Média | Namespace `.ksdd/fixes/` separado; `new:feature` e `new:fix` documentam a fronteira; `build:feature` redireciona slug de fix |
 | Colisão de ID entre feature tasks e fix tasks | Médio | Média | Espaço global único de IDs; `new:fix` e `new:feature` varrem ambas as árvores (tasks 035, 039) |
-| Dois commands novos incham o `COMMAND_FILES` e a superfície de 4 targets | Baixo | Alta (esperada) | São commands de conteúdo — 2 entradas em `COMMAND_FILES`, distribuídas pelo loop existente. **Não** criam função `install*` (não tocam a dívida ADR-010/011) |
+| Dois commands novos incham o `COMMAND_FILES` e a superfície de 5 targets | Baixo | Alta (esperada) | São commands de conteúdo — 2 entradas em `COMMAND_FILES`, distribuídas pelo loop existente. **Não** criam função `install*` (não tocam a dívida ADR-010/011) |
 | `build:fix` diverge de `build:feature` e vira código duplicado a manter | Médio | Média | `build:fix` referencia o fluxo do `build:feature` e documenta só os deltas (repro-first, gate de regressão, labels); evitar reescrever o pipeline inteiro |
 | Gate de regressão trava fixes legítimos onde o teste é difícil (ex: bug de concorrência) | Médio | Baixa | Documentar exceção explícita: se um teste automatizado é inviável, exigir evidência manual reproduzível + aprovação consciente do usuário (não silenciar o gate) |
 | Leitura de issue do GitHub falha/varia entre ambientes | Baixo | Média | Best-effort via `gh`; fallback pede o conteúdo colado. Sem SDK embarcado (ADR-003) |
@@ -381,11 +381,11 @@ Nenhum. Convenções de cor da SPEC 3.2 cobrem todos os casos.
 - [ ] `/ksdd:build:all` não inclui `.ksdd/tasks/fix-*/` na fila de features.
 - [ ] Gate 8 (`new:fix`) e Gate 9 (`build:fix`) documentados em `references/approval-gates.md`.
 - [ ] `.ksdd/specs/SPEC.md` lista os 2 commands (7.2), a classe `.ksdd/fixes/` (4.2), e reconcilia a contagem de commands (11).
-- [ ] `.ksdd/specs/architecture.md` registra ADR-012 (`.ksdd/fixes/`), atualiza tabela de artefatos e roadmap.
+- [ ] `.ksdd/specs/architecture.md` registra ADR-013 (`.ksdd/fixes/`), atualiza tabela de artefatos e roadmap.
 - [ ] `README.md` lista os 2 commands e tem seção "Corrigindo bugs" com exemplos; `INSTALL.md` atualizado.
-- [ ] `CHANGELOG.md` tem entrada `## [0.10.0]`; `package.json` bumpado para `0.10.0`.
+- [ ] `CHANGELOG.md` tem entrada `## [0.11.0]`; `package.json` bumpado para `0.11.0`.
 - [ ] Dogfooding: um bug real do repo investigado via `/ksdd:new:fix`, gerando o primeiro `.ksdd/fixes/FIX-*.md`.
-- [ ] QA cobre: entrada por descrição/issue/teste, checkpoints, bug não reproduzível, fix inline (aceito e recusado), `build:fix` (repro-first + gate de regressão + PR), instalação nos 4 targets, colisão de ID, redirecionamento de slug de fix.
+- [ ] QA cobre: entrada por descrição/issue/teste, checkpoints, bug não reproduzível, fix inline (aceito e recusado), `build:fix` (repro-first + gate de regressão + PR), instalação nos 5 targets, colisão de ID, redirecionamento de slug de fix.
 
 ---
 
@@ -397,14 +397,14 @@ Nenhum. Convenções de cor da SPEC 3.2 cobrem todos os casos.
 - [ ] Criar `commands/build:fix.md` (repro-first + gate de regressão + PR rotulado).
 
 ### Fase 2 — Instalador + integração com commands existentes
-- [ ] Adicionar `new:fix.md` e `build:fix.md` a `COMMAND_FILES` em `bin/ksdd.js` + verificar distribuição/uninstall nos 4 targets.
+- [ ] Adicionar `new:fix.md` e `build:fix.md` a `COMMAND_FILES` em `bin/ksdd.js` + verificar distribuição/uninstall nos 5 targets.
 - [ ] Atualizar `commands/new:feature.md` (numeração considera `fix-*`).
 - [ ] Atualizar `commands/build:feature.md` e `commands/build:all.md` (redirecionar/excluir fix tasks).
 
 ### Fase 3 — Gates + artefatos KSDD + docs + release
 - [ ] Adicionar Gate 8 e Gate 9 em `references/approval-gates.md`.
-- [ ] Atualizar `SPEC.md` + `architecture.md` (ADR-012, artefatos, superfícies, roadmap, contagem).
-- [ ] Atualizar `README.md` / `INSTALL.md` / `CHANGELOG.md` + bump `package.json` para `0.10.0`.
+- [ ] Atualizar `SPEC.md` + `architecture.md` (ADR-013, artefatos, superfícies, roadmap, contagem).
+- [ ] Atualizar `README.md` / `INSTALL.md` / `CHANGELOG.md` + bump `package.json` para `0.11.0`.
 
 ### Fase 4 — Dogfood + QA
 - [ ] Rodar `/ksdd:new:fix` sobre um bug real do repo (contagem de commands) — primeiro FIX doc.

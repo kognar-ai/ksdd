@@ -1,7 +1,7 @@
 ---
 id: 037
 title: Criar commands/build:fix.md (repro-first, teste de regressão obrigatório, PR rotulado bug)
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P0

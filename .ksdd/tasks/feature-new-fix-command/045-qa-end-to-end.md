@@ -1,7 +1,7 @@
 ---
 id: 045
 title: QA end-to-end — matriz de cenários (new:fix, build:fix, 4 targets, edge cases)
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: qa
 priority: P0

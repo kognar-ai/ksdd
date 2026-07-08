@@ -1,7 +1,7 @@
 ---
 id: 040
 title: Atualizar build:feature (redireciona slug de fix) e build:all (exclui fix tasks da fila)
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P2

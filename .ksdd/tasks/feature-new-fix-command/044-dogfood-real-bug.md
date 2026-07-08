@@ -1,7 +1,7 @@
 ---
 id: 044
 title: Dogfood — usar /ksdd:new:fix num bug real do repo (contagem de commands) e gerar o primeiro FIX doc
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: qa
 priority: P1

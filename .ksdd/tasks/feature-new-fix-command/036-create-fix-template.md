@@ -1,7 +1,7 @@
 ---
 id: 036
 title: Criar references/fix-template.md (template canônico do FIX doc)
-status: para implementar
+status: em revisão
 feature: new-fix-command
 area: backend
 priority: P0
