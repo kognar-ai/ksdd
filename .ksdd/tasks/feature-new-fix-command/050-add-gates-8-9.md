@@ -1,12 +1,12 @@
 ---
-id: 041
+id: 050
 title: Adicionar Gate 8 (new:fix) e Gate 9 (build:fix) em references/approval-gates.md
 status: em revisão
 feature: new-fix-command
 area: backend
 priority: P1
 estimate: S
-depends_on: [035, 037]
+depends_on: [044, 046]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#52-superfícies-novas"
   - ".ksdd/features/FEATURE-new-fix-command.md#4-fluxos-de-uso"
@@ -15,7 +15,7 @@ spec_refs:
 arch_refs: []
 ---
 
-# 041 — Gates 8 e 9 nos approval-gates
+# 050 — Gates 8 e 9 nos approval-gates
 
 ## Objetivo
 Documentar os checkpoints dos novos commands em `references/approval-gates.md`: Gate 8 para `/ksdd:new:fix` (dois checkpoints internos: FIX doc e tasks) e Gate 9 para `/ksdd:build:fix` (checkpoints por task + gate de regressão).
@@ -30,8 +30,8 @@ Documentar os checkpoints dos novos commands em `references/approval-gates.md`: 
 - Se houver contagem/menção a "7 gates" ou similar no arquivo, reconciliar para 9.
 
 ## Fora de escopo
-- Criar os commands (tasks 035, 037).
-- SPEC/architecture/README (tasks 042, 043).
+- Criar os commands (tasks 044, 046).
+- SPEC/architecture/README (tasks 051, 052).
 
 ## Critérios de aceitação
 - [ ] `references/approval-gates.md` tem seção "Gate 8 — Após `/ksdd:new:fix`" com os 2 checkpoints internos.

@@ -1,5 +1,5 @@
 ---
-id: 036
+id: 045
 title: Criar references/fix-template.md (template canônico do FIX doc)
 status: em revisão
 feature: new-fix-command
@@ -16,7 +16,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#3-modelo-de-dados-schemas"
 ---
 
-# 036 — Criar `references/fix-template.md`
+# 045 — Criar `references/fix-template.md`
 
 ## Objetivo
 Criar o template canônico do artefato `FIX-[slug].md`, análogo a `references/feature-template.md` mas orientado a diagnóstico de bug: bug, reprodução, root cause com evidência, blast radius, ajuste proposto, critérios de verificação e estratégia de teste de regressão. Lido pelo `/ksdd:new:fix` para preencher cada investigação de forma consistente.
@@ -37,9 +37,9 @@ Criar o template canônico do artefato `FIX-[slug].md`, análogo a `references/f
 - Campo de **severidade** (Crítica / Alta / Média / Baixa) ligada a impacto no usuário — distinto de "prioridade" de task.
 
 ## Fora de escopo
-- O command que consome o template (task 035).
-- Formato das tasks de fix (embutido no command 035, reusa o formato de feature task).
-- Distribuição via instalador (task 038 — `copyDir` de `references/` já cobre; verificar).
+- O command que consome o template (task 044).
+- Formato das tasks de fix (embutido no command 044, reusa o formato de feature task).
+- Distribuição via instalador (task 047 — `copyDir` de `references/` já cobre; verificar).
 
 ## Critérios de aceitação
 - [ ] `references/fix-template.md` existe com as 9 seções canônicas + header com placeholders.
@@ -51,7 +51,7 @@ Criar o template canônico do artefato `FIX-[slug].md`, análogo a `references/f
 
 ## Notas técnicas
 - Basear-se em `references/feature-template.md` (estrutura, estilo de placeholders, seção de referências).
-- Distribuição: `references/` é copiado via `copyDir` nas funções `install*` de `bin/ksdd.js` — o template entra no bundle de skill de cada target automaticamente (confirmar na task 038).
+- Distribuição: `references/` é copiado via `copyDir` nas funções `install*` de `bin/ksdd.js` — o template entra no bundle de skill de cada target automaticamente (confirmar na task 047).
 - O `FIX-[slug].md` é read-only durante `/ksdd:build:fix` (mesma regra do FEATURE spec no build).
 
 ## Riscos / dependências externas

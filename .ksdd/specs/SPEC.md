@@ -112,7 +112,7 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
 
 ```json
 {
-  "version": "0.9.0",
+  "version": "0.11.0",
   "installedAt": "ISO-8601 timestamp",
   "pkgRoot": "/path/absoluto/do/pacote/npm",
   "targets": {

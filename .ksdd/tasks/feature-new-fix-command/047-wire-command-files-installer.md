@@ -1,12 +1,12 @@
 ---
-id: 038
+id: 047
 title: Adicionar new:fix.md e build:fix.md a COMMAND_FILES em bin/ksdd.js + verificar distribuição/uninstall
 status: em revisão
 feature: new-fix-command
 area: backend
 priority: P0
 estimate: S
-depends_on: [035, 037]
+depends_on: [044, 046]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#72-endpointssuperfícies-modificadas"
   - ".ksdd/features/FEATURE-new-fix-command.md#51-superfícies-modificadas"
@@ -17,7 +17,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#10-decisões-arquiteturais-significativas-adrs"
 ---
 
-# 038 — Wiring de `COMMAND_FILES` no instalador
+# 047 — Wiring de `COMMAND_FILES` no instalador
 
 ## Objetivo
 Adicionar `new:fix.md` e `build:fix.md` ao array `COMMAND_FILES` em `bin/ksdd.js` para que os dois commands sejam distribuídos e removidos corretamente nos 5 targets (Claude, Codex, opencode, Antigravity).
@@ -31,8 +31,8 @@ Adicionar `new:fix.md` e `build:fix.md` ao array `COMMAND_FILES` em `bin/ksdd.js
 - Verificar `cmdUninstall` (fallback sem manifest) — remove `ksdd:*` e `ksdd-*` por convenção; os novos entram no padrão sem código extra.
 
 ## Fora de escopo
-- Criar os commands e o template (tasks 035, 036, 037).
-- Documentação/CHANGELOG/bump (task 043).
+- Criar os commands e o template (tasks 044, 045, 046).
+- Documentação/CHANGELOG/bump (task 052).
 - Nova função `install*` — **não** é necessária (são commands de conteúdo; sem dívida ADR-010/011).
 
 ## Critérios de aceitação
@@ -50,4 +50,4 @@ Adicionar `new:fix.md` e `build:fix.md` ao array `COMMAND_FILES` em `bin/ksdd.js
 - Validar localmente com `ANTIGRAVITY_HOME`/`OPENCODE_HOME`/`CODEX_HOME` apontando para tmpdir se quiser evitar sujar o home.
 
 ## Riscos / dependências externas
-- Baixo risco — mudança de 2 linhas num array. O grosso da verificação é o smoke de install/uninstall (fecha no QA, task 045).
+- Baixo risco — mudança de 2 linhas num array. O grosso da verificação é o smoke de install/uninstall (fecha no QA, task 054).

@@ -1,12 +1,12 @@
 ---
-id: 039
+id: 048
 title: Atualizar commands/new:feature.md — numeração de IDs considera .ksdd/tasks/fix-*/
 status: em revisão
 feature: new-fix-command
 area: backend
 priority: P1
 estimate: S
-depends_on: [035]
+depends_on: [044]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#62-alterações-em-entidades-existentes"
   - ".ksdd/features/FEATURE-new-fix-command.md#51-superfícies-modificadas"
@@ -16,7 +16,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#3-modelo-de-dados-schemas"
 ---
 
-# 039 — Numeração de IDs no `new:feature` considera fixes
+# 048 — Numeração de IDs no `new:feature` considera fixes
 
 ## Objetivo
 Atualizar `commands/new:feature.md` para que o cálculo do próximo ID de task varra também `.ksdd/tasks/fix-*/`, garantindo espaço global único de IDs entre feature tasks e fix tasks.
@@ -27,8 +27,8 @@ Atualizar `commands/new:feature.md` para que o cálculo do próximo ID de task v
 - Adicionar nota curta sobre a fronteira de namespaces: features vivem em `.ksdd/features/` + `.ksdd/tasks/feature-*/`; fixes em `.ksdd/fixes/` + `.ksdd/tasks/fix-*/`. Bug ≠ feature.
 
 ## Fora de escopo
-- Criar/alterar `new:fix` (task 035) ou `build:fix` (task 037).
-- Alterar `build:feature`/`build:all` (task 040).
+- Criar/alterar `new:fix` (task 044) ou `build:fix` (task 046).
+- Alterar `build:feature`/`build:all` (task 049).
 - Mover ou renomear tasks existentes.
 
 ## Critérios de aceitação
@@ -39,7 +39,7 @@ Atualizar `commands/new:feature.md` para que o cálculo do próximo ID de task v
 
 ## Notas técnicas
 - Espelha exatamente o tratamento que a feature `archive-features` deu ao incluir `.ksdd/archive/raw/*/tasks/` na numeração (CHANGELOG `[0.7.0]`).
-- O `new:fix` (task 035) já faz a varredura simétrica (inclui `feature-*`); esta task fecha o outro lado.
+- O `new:fix` (task 044) já faz a varredura simétrica (inclui `feature-*`); esta task fecha o outro lado.
 
 ## Riscos / dependências externas
 - Nenhuma. Mudança documental de baixo risco no prompt.

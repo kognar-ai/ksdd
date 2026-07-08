@@ -1,5 +1,5 @@
 ---
-id: 035
+id: 044
 title: Criar commands/new:fix.md (investigação code-aware, FIX doc, tasks, fix inline opcional)
 status: em revisão
 feature: new-fix-command
@@ -19,7 +19,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#3-modelo-de-dados-schemas"
 ---
 
-# 035 — Criar `commands/new:fix.md`
+# 044 — Criar `commands/new:fix.md`
 
 ## Objetivo
 Criar o novo slash command `/ksdd:new:fix` em `commands/new:fix.md`, escrito como prompt Markdown para Claude/Codex/opencode/Antigravity, que investiga um bug apontado (code-aware), gera `.ksdd/fixes/FIX-[slug].md`, quebra em tasks em `.ksdd/tasks/fix-[slug]/`, e oferece fix inline opcional para bugs pequenos. É o núcleo da feature.
@@ -30,7 +30,7 @@ Criar o novo slash command `/ksdd:new:fix` em `commands/new:fix.md`, escrito com
 - **Investigação code-aware** (diferencial vs `new:feature`): instruir o agente a reproduzir o bug, localizar root cause com `Grep`/`Read` e citar evidência `arquivo:linha`, mapear componentes afetados e blast radius.
 - **Derivação de slug** kebab-case + checagem de colisão com `.ksdd/fixes/FIX-*.md` e slugs arquivados em `.ksdd/archive/raw/`.
 - **Geração de `.ksdd/fixes/FIX-[slug].md`** a partir de `references/fix-template.md` (`mkdir -p .ksdd/fixes/` antes do `create_file`).
-- **Checkpoint 1 (FIX doc)** obrigatório antes de quebrar em tasks; **Checkpoint 2 (tasks)** antes de qualquer implementação (Gate 8 — task 041).
+- **Checkpoint 1 (FIX doc)** obrigatório antes de quebrar em tasks; **Checkpoint 2 (tasks)** antes de qualquer implementação (Gate 8 — task 050).
 - **Quebra em tasks** em `.ksdd/tasks/fix-[slug]/NNN-*.md` + `README.md`, com frontmatter usando `fix: [slug]` e `fix_refs`; numeração no espaço global de IDs (varre `.ksdd/tasks/feature-*/`, `.ksdd/tasks/fix-*/`, `docs/tasks/*`, `.ksdd/archive/raw/*/tasks/` — maior ID + 1). Sempre incluir uma task/critério de **teste de regressão**.
 - **Fix inline opcional** (FEATURE 4.2): opt-in explícito no Checkpoint 2, só para bug pequeno (heurística: 1 arquivo, sem schema/API/auth/PII); cria branch, aplica patch, escreve teste de regressão, roda verificação local, mostra diff — sem commit/merge automático; recusa e recomenda `/ksdd:build:fix` se cresce.
 - **Bug não reproduzível** (FEATURE 4.5): gerar FIX em modo "investigação incompleta" e parar pedindo dados faltantes — nunca propor ajuste sobre diagnóstico chutado.
@@ -38,11 +38,11 @@ Criar o novo slash command `/ksdd:new:fix` em `commands/new:fix.md`, escrito com
 - Mensagens canônicas (FEATURE 8.3) com cores ANSI conforme SPEC seção 3.2.
 
 ## Fora de escopo
-- `commands/build:fix.md` (task 037).
-- Template `references/fix-template.md` (task 036).
-- Wiring em `bin/ksdd.js` (task 038).
-- Atualizações em `new:feature`/`build:feature`/`build:all` (tasks 039, 040).
-- Gates, SPEC, architecture, docs, bump (tasks 041, 042, 043).
+- `commands/build:fix.md` (task 046).
+- Template `references/fix-template.md` (task 045).
+- Wiring em `bin/ksdd.js` (task 047).
+- Atualizações em `new:feature`/`build:feature`/`build:all` (tasks 048, 049).
+- Gates, SPEC, architecture, docs, bump (tasks 050, 051, 052).
 - Arquivamento de fixes, `--all`/triagem em lote, auto-link à feature que introduziu o bug (FEATURE seção 2.2).
 
 ## Critérios de aceitação
@@ -67,6 +67,6 @@ Criar o novo slash command `/ksdd:new:fix` em `commands/new:fix.md`, escrito com
 - Diferença central vs `new:feature`: `new:fix` **lê o codebase**; garantir que o prompt orienta busca por evidência, não só descrição de produto.
 
 ## Riscos / dependências externas
-- Tom precisa ser inequívoco para o agente não pular a reprodução — cobrir no QA (task 045).
-- Depende conceitualmente do template (036) e será validado pelo dogfood (044); mas o arquivo do command pode ser escrito sem eles (referencia por path).
+- Tom precisa ser inequívoco para o agente não pular a reprodução — cobrir no QA (task 054).
+- Depende conceitualmente do template (045) e será validado pelo dogfood (053); mas o arquivo do command pode ser escrito sem eles (referencia por path).
 - Heurística de "bug pequeno" para inline precisa ser objetiva o suficiente para o agente aplicar com consistência.

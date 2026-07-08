@@ -1,12 +1,12 @@
 ---
-id: 043
+id: 052
 title: Atualizar README/INSTALL/CHANGELOG + bump package.json para 0.11.0
 status: em revisão
 feature: new-fix-command
 area: backend
 priority: P0
 estimate: S
-depends_on: [035, 036, 037, 038, 039, 040, 041, 042]
+depends_on: [044, 045, 046, 047, 048, 049, 050, 051]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#21-o-que-entra-v1"
   - ".ksdd/features/FEATURE-new-fix-command.md#51-superfícies-modificadas"
@@ -16,7 +16,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#12-roadmap-de-implementação"
 ---
 
-# 043 — Docs públicas + version bump
+# 052 — Docs públicas + version bump
 
 ## Objetivo
 Documentar os dois commands nas docs públicas e cortar a release: README, INSTALL, CHANGELOG `[0.11.0]` e bump de `package.json`.
@@ -26,12 +26,12 @@ Documentar os dois commands nas docs públicas e cortar a release: README, INSTA
 - **`INSTALL.md`**: atualizar contagem de arquivos por target e paths se enumerados.
 - **`CHANGELOG.md`**: entrada `## [0.11.0] - 2026-XX-XX` no topo, seguindo Keep a Changelog (pt-BR), com "Adicionado" (2 commands + `references/fix-template.md` + classe `.ksdd/fixes/`), "Alterado" (`new:feature` numeração, `build:feature`/`build:all` integração, `bin/ksdd.js` `COMMAND_FILES`), "Arquitetura" (ADR-013). Espelhar o estilo da entrada `[0.7.0]` (archive).
 - **`package.json`**: `version` de `0.9.0` → `0.11.0`.
-- Verificar coerência da contagem "11 commands" entre README, INSTALL e SPEC (task 042).
+- Verificar coerência da contagem "11 commands" entre README, INSTALL e SPEC (task 051).
 
 ## Fora de escopo
-- Criar commands/template (tasks 035–037).
-- Alterar SPEC/architecture (task 042) — só sincronizar a contagem.
-- Dogfood/QA (tasks 044, 045).
+- Criar commands/template (tasks 044–046).
+- Alterar SPEC/architecture (task 051) — só sincronizar a contagem.
+- Dogfood/QA (tasks 053, 054).
 
 ## Critérios de aceitação
 - [ ] README lista os 2 commands e tem seção "Corrigindo bugs" com exemplos por modo.

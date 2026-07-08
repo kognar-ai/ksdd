@@ -1,12 +1,12 @@
 ---
-id: 037
+id: 046
 title: Criar commands/build:fix.md (repro-first, teste de regressão obrigatório, PR rotulado bug)
 status: em revisão
 feature: new-fix-command
 area: backend
 priority: P0
 estimate: L
-depends_on: [035]
+depends_on: [044]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#21-o-que-entra-v1"
   - ".ksdd/features/FEATURE-new-fix-command.md#43-implementação-completa-via-ksddbuildfix"
@@ -18,7 +18,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#4-apis-e-endpoints"
 ---
 
-# 037 — Criar `commands/build:fix.md`
+# 046 — Criar `commands/build:fix.md`
 
 ## Objetivo
 Criar o slash command `/ksdd:build:fix` em `commands/build:fix.md`, que implementa tasks de fix ponta-a-ponta na linha do `/ksdd:build:feature`, com três adaptações de bug: repro-first, teste de regressão como quality gate obrigatório, e issue/PR rotulados como bug.
@@ -35,8 +35,8 @@ Criar o slash command `/ksdd:build:fix` em `commands/build:fix.md`, que implemen
 - Mensagens canônicas (FEATURE 8.3) com cores ANSI (SPEC 3.2).
 
 ## Fora de escopo
-- `commands/new:fix.md` (task 035) e `references/fix-template.md` (task 036).
-- Wiring em `bin/ksdd.js` (task 038).
+- `commands/new:fix.md` (task 044) e `references/fix-template.md` (task 045).
+- Wiring em `bin/ksdd.js` (task 047).
 - Reescrever o pipeline do `build:feature` — referenciar e adaptar, não copiar 400 linhas.
 - `--hotfix` a partir de tag de produção (FEATURE seção 2.2).
 
@@ -59,5 +59,5 @@ Criar o slash command `/ksdd:build:fix` em `commands/build:fix.md`, que implemen
 
 ## Riscos / dependências externas
 - Divergência de manutenção entre `build:fix` e `build:feature` — mitigar referenciando o pipeline em vez de duplicá-lo.
-- Depende de 035 para o contrato de layout (`.ksdd/fixes/`, `.ksdd/tasks/fix-[slug]/`, frontmatter `fix:`).
-- Gate de regressão pode travar bug difícil de testar — exceção documentada, coberta no QA (task 045).
+- Depende de 044 para o contrato de layout (`.ksdd/fixes/`, `.ksdd/tasks/fix-[slug]/`, frontmatter `fix:`).
+- Gate de regressão pode travar bug difícil de testar — exceção documentada, coberta no QA (task 054).

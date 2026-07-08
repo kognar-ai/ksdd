@@ -1,5 +1,5 @@
 ---
-id: 046
+id: 055
 title: Guarda de consistência da contagem de slash commands (evitar recorrência)
 status: para implementar
 fix: spec-command-count
@@ -15,7 +15,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#9-estratégia-de-testes"
 ---
 
-# 046 — Guarda de consistência da contagem de commands
+# 055 — Guarda de consistência da contagem de commands
 
 ## Objetivo
 Evitar que a contagem de slash commands volte a divergir entre `bin/ksdd.js` (fonte de verdade) e a prosa dos artefatos. É a guarda de regressão do `FIX-spec-command-count`.
@@ -28,7 +28,7 @@ Evitar que a contagem de slash commands volte a divergir entre `bin/ksdd.js` (fo
 - Documentar no `CLAUDE.md` que adicionar/remover um command exige atualizar a contagem nos pontos de tempo presente.
 
 ## Fora de escopo
-- A reconciliação em si (já aplicada na v0.11.0 — tasks 042/043 + brainstorm §3 via o próprio fix).
+- A reconciliação em si (já aplicada na v0.11.0 — tasks 051/052 + brainstorm §3 via o próprio fix).
 - CI/CD (não há workflow no repo hoje — architecture §9). Se/quando existir, plugar a checagem lá.
 - Alterar `bin/ksdd.js` de runtime para ler prosa (proibido — `COMMAND_FILES` é a fonte de verdade).
 

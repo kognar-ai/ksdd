@@ -3,7 +3,7 @@
 **Data:** 2026-07-08
 **Versão-alvo:** 0.11.0
 **Base:** rebase sobre `origin/main` (v0.10.0, 5 targets, Copilot=ADR-012)
-**Escopo:** task 045 — matriz de cenários A–O + smoke de instalação nos 5 targets.
+**Escopo:** task 054 — matriz de cenários A–O + smoke de instalação nos 5 targets.
 
 ## Natureza da validação
 
@@ -12,7 +12,7 @@ de IA em tempo de uso, não código com runtime testável. Portanto a QA combina
 
 - **SMOKE (automatizado):** `bin/ksdd.js` — instalação/distribuição/uninstall real em sandbox `/tmp`.
 - **INSPEÇÃO (conteúdo):** o prompt do command instrui explicitamente o comportamento exigido pelo critério.
-- **DOGFOOD (real):** o fluxo `/ksdd:new:fix` foi exercido de verdade sobre um bug real do repo (task 044 → `.ksdd/fixes/FIX-spec-command-count.md`).
+- **DOGFOOD (real):** o fluxo `/ksdd:new:fix` foi exercido de verdade sobre um bug real do repo (task 053 → `.ksdd/fixes/FIX-spec-command-count.md`).
 
 Não há suite automatizada de runtime (architecture §9) — esperado para este projeto.
 
@@ -32,7 +32,7 @@ Comando: `HOME=$SB CODEX_HOME=… OPENCODE_HOME=… ANTIGRAVITY_HOME=… COPILOT
 | `ksdd uninstall` remove tudo rastreado (0 resíduos `ksdd*fix*`) | ✅ |
 | Idempotência (2× install) | ✅ |
 
-## Matriz de cenários (task 045)
+## Matriz de cenários (task 054)
 
 | # | Cenário | Nível | Resultado / evidência |
 |---|---------|-------|-----------------------|
@@ -40,7 +40,7 @@ Comando: `HOME=$SB CODEX_HOME=… OPENCODE_HOME=… ANTIGRAVITY_HOME=… COPILOT
 | B | new:fix por `#issue` (gh best-effort / fallback colado) | INSPEÇÃO | ✅ §2 coleta de bug cobre `#N`/URL via `gh` com fallback |
 | C | new:fix por teste que reproduz | INSPEÇÃO | ✅ §2 aceita caminho de teste como âncora |
 | D | Checkpoints obrigatórios (não quebra tasks sem aprovar FIX; não implementa sem aprovar tasks) | INSPEÇÃO | ✅ §6 (Checkpoint 1) + §9 (Checkpoint 2); Gate 8 em approval-gates |
-| E | Quebra em tasks `.ksdd/tasks/fix-[slug]/` + numeração global + task de regressão | INSPEÇÃO + DOGFOOD | ✅ §7 (fix:/fix_refs, 4-path numbering, regressão sempre); dogfood gerou task 046 (ID global após 045) |
+| E | Quebra em tasks `.ksdd/tasks/fix-[slug]/` + numeração global + task de regressão | INSPEÇÃO + DOGFOOD | ✅ §7 (fix:/fix_refs, 4-path numbering, regressão sempre); dogfood gerou task 055 (ID global após 054) |
 | F | Fix inline aceito (bug pequeno) — patch + regressão em branch, sem commit | INSPEÇÃO | ✅ §10 (opt-in, heurística estrita, sem commit/merge) |
 | G | Fix inline recusado (bug cresce) → recomenda build:fix | INSPEÇÃO | ✅ §10 (recusa + recomendação) |
 | H | Bug não reproduzível → FIX "investigação incompleta", para | INSPEÇÃO | ✅ seção dedicada + template §3 estado `[investigação incompleta]` |
@@ -56,13 +56,13 @@ Comando: `HOME=$SB CODEX_HOME=… OPENCODE_HOME=… ANTIGRAVITY_HOME=… COPILOT
 
 `/ksdd:new:fix` foi usado sobre a **inconsistência real de contagem de slash commands** nos
 artefatos (8 × 9 × 11; §7.2 do SPEC omitia `archive`). Resultado: `.ksdd/fixes/FIX-spec-command-count.md`
-(root cause com evidência, ajuste aplicado inline, task de regressão 046). Critérios de verificação
+(root cause com evidência, ajuste aplicado inline, task de regressão 055). Critérios de verificação
 do FIX doc conferidos: todas as menções em tempo presente = 11; §7.2 lista os 11; menções
 históricas (brainstorm §7 v0.5.0; evidência ADR-011/012) preservadas. Primeiro `.ksdd/fixes/*` do repo. ✅
 
 ## Pendências / follow-ups (não bloqueiam)
 
-- **Task 046** (`fix-spec-command-count`, P2, `para implementar`): guarda de consistência para
+- **Task 055** (`fix-spec-command-count`, P2, `para implementar`): guarda de consistência para
   a contagem de commands não voltar a divergir. Aberta conscientemente.
 - **Path IDE do Antigravity** (`~/.gemini/antigravity/skills/`) permanece `[verificar]` — herdado da feature Antigravity, fora do escopo desta.
 - **Confirmação empírica** dos comportamentos de prompt (investigação, checkpoints, inline) só

@@ -1,12 +1,12 @@
 ---
-id: 045
+id: 054
 title: QA end-to-end — matriz de cenários (new:fix, build:fix, 5 targets, edge cases)
 status: em revisão
 feature: new-fix-command
 area: qa
 priority: P0
 estimate: M
-depends_on: [044]
+depends_on: [053]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#10-critérios-de-aceite"
   - ".ksdd/features/FEATURE-new-fix-command.md#4-fluxos-de-uso"
@@ -17,7 +17,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#9-estratégia-de-testes"
 ---
 
-# 045 — QA end-to-end
+# 054 — QA end-to-end
 
 ## Objetivo
 Validar toda a feature (2 commands + template + wiring + integrações) contra os critérios de aceite, cobrindo modos, edge cases e instalação nos 5 targets. Produzir um QA-REPORT.md como os das features anteriores.
@@ -57,4 +57,4 @@ Validar toda a feature (2 commands + template + wiring + integrações) contra o
 
 ## Riscos / dependências externas
 - `gh` pode não estar disponível no ambiente de QA — cobrir o fallback (cenário B) explicitamente.
-- Última task da feature; depende do dogfood (044) e de todo o resto mergeado.
+- Última task da feature; depende do dogfood (053) e de todo o resto mergeado.

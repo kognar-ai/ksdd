@@ -8,7 +8,7 @@
 **Data:** 08/07/2026
 **Projeto:** KSDD — Kognar Spec-Driven Design & Development
 
-> **Nota:** primeiro FIX doc do repo, gerado como dogfood do fluxo `/ksdd:new:fix` (task 044 da feature `new-fix-command`).
+> **Nota:** primeiro FIX doc do repo, gerado como dogfood do fluxo `/ksdd:new:fix` (task 053 da feature `new-fix-command`).
 
 ---
 
@@ -70,11 +70,11 @@ Reportado durante o dogfood da feature `new-fix-command`; sempre reproduzível (
 Reconciliar toda menção **em tempo presente** para **11** e enumerar os 11 commands na lista canônica (§7.2). Preservar as menções **historicamente corretas** (ex.: brainstorm §7 "entregue até v0.5.0: 8 commands", e a evidência dos ADR-011/012 que descreve entregas de v0.9.0/v0.10.0) — mudá-las falsificaria o histórico.
 
 **Aplicado nesta v0.11.0 (inline, dentro da feature `new-fix-command`):**
-- SPEC §1.2/§7.2/§7.5/§7.7 → 11 + lista completa (task 042).
-- README/INSTALL → 11 (task 043).
+- SPEC §1.2/§7.2/§7.5/§7.7 → 11 + lista completa (task 051).
+- README/INSTALL → 11 (task 052).
 - `brainstorm.md §3` (tempo presente) → 11 (aplicado por este fix; §7 permanece histórico).
 
-**Caminho de implementação:** inline — mudança documental de baixo risco, aplicada junto da feature que introduziu os 2 commands. A guarda de regressão (evitar recorrência) fica como task `046` (`/ksdd:build:fix` opcional, ou manual).
+**Caminho de implementação:** inline — mudança documental de baixo risco, aplicada junto da feature que introduziu os 2 commands. A guarda de regressão (evitar recorrência) fica como task `055` (`/ksdd:build:fix` opcional, ou manual).
 
 ---
 
@@ -91,7 +91,7 @@ Reconciliar toda menção **em tempo presente** para **11** e enumerar os 11 com
 
 Bug **documental** — não há teste unitário de runtime. A regressão recorre toda vez que um command é adicionado sem atualizar a contagem em todos os pontos.
 
-**Guarda proposta (task 046, `para implementar`):** uma checagem de consistência que compara `COMMAND_FILES.length` (fonte de verdade em `bin/ksdd.js`) com a contagem declarada nos artefatos, falhando se divergirem. Enquanto não existir, o item vira parte do checklist de "adicionar um novo command" em `CLAUDE.md`.
+**Guarda proposta (task 055, `para implementar`):** uma checagem de consistência que compara `COMMAND_FILES.length` (fonte de verdade em `bin/ksdd.js`) com a contagem declarada nos artefatos, falhando se divergirem. Enquanto não existir, o item vira parte do checklist de "adicionar um novo command" em `CLAUDE.md`.
 
 **Falha ANTES:** na base atual a checagem acusaria 3 valores distintos (8/9/11) para 11 arquivos reais.
 **Passa DEPOIS:** com a reconciliação, a checagem confirma 11 em todos os pontos de tempo presente.
@@ -103,14 +103,14 @@ Bug **documental** — não há teste unitário de runtime. A regressão recorre
 | Risco / regressão possível | Impacto | Mitigação |
 |----------------------------|---------|-----------|
 | Mudar por engano uma menção histórica (falsificar release passado) | Baixo | Só tocar menções em tempo presente; preservar §7 do brainstorm e evidências de ADR |
-| Recorrência no próximo command adicionado | Médio | Task 046 (guarda de consistência) + checklist em `CLAUDE.md` |
+| Recorrência no próximo command adicionado | Médio | Task 055 (guarda de consistência) + checklist em `CLAUDE.md` |
 
 ---
 
 ## 9. Referências
 
-- `.ksdd/specs/SPEC.md` — §1.2, §7.2, §7.5, §7.7 (contrato quebrado / corrigido na task 042)
+- `.ksdd/specs/SPEC.md` — §1.2, §7.2, §7.5, §7.7 (contrato quebrado / corrigido na task 051)
 - `.ksdd/specs/brainstorm.md` — §3 (tempo presente, corrigido) · §7 (histórico, preservado)
-- `README.md` / `INSTALL.md` — contagem (task 043)
+- `README.md` / `INSTALL.md` — contagem (task 052)
 - `bin/ksdd.js` — `COMMAND_FILES` (fonte de verdade dos commands)
-- Feature: `.ksdd/features/FEATURE-new-fix-command.md` (dogfood — seção 4.6) · Task: `.ksdd/tasks/fix-spec-command-count/046-command-count-consistency-guard.md`
+- Feature: `.ksdd/features/FEATURE-new-fix-command.md` (dogfood — seção 4.6) · Task: `.ksdd/tasks/fix-spec-command-count/055-command-count-consistency-guard.md`

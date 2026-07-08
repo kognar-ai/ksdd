@@ -1,12 +1,12 @@
 ---
-id: 040
+id: 049
 title: Atualizar build:feature (redireciona slug de fix) e build:all (exclui fix tasks da fila)
 status: em revisão
 feature: new-fix-command
 area: backend
 priority: P2
 estimate: S
-depends_on: [035, 037]
+depends_on: [044, 046]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#51-superfícies-modificadas"
   - ".ksdd/features/FEATURE-new-fix-command.md#23-o-que-não-é-essa-feature"
@@ -16,7 +16,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#4-apis-e-endpoints"
 ---
 
-# 040 — Integração com `build:feature` e `build:all`
+# 049 — Integração com `build:feature` e `build:all`
 
 ## Objetivo
 Ajustar os dois commands de build de feature para conviverem com o namespace de fix: `build:feature` redireciona quando recebe um slug de fix; `build:all` mantém fix tasks fora da fila de features.
@@ -26,8 +26,8 @@ Ajustar os dois commands de build de feature para conviverem com o namespace de 
 - **`commands/build:all.md`** (via `str_replace`): na fase de planejamento/montagem da fila, deixar explícito que `.ksdd/tasks/fix-*/` **não** entra no `BUILD-PLAN.md` (o `build:all` decompõe fases do SPEC em features; correções reativas são conduzidas por `/ksdd:new:fix`/`/ksdd:build:fix`). Opcional: listar fixes pendentes como linha informativa, sem entrar na fila — espelhando como o `build:all` já trata slugs arquivados (CHANGELOG `[0.7.0]`).
 
 ## Fora de escopo
-- Criar `new:fix`/`build:fix` (tasks 035, 037).
-- Numeração no `new:feature` (task 039).
+- Criar `new:fix`/`build:fix` (tasks 044, 046).
+- Numeração no `new:feature` (task 048).
 - Qualquer alteração no pipeline de execução de tasks.
 
 ## Critérios de aceitação

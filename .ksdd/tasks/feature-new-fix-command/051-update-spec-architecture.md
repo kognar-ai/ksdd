@@ -1,12 +1,12 @@
 ---
-id: 042
+id: 051
 title: Atualizar SPEC.md e architecture.md (ADR-013 .ksdd/fixes/, artefatos, superfícies, roadmap, contagem)
 status: em revisão
 feature: new-fix-command
 area: backend
 priority: P1
 estimate: M
-depends_on: [035, 037]
+depends_on: [044, 046]
 feature_refs:
   - ".ksdd/features/FEATURE-new-fix-command.md#6-impacto-no-modelo-de-dados"
   - ".ksdd/features/FEATURE-new-fix-command.md#7-impacto-na-api"
@@ -19,7 +19,7 @@ arch_refs:
   - ".ksdd/specs/architecture.md#12-roadmap-de-implementação"
 ---
 
-# 042 — Atualizar SPEC e architecture
+# 051 — Atualizar SPEC e architecture
 
 ## Objetivo
 Refletir a nova classe de artefato `.ksdd/fixes/` e os dois commands nos artefatos KSDD do próprio repo: SPEC (produto) e architecture (decisão + roadmap).
@@ -29,7 +29,7 @@ Refletir a nova classe de artefato `.ksdd/fixes/` e os dois commands nos artefat
 - **Seção 4.2** (artefatos KSDD): adicionar linhas para `FIX-[slug].md` (`.ksdd/fixes/`, gerado por `/ksdd:new:fix`) e tasks `.ksdd/tasks/fix-[slug]/`.
 - **Seção 4.4** (diagrama de relações): adicionar `.ksdd/fixes/FIX-[slug].md` consumido por `build:fix`.
 - **Seções 7.3/7.4/7.5** (Codex/opencode/Antigravity): mencionar os basenames `ksdd-new-fix`/`ksdd-build-fix` na contagem/lista, se as seções enumeram commands.
-- **Reconciliar a contagem de commands** — o SPEC hoje diz "8 slash commands" (seções 1.2/7.2) e "9 commands" (seções Antigravity). Após esta feature são **11**. Uniformizar para 11 (este é, inclusive, o bug candidato do dogfood — task 044).
+- **Reconciliar a contagem de commands** — o SPEC hoje diz "8 slash commands" (seções 1.2/7.2) e "9 commands" (seções Antigravity). Após esta feature são **11**. Uniformizar para 11 (este é, inclusive, o bug candidato do dogfood — task 053).
 - **Seção 13** (fluxos críticos): opcional — adicionar um fluxo "Correção de bug isolada" (new:fix → build:fix) espelhando 13.3.
 - **Seção 14** (fases de entrega): registrar a entrega dos commands de fix.
 
@@ -40,9 +40,9 @@ Refletir a nova classe de artefato `.ksdd/fixes/` e os dois commands nos artefat
 - **Seção 12** (roadmap): marcar a entrega; registrar "arquivar fixes" como item futuro.
 
 ## Fora de escopo
-- README/INSTALL/CHANGELOG/package.json (task 043).
-- Gates (task 041).
-- Criar os commands (tasks 035, 037).
+- README/INSTALL/CHANGELOG/package.json (task 052).
+- Gates (task 050).
+- Criar os commands (tasks 044, 046).
 
 ## Critérios de aceitação
 - [ ] SPEC 7.2 lista `ksdd:new:fix` e `ksdd:build:fix`.
@@ -57,4 +57,4 @@ Refletir a nova classe de artefato `.ksdd/fixes/` e os dois commands nos artefat
 - Estes artefatos são read-only durante `build:feature`/`build:fix` de OUTRAS features — mas atualizá-los para documentar ESTA feature é trabalho legítimo desta task (não é build de outra feature).
 
 ## Riscos / dependências externas
-- A contagem "11 commands" precisa ficar consistente com o README (task 043) — sincronizar as duas tasks.
+- A contagem "11 commands" precisa ficar consistente com o README (task 052) — sincronizar as duas tasks.
