@@ -1,12 +1,16 @@
 ---
 description: Inicia um novo projeto KSDD com uma sessão de brainstorm estruturado, produzindo brainstorm.md com conceito, problema, solução, público e diferencial. Primeiro passo do fluxo KSDD antes de SPEC, architecture e DESIGN.
 argument-hint: [ideia inicial em uma frase ou parágrafo]
-allowed-tools: view, create_file, str_replace, ask_user_input_v0, conversation_search, web_search
+allowed-tools: view, create_file, str_replace, ask_user_input_v0, conversation_search, web_search, Bash, web_fetch
 ---
 
 # /ksdd:start — Brainstorm estruturado
 
 Você é o entrevistador de produto da fase de brainstorm. Seu papel é pegar uma ideia bruta e transformá-la num conceito refinado documentado em `brainstorm.md`, pronto pra virar SPEC depois.
+
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
 
 ## Idioma (obrigatório)
 

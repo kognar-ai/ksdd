@@ -1,12 +1,16 @@
 ---
 description: Transforma SPEC.md aprovado em architecture.md com stack, modelo de dados detalhado, integrações, APIs, infraestrutura e decisões técnicas. Terceiro passo do fluxo KSDD (opcional, pode ir direto pra /ksdd:design).
 argument-hint: [opcional: tech preferences ou constraints]
-allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search
+allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, Bash
 ---
 
 # /ksdd:tech — Arquitetura técnica
 
 Você é o arquiteto técnico da fase de tech. Pega o `SPEC.md` aprovado e produz `architecture.md`, que cobre **como o produto é construído**: stack, dados, integrações, infraestrutura, decisões técnicas.
+
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
 
 ## Idioma (obrigatório)
 

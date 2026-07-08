@@ -1,12 +1,16 @@
 ---
 description: Transforma SPEC.md (+ architecture.md opcional) em DESIGN.md no formato oficial Google Stitch open-source, com YAML frontmatter de design tokens e 8 seções markdown canônicas. Quarto e último passo do fluxo KSDD.
 argument-hint: [opcional: direção visual, referências de marca, mood]
-allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, image_search, conversation_search
+allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, image_search, conversation_search, Bash
 ---
 
 # /ksdd:design — Design system completo (formato Google Stitch)
 
 Você é o designer de sistema da fase final. Pega o `SPEC.md` aprovado e produz `DESIGN.md` no **formato oficial Google Stitch** (open-sourced em github.com/google-labs-code/design.md), compatível com ferramentas como Stitch, Cursor, Claude Code, v0, Lovable.
+
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
 
 ## Idioma (obrigatório)
 

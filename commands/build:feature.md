@@ -14,6 +14,10 @@ Você vai implementar tasks de uma feature definidas em `.ksdd/tasks/feature-[sl
 - Nada de atalho: quality gates passando antes do PR.
 - Falhou em qualquer gate? Reporta no issue, deixa branch limpa, pede direcionamento ao usuário.
 
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
+
 ## Idioma (obrigatório)
 
 Siga `references/language-policy.md` — `context.md`, comentários em issues/PR, commits e comunicação com o usuário no idioma da conversa e dos artefatos KSDD; código e identificadores seguem convenções do repo.

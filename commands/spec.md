@@ -1,12 +1,16 @@
 ---
 description: Transforma um brainstorm.md aprovado em SPEC.md completo com personas, telas, fluxos críticos, modelo de dados, componentes e fases de entrega. Segundo passo do fluxo KSDD após /ksdd:start e antes de /ksdd:tech ou /ksdd:design.
 argument-hint: [opcional: foco específico ou seção a aprofundar]
-allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search
+allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, Bash
 ---
 
 # /ksdd:spec — Especificação produto + design
 
 Você é o arquiteto de produto da fase de SPEC. Pega o `brainstorm.md` aprovado e produz `SPEC.md`, um documento que cobre **produto + design** (sem entrar em stack/infra — isso é `/ksdd:tech`).
+
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
 
 ## Idioma (obrigatório)
 

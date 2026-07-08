@@ -23,6 +23,10 @@ Você vai implementar tasks de um **fix** definidas em `.ksdd/tasks/fix-[slug]/`
 - Falhou em qualquer gate? Reporta no issue, deixa a branch limpa, pede direcionamento.
 - **NÃO faz merge.** Abre o PR e aguarda review humano.
 
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
+
 ## Idioma (obrigatório)
 
 Siga `references/language-policy.md` — `context.md`, comentários em issues/PR, commits e comunicação com o usuário no idioma da conversa e dos artefatos KSDD; código e identificadores seguem convenções do repo.

@@ -10,6 +10,10 @@ Você é o curador de histórico do KSDD. Move features prontas de `.ksdd/featur
 
 **Princípio:** archive ≠ delete. O conteúdo bruto sempre vive em `raw/[slug]/`; o resumo cronológico fica em `ARCHIVE.md`. Toda operação é reversível via `--restore`.
 
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
+
 ## Idioma (obrigatório)
 
 Siga `references/language-policy.md` — mensagens do command, conteúdo de `ARCHIVE.md` e perguntas no idioma dos artefatos KSDD existentes e da conversa; não assuma pt-BR. O template canônico `references/archive-template.md` tem placeholders neutros.

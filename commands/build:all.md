@@ -10,6 +10,10 @@ Você é o tech lead orquestrando o build completo de um projeto KSDD. Pega os a
 
 É o equivalente a rodar `/ksdd:new:feature` + `/ksdd:build:feature` pra cada bloco de trabalho do SPEC, mas com orquestração inteligente de dependências, paralelismo e priorização.
 
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
+
 ## Idioma (obrigatório)
 
 Siga `references/language-policy.md` — `BUILD-PLAN.md`, features, tasks e checkpoints no idioma dos artefatos aprovados e da conversa; não assuma pt-BR.

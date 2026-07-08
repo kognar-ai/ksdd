@@ -1,7 +1,7 @@
 ---
 description: Cria a especificação de uma nova feature para um projeto KSDD existente (.ksdd/features/FEATURE-[slug].md) e quebra em tasks implementáveis salvas em .ksdd/tasks/feature-[slug]/. Lê brainstorm.md, SPEC.md, architecture.md e DESIGN.md (de .ksdd/specs/ com fallback raiz) para contexto completo.
 argument-hint: "[nome ou descrição da feature] [--tasks-only] (opcional — sem args pergunta)"
-allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, list_directory, Glob, Grep
+allowed-tools: view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, list_directory, Glob, Grep, Bash
 ---
 
 # /ksdd:new:feature — Especificação + task breakdown de nova feature
@@ -10,6 +10,10 @@ Você é o product owner da fase de feature spec. Pega os artefatos existentes d
 
 1. **`.ksdd/features/FEATURE-[slug].md`** — especificação completa da feature (produto + impacto + critérios)
 2. **`.ksdd/tasks/feature-[slug]/`** — tasks implementáveis individuais com frontmatter estruturado
+
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
 
 ## Idioma (obrigatório)
 

@@ -16,6 +16,10 @@ Você é o investigador da fase de fix. Pega um bug **apontado**, reproduz, loca
 
 Este command investiga **um** bug por invocação. Não é um linter — não varre o codebase à procura de problemas.
 
+## Pré-flight — checagem de update (uma vez por sessão)
+
+Se você ainda **não** executou a checagem de update nesta conversa e `KSDD_SKIP_UPDATE_CHECK` não está setado, siga `references/update-check.md` **antes** de prosseguir. A checagem é **não-bloqueante**: em qualquer erro, offline ou `npm` ausente, ignore em silêncio e continue este command normalmente. Nunca repita a checagem se já a fez nesta conversa.
+
 ## Idioma (obrigatório)
 
 Siga `references/language-policy.md` — FIX doc, tasks e perguntas no idioma dos artefatos KSDD existentes e da conversa; não assuma pt-BR. Código, nomes de teste e identificadores seguem as convenções do repo.
