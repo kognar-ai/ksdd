@@ -22,7 +22,7 @@ KSDD é um pacote npm que distribui **conteúdo Markdown** (commands, references
               ┌─────────────────────────────────────────────────────────────┐
               │  Pacote local (PKG_ROOT)                                    │
               │  ├── bin/ksdd.js          (CLI Node, sem deps)              │
-              │  ├── commands/*.md         (8 slash commands)               │
+              │  ├── commands/*.md         (11 slash commands)              │
               │  ├── references/*.md       (templates canônicos)            │
               │  ├── agents/*.md           (helpers: interviewer/critic/...) │
               │  ├── README.md / INSTALL.md / CHANGELOG.md / LICENSE        │
@@ -161,6 +161,8 @@ Schema declarado em `references/build-plan-template.md` `[verificar conteúdo co
 - `estimate` — estimativa de horas/pontos
 - `depends_on` — array de IDs de tasks pré-requisito
 - `refs` — referências cruzadas para SPEC, FEATURE, etc.
+- `feature` / `fix` — contexto da task, mutuamente exclusivos: `feature: [slug]` para tasks em `.ksdd/tasks/feature-[slug]/`; `fix: [slug]` para tasks em `.ksdd/tasks/fix-[slug]/` (novo em v0.11.0, feature new-fix-command). Retrocompatível — feature tasks inalteradas.
+- `fix_refs` — em tasks de fix, referencia o `.ksdd/fixes/FIX-[slug].md` de origem (equivalente a `feature_refs` para features). Demais campos idênticos aos das feature tasks — o `build:fix` reusa o parser de frontmatter do `build:feature`.
 
 ### 3.4 Frontmatter de SKILL (Codex)
 
@@ -235,6 +237,14 @@ ksdd help                 # default; também --help, -h
 | `installAntigravity(tracked, out)` | Instala em `~/.gemini/antigravity-cli/skills/` + `~/.gemini/antigravity/skills/` + bundle `~/.gemini/ksdd/` (cópia adaptada de `installOpencode` — ADR-011) | `[verificar]` |
 | `installCopilot(tracked, out, opts)` | Instala prompt files no perfil VS Code por SO + chat mode + bundle `<vscode-user>/ksdd/` + placeholder CLI `~/.copilot/` + modo `--project` (`.github/`) (cópia adaptada de `installAntigravity` — ADR-012) | `[verificar]` |
 | `resolveVscodeUserDir()` | Resolve o `Code/User` por SO (macOS/Linux/Windows) com override `COPILOT_HOME` | `[verificar]` |
+
+### 4.4 Superfície de slash commands distribuída
+
+Os arquivos em `commands/*.md` são copiados para cada target (Claude: `ksdd:*.md`; Codex/opencode/Antigravity/Copilot: `ksdd-*.md` via `agentPromptBasename`). São **11 slash commands** (v0.11.0):
+
+`start`, `spec`, `tech`, `design`, `new:feature`, `new:fix`, `build:feature`, `build:fix`, `build:all`, `setup`, `archive`.
+
+`new:fix` e `build:fix` (feature new-fix-command, v0.11.0) entram como **commands de conteúdo** — 2 entradas em `COMMAND_FILES`, distribuídas pelo loop de cópia existente, **sem** função `install*` nova (ver ADR-013). O template `references/fix-template.md` acompanha no bundle de skill de cada target.
 
 ---
 
@@ -409,6 +419,13 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 **Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (hardcoded + 4 superfícies + prioridade Alta / bump minor 0.10.0).
 **Consequência:** entrega rápida do target de maior alcance; a dívida sobe para **5 funções `install*` duplicadas** (~250 linhas a mais), e o refator agora unificará 5 funções. Riscos novos específicos deste target: resolução de path por SO (`resolveVscodeUserDir()`) e pruning sob o diretório `User/` compartilhado do VS Code (nunca prunar o próprio `User/`). Trade-off aceito explicitamente.
 
+### ADR-013: `.ksdd/fixes/` como nova classe de artefato (paralela a `.ksdd/features/`) — commands de conteúdo, sem novo target
+
+**Evidência:** feature new-fix-command (v0.11.0) adiciona os slash commands `/ksdd:new:fix` e `/ksdd:build:fix` como **2 entradas em `COMMAND_FILES`** (`bin/ksdd.js`), mais o template `references/fix-template.md`. São **commands de conteúdo** — distribuídos a todos os targets (Claude/Codex/opencode/Antigravity/Copilot) pelo loop de cópia existente, com basename `ksdd-new-fix.md` / `ksdd-build-fix.md` via `agentPromptBasename`. **Não** criam nenhuma função `install*`. Decisão e trade-off em `.ksdd/features/FEATURE-new-fix-command.md` seções 2, 6 e 7.
+**Decisão:** tratar bug investigado como **classe de artefato própria** — `.ksdd/fixes/FIX-[slug].md` + tasks em `.ksdd/tasks/fix-[slug]/` — paralela a `.ksdd/features/`, com namespace separado (evita a ambiguidade "isso é bug ou feature?"). Como os dois commands são de conteúdo (não superfícies de instalação), **não** incorrem na dívida do ADR-010/011 e **não** disparam o refator `installTarget(targetConfig)`; o gatilho do ADR-012 (refator inescapável antes do 6º target) permanece intocado. Duas decisões de produto ficam registradas: (a) **fix inline opcional** para bugs pequenos (1 arquivo, sem schema/API/auth) — opt-in explícito, com teste de regressão obrigatório mesmo inline; (b) **gate de regressão obrigatório** no `build:fix` — o PR só abre se existir um teste que falha-antes/passa-depois (ao contrário de features, onde o teste não é gate bloqueante).
+**Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (par de commands + namespace `.ksdd/fixes/` + bump minor 0.11.0).
+**Consequência:** o KSDD passa a cobrir o terceiro momento do ciclo de vida (manutenção reativa) sem tocar a arquitetura de instalação — a superfície de slash commands sobe de 9 para 11, mas a contagem de funções `install*` permanece em 5. A rastreabilidade de bug vira artefato versionável (`FIX-[slug].md`). Custo: `new:feature` e `new:fix` passam a varrer `.ksdd/tasks/fix-*/` além de `feature-*` para manter o espaço global de IDs; arquivar fixes via `/ksdd:archive` fica como item futuro (hoje o archive cobre só features).
+
 ---
 
 ## 11. Riscos Técnicos
@@ -469,6 +486,14 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 - [ ] Suporte a Windsurf
 - [ ] Suporte a Cline
 - [ ] Manifest com `targets.cursor`, `targets.windsurf`, `targets.cline`
+
+### Fase 5.5 — Manutenção reativa: comandos de fix — **Concluído (08/07/2026)**
+- [x] Commands `new:fix`, `build:fix` — 2 entradas em `COMMAND_FILES`, sem função `install*` nova (ADR-013)
+- [x] Nova classe de artefato `.ksdd/fixes/FIX-[slug].md` + tasks `.ksdd/tasks/fix-[slug]/` (frontmatter `fix:` / `fix_refs`)
+- [x] Template `references/fix-template.md`; Gates 8 e 9 em `references/approval-gates.md`
+- [x] Fix inline opcional (bugs pequenos) + teste de regressão como gate obrigatório no `build:fix`
+- [x] Superfície de slash commands 9 → 11; bump minor v0.11.0
+- [ ] **Futuro:** arquivar fixes via `/ksdd:archive` (hoje o archive cobre só `.ksdd/features/`)
 
 ### Fase 6 — Integração design tools — **Roadmap confirmado**
 - [ ] Exportador `DESIGN.md` → Figma (via plugin ou JSON intermediário)
