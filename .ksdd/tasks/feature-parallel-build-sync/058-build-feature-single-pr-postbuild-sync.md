@@ -1,7 +1,7 @@
 ---
 id: 058
 title: build:feature — PR único ao final + fase de sincronização de docs pós-build
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P0

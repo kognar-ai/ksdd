@@ -1,12 +1,14 @@
 ---
 description: Implementa tasks de uma feature ponta-a-ponta — issue+subtasks no GitHub, branch, context.md, execução via teammates, validação de quality gates, commit atômico e PR. Lê .ksdd/features/FEATURE-[slug].md + tasks de .ksdd/tasks/feature-[slug]/ (com fallback para docs/ e raiz legados).
-argument-hint: "<slug|task-id|--all> (ex: push-notifications, 016, 016-create-endpoint, --all)"
+argument-hint: "<slug|task-id|--all> [--multi-pr] (ex: push-notifications, 016, 016-create-endpoint, --all, push-notifications --multi-pr)"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, WebFetch, view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, execute_shell, list_directory, mcp__github__*, mcp__context7__*, mcp__pencil__*, mcp__executeautomation-playwright-server__*
 ---
 
 # /ksdd:build:feature — Implementar feature task por task
 
-Você vai implementar tasks de uma feature definidas em `.ksdd/tasks/feature-[slug]/` (com fallback para `docs/tasks/feature-[slug]/` legado) seguindo o fluxo completo: pre-flight → leitura de contexto → issue no GitHub → branch → context.md → execução com teammates → quality gates → commit → PR.
+Você vai implementar tasks de uma feature definidas em `.ksdd/tasks/feature-[slug]/` (com fallback para `docs/tasks/feature-[slug]/` legado) seguindo o fluxo completo: pre-flight → leitura de contexto → issue no GitHub → branch de build → context.md → execução paralela em ondas (teammates + worktrees) → quality gates → sincronização de docs → PR único.
+
+O modelo de execução (paralelismo, worktrees, PR único, sync) é canônico em `references/parallel-build.md` — este command o **aplica e referencia**, sem reduplicar a prosa.
 
 **Princípios:**
 
@@ -28,7 +30,8 @@ Siga `references/language-policy.md` — `context.md`, comentários em issues/PR
 - **ID de task:** `016` → resolve para `.ksdd/tasks/feature-*/016-*.md` (fallback `docs/tasks/feature-*/016-*.md`).
 - **Slug parcial:** `016-create-endpoint` ou `create-endpoint`.
 - **Caminho completo:** `.ksdd/tasks/feature-push-notifications/016-create-endpoint.md` (ou path legado).
-- **`--all`:** implementa todas as tasks `para implementar` da feature em ordem de dependência (com checkpoint entre cada uma).
+- **`--all`:** implementa todas as tasks `para implementar` da feature em **ondas paralelas**, respeitando dependências e prioridade (ver seção 5 e "Quando implementar `--all`"). Roda autônomo até o fim; pausa só em falha de gate ou no checkpoint da sync pós-build.
+- **`--multi-pr`:** modificador (combina com `--all` ou com o slug) — abre **1 PR por task** em vez do PR único ao final (seção 9). Sem ele, build completo = **1 PR**.
 
 Se ambíguo (mais de um match — incl. mesmo ID em paths novo e legado), **pare e peça desambiguação** — não adivinhe.
 
@@ -205,7 +208,25 @@ Checklist dos comandos que serão rodados antes do commit:
 
 ---
 
-## 5. Executar implementação via teammates
+## 5. Executar implementação via teammates (ondas de paralelismo)
+
+O modelo de execução paralela é **canônico** em `references/parallel-build.md` (seções 1 e 2) — esta seção o **aplica**, sem reduplicar a prosa. Consulte o reference para o racional completo (ondas, worktrees, quem comita).
+
+### 5.1 Organizar as tasks em ondas
+
+Num build completo (mais de uma task — `--all` ou o slug da feature), organize as tasks `para implementar` em **ondas de execução** (`parallel-build.md` §1.1):
+
+- **Dentro de uma onda:** tasks **independentes** rodam em paralelo — **um teammate cada, todas as chamadas de agente despachadas na MESMA mensagem** para rodarem concorrentes (contrato do skill dispatching-parallel-agents: um agente por problema independente; cada prompt self-contained, escopado a um domínio, com entregável explícito).
+- **Entre ondas:** respeita-se a ordem de dependência.
+
+Duas tasks são **independentes** (cabem na mesma onda) quando, e só quando:
+
+1. Não há `depends_on` mútuo entre elas (nem transitivo ainda pendente), **e**
+2. Não há **overlap de arquivos previsto** — derivado do bloco "Plano de implementação" (§4.7) de cada task / do `context.md`.
+
+Task com dependência pendente **ou** overlap de arquivos vai para uma **onda posterior** — nunca para a mesma onda paralela. Build de **task única** (o argumento é um ID/slug isolado) não paraleliza: é uma onda de um teammate só.
+
+### 5.2 Roteamento por área
 
 Divida o trabalho entre agentes especializados (Agent tool). Roteamento por área:
 
@@ -216,18 +237,59 @@ Divida o trabalho entre agentes especializados (Agent tool). Roteamento por áre
 | `infra`, `observability` | `generalPurpose` | `devops-iac-engineer` |
 | `qa` | `generalPurpose` | `webapp-testing` |
 
-**Regras de orquestração:**
+### 5.3 Regras de orquestração
 
-1. **Prompt do agente** sempre inclui:
-   - Caminho absoluto do `context.md` (agente lê antes de codar)
-   - Caminho da task original
-   - Critérios de aceitação **apenas dessa task**
-   - Regra: o agente implementa e testa localmente, retorna com diff resumido
-2. **Após cada agente concluir:**
-   - Inspecione o diff (`git diff`)
-   - Se satisfatório: `git add -p` → `git commit -m "feat(task-NNN): <descrição>" -m "Refs #ISSUE_NUM"`
-   - Se ruim: `git restore .`, re-prompte com feedback mais específico
-3. **Progresso na issue** (se GitHub disponível): após cada commit, adicione comentário com o que foi feito
+1. **Prompt de cada teammate** (self-contained — `parallel-build.md` §1.2) sempre inclui:
+   - Caminho absoluto do `context.md` da task (o teammate lê antes de codar)
+   - Caminho da task original + os **critérios de aceitação apenas dessa task**
+   - Restrições explícitas: "edite só os arquivos do seu plano de implementação", "**não rode `git`**", "não toque em arquivos de outra task da onda"
+   - Formato de retorno: **diff resumido** + o que validou localmente
+2. **Teammates editam arquivos e retornam — não rodam `git`** (`parallel-build.md` §1.3). Quem comita é o orquestrador (este command), **sequencialmente após a onda**, para evitar contenção de index lock entre agentes concorrentes. Para cada task da onda que retornou:
+   - Inspecione o diff (`git diff` no worktree da task)
+   - Rode os **quality gates daquela task** (seção 6) — obrigatórios antes de integrar
+   - Se aprovado: integre na **branch de build** com **commit atômico** `feat(task-NNN): <descrição>` (+ `Refs #ISSUE_NUM` quando houver issue) e **remova o worktree** (seção 5.4)
+   - Se ruim: `git restore .` no worktree e re-prompte o teammate com feedback específico
+3. **Progresso na issue** (se GitHub disponível): após cada commit atômico, comente no issue da task o que foi feito.
+
+O paralelismo **não afrouxa nenhum gate**: os gates da seção 6 rodam por task, antes da integração de cada uma.
+
+### 5.4 Isolamento em git worktrees
+
+Ciclo de vida canônico em `references/parallel-build.md` (seção 2) — aqui está a aplicação (contrato do skill using-git-worktrees).
+
+**Branch de build (base do PR único).** Num build completo, crie **uma** branch de build da feature a partir do default branch — ela **substitui a criação de branch-por-task da §3**, é onde os commits atômicos de todas as tasks são integrados, e dela sai o PR único (seção 9). No build de **task única**, a branch criada na §3 já é essa base (uma task = uma branch = um PR).
+
+**Por teammate paralelo:**
+
+1. **Detecte isolamento existente antes de criar — nunca aninhe worktrees.** Compare git-dir e git-common-dir; se diferentes, já há isolamento e você **não** cria outro:
+   ```bash
+   GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+   GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+   # GIT_DIR != GIT_COMMON (e não é submódulo) ⇒ já isolado; não crie outro worktree.
+   ```
+2. **Crie o worktree** com branch própria a partir da branch de build:
+   ```bash
+   git worktree add <path> -b feature/[slug]/NNN-[task-slug]
+   ```
+   Priorize `.worktrees/` (ou `worktrees/` se o projeto já usa). **Verifique que o diretório de worktrees está git-ignored** antes de criar.
+3. O teammate trabalha dentro do `<path>` do seu worktree, isolado dos demais da onda.
+4. **Na integração** (após gates verdes e commit atômico — seção 5.3), **remova o worktree** para não deixar órfãos:
+   ```bash
+   git worktree remove <path>
+   ```
+
+Nenhum worktree pode sobrar ao final do build.
+
+### 5.5 Fallback seguro (sequencial in-place)
+
+O paralelismo é o **default**, mas nunca ao custo de conflito garantido. Caia para **execução sequencial in-place** na branch de build — uma task por vez, **preservando todo o resto do fluxo** (gates por task, commits atômicos, sincronização pós-build e PR único) — quando:
+
+- O ambiente **nega** `git worktree add` (sandbox), **ou**
+- Duas tasks da onda **tocam os mesmos arquivos** (overlap de arquivos previsto).
+
+Avise o usuário com a mensagem amarela canônica (FEATURE §8.3):
+
+> ⚠ worktrees indisponíveis neste ambiente (ou tasks com overlap de arquivos) — executando em modo sequencial in-place.
 
 ---
 
@@ -296,27 +358,77 @@ Para cada `- [ ]` na seção "Critérios de aceitação" da task:
 
 ---
 
+## 8.5 Sincronização de artefatos e docs (pós-build)
+
+Aplica `references/parallel-build.md` (seção 5). Roda **depois de todas as tasks** do build completo estarem concluídas na branch de build, **antes do PR** (seção 9) e **com checkpoint de aprovação antes de comitar**.
+
+### 8.5.1 Atualiza SÓ docs derivados (edição cirúrgica)
+
+Somente os que **existirem** no projeto — `str_replace` cirúrgico, nunca reescrita:
+
+- `README.md` (raiz)
+- `CLAUDE.md` / `AGENTS.md` (guia de agentes)
+- `CHANGELOG.md`
+- Tracking de tasks: confirma o `status:` das tasks (a §8 já move cada uma para `em revisão`) e atualiza de forma consolidada o `README.md` de tasks da feature
+
+**Doc derivado ausente → pula aquele doc e informa o usuário:**
+
+> README.md/CLAUDE.md/CHANGELOG não encontrado — pulando atualização deste doc.
+
+### 8.5.2 NUNCA edita os artefatos-contrato — só sinaliza drift
+
+`SPEC.md`, `architecture.md`, `DESIGN.md` e `FEATURE-*.md` permanecem **read-only** nesta fase. Se a implementação sugerir que algum ficou desatualizado, **sinalize sem editar** (mensagem amarela, FEATURE §8.3):
+
+> ⚠ A implementação sugere que <artefato read-only> pode estar desatualizado: <o que revisar>. Não foi editado — revise manualmente.
+
+### 8.5.3 Checkpoint + commit
+
+Apresente o **diff dos docs derivados** + a **lista de drift sinalizado** e **peça aprovação** ao usuário. Só após o OK, comite a sincronização na **branch de build** (`docs(sync): sincroniza docs derivados pós-build`) — ela entra no **PR único** (seção 9). Este é um **checkpoint humano obrigatório**: nunca comite a sync sem aprovação.
+
+---
+
 ## 9. Abrir PR (se GitHub disponível)
+
+Modelo canônico em `references/parallel-build.md` (seção 3) — aqui está a aplicação.
+
+### 9.1 PR único — default do build completo
+
+Um **build completo** (`--all` ou o slug da feature) abre **exatamente 1 PR** ao final, da **branch de build** para o default branch, **agregando todos os commits atômicos** das tasks **+ o commit de sincronização pós-build** (seção 8.5). **NÃO faz merge** — aguarda review humano. Mensagem de sucesso:
+
+> PR único aberto para a feature [slug]: <URL>. Múltiplos PRs? use --multi-pr.
+
+### 9.2 `--multi-pr` — 1 PR por task (sob pedido)
+
+Com `--multi-pr` no `$ARGUMENTS` (ou pedido explícito do usuário na conversa), reproduz o comportamento histórico: **1 PR por task** concluída. A fase de sync (seção 8.5) roda uma vez ao final.
+
+### 9.3 Build de task única — 1 PR daquela task
+
+Quando o argumento é um único ID/slug de task, abre **1 PR daquela task** (semântica inalterada). O "PR único ao final" é a semântica do **build completo**, não da task isolada.
+
+### 9.4 Conteúdo do PR
 
 Use `gh pr create` com:
 
-- **Base:** branch principal do projeto (main/master/production)
-- **Head:** branch atual
-- **Título:** `[Task NNN] <título>`
+- **Base:** default branch do projeto (main/master/production)
+- **Head:** a **branch de build** (9.1) ou a branch da task (9.2/9.3)
+- **Título:** build completo → `[Feature <slug>] <nome da feature>`; task única / `--multi-pr` → `[Task NNN] <título>`
 - **Body:**
 
 ```markdown
 ## Resumo
-<2-4 bullets do que mudou>
+<2-4 bullets: o que a feature entrega (build completo) ou o que a task mudou (task única / --multi-pr)>
 
-## Issue
-Closes #<ISSUE_NUM>
+## Issues
+Closes #<ISSUE_NUM>   <!-- uma linha por issue de task no build completo -->
 
 ## Feature
 .ksdd/features/FEATURE-[slug].md — [nome da feature] (ou path legado se a feature ainda não migrou)
 
+## Commits
+<lista dos commits atômicos por task + o commit de sync pós-build (build completo)>
+
 ## Critérios de aceitação
-<checklist marcada>
+<checklist marcada: da feature no build completo; da task em task única / --multi-pr>
 
 ## Quality gates
 - [x] Build OK
@@ -326,11 +438,14 @@ Closes #<ISSUE_NUM>
 - [x] Code review
 - [x] Security audit (se aplicável)
 
+## Sincronização pós-build (seção 8.5)
+<docs derivados atualizados (README/CLAUDE.md/CHANGELOG/status de tasks) + drift sinalizado dos read-only>
+
 ## Notas para revisor
 <pontos sutis, decisões, trade-offs>
 ```
 
-- **Labels:** `feature-<slug>`, `area-<area>`, `ready-for-review`
+- **Labels:** `feature-<slug>`, `area-<area>` (uma por área tocada), `ready-for-review`
 
 **NÃO faça merge** — aguarde review humano.
 
@@ -339,6 +454,8 @@ Se `gh` não está disponível, apresente o resumo ao usuário com instruções 
 ---
 
 ## 10. Checkpoint final
+
+**Build de task única:**
 
 > Task **NNN — [título]** implementada.
 >
@@ -352,23 +469,30 @@ Se `gh` não está disponível, apresente o resumo ao usuário com instruções 
 >
 > Quer implementar a próxima? Ou revisar algo nesta?
 
+**Build completo (`--all` / slug):**
+
+> Feature **[slug]** buildada.
+>
+> - Execução: [K] ondas em paralelo ([N] teammates) — ou `sequencial in-place` (motivo: worktree negado pelo ambiente / overlap de arquivos)
+> - Tasks: [N] concluídas · commits atômicos: [N]
+> - PR: **1 único** — [URL] — ou `[N] PRs` (com `--multi-pr`)
+> - Sync pós-build: docs derivados sincronizados ([lista]); drift sinalizado: [lista ou "nenhum"]
+> - Quality gates: todos verdes por task
+>
+> **NÃO** foi feito merge — o PR aguarda review humano.
+
 ---
 
 ## Quando implementar `--all` (múltiplas tasks)
 
-Se `$ARGUMENTS` contém `--all` ou é apenas o slug da feature:
+Se `$ARGUMENTS` contém `--all` ou é apenas o slug da feature, o build roda no **modelo paralelo canônico** (`references/parallel-build.md`) — **não** task-por-task com checkpoint entre cada uma:
 
-1. Liste todas as tasks `para implementar` da feature, ordenadas por: dependências → prioridade (P0 primeiro) → ID
-2. **Checkpoint antes de cada task**: mostre qual task será implementada e peça confirmação
-3. Execute o fluxo completo (seções 1-10) para cada task
-4. Após todas concluídas, mostre resumo agregado:
+1. Liste todas as tasks `para implementar` da feature e calcule as **ondas de execução** (seção 5.1). A ordem entre ondas continua respeitando dependências (`depends_on`) → prioridade (P0 primeiro) → ID.
+2. Crie a **branch de build** da feature (seção 5.4) e execute **onda a onda**, cada onda despachando em paralelo os teammates das tasks independentes (seção 5). **Sem checkpoint humano obrigatório entre cada task** — o usuário pode rodar o build completo de forma **autônoma até o fim**.
+3. Após todas as ondas: rode a **sincronização pós-build** (seção 8.5, com seu checkpoint de aprovação) e abra **1 único PR** (seção 9) — ou `N` PRs com `--multi-pr`.
+4. Reporte o resumo agregado no checkpoint final (seção 10): ondas usadas (ou fallback sequencial + motivo), PR(s), docs sincronizados, drift sinalizado.
 
-```
-Build da feature [slug] concluído:
-- [N] tasks implementadas
-- [N] PRs abertos
-- [N/N] critérios de aceite da feature atendidos
-```
+**Checkpoint em falha (mantido):** se um gate falhar numa task, aquela task pausa/volta ao teammate enquanto as demais da onda seguem; a branch de build fica inspecionável. Pare e peça direcionamento **apenas** quando um gate bloquear — não a cada task bem-sucedida.
 
 ---
 
@@ -384,9 +508,9 @@ Build da feature [slug] concluído:
 
 ## Artefatos são read-only durante build
 
-**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` ou `FEATURE-[slug].md` (em qualquer um dos paths suportados — `.ksdd/specs/`, `.ksdd/features/`, raiz, `docs/`) durante o build. Se durante a implementação ficar claro que algo está errado ou incompleto num artefato, sinalize ao usuário — não corrija automaticamente.
+**NUNCA** modifique os **artefatos-contrato** — `SPEC.md`, `architecture.md`, `DESIGN.md` ou `FEATURE-[slug].md` (em qualquer um dos paths suportados — `.ksdd/specs/`, `.ksdd/features/`, raiz, `docs/`) — durante o build. Eles seguem **read-only inclusive na sincronização pós-build** (seção 8.5): drift é apenas **sinalizado** ao usuário, nunca corrigido automaticamente. Se durante a implementação ficar claro que algo está errado ou incompleto num desses artefatos, sinalize — não corrija.
 
-A única exceção são os arquivos de task: `status` e o `README.md` de tasks podem ser atualizados (no path onde a task vive).
+**Exceção — docs derivados:** a fase de sync pós-build (seção 8.5) faz **edição cirúrgica** apenas nos **docs derivados** do projeto (`README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md`) e no tracking de tasks (`status` e o `README.md` de tasks, no path onde a task vive), sempre com o **checkpoint de aprovação** da §8.5. Durante as ondas de implementação (seções 5–8), trate tudo como read-only exceto o `status`/README das tasks que você conclui.
 
 ---
 

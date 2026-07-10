@@ -1,7 +1,7 @@
 ---
 id: 057
 title: build:feature — execução com máximo de paralelismo + worktrees + fallback seguro
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P0
