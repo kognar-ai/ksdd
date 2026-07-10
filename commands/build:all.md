@@ -1,6 +1,6 @@
 ---
 description: Builda um projeto KSDD inteiro a partir do SPEC.md — decompõe as fases de entrega em features, quebra em tasks, e implementa tudo em ordem de dependência com checkpoints por fase. Orquestra /ksdd:new:feature e /ksdd:build:feature automaticamente.
-argument-hint: "[--phase N] [--plan-only] [--resume] (opcional — sem args builda tudo do MVP em diante)"
+argument-hint: "[--phase N] [--plan-only] [--resume] [--multi-pr] (opcional — sem args builda tudo do MVP em diante)"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, WebFetch, view, create_file, str_replace, ask_user_input_v0, web_search, web_fetch, conversation_search, execute_shell, list_directory, mcp__github__*, mcp__context7__*, mcp__pencil__*, mcp__executeautomation-playwright-server__*
 ---
 
@@ -49,6 +49,7 @@ A partir da v0.6.0, KSDD usa `.ksdd/` para todos os artefatos:
 - `--phase N` → builda apenas a fase N do SPEC (seção 14: Fases de Entrega). Sem flag, builda da Fase 1 (MVP) em diante.
 - `--plan-only` → gera o plano completo (features + tasks) mas NÃO implementa. Útil pra revisar antes de executar.
 - `--resume` → retoma de onde parou (detecta features/tasks existentes e pula as concluídas).
+- `--multi-pr` → por default cada feature abre **1 PR** (agregando os commits atômicos de todas as suas tasks); com `--multi-pr`, abre **1 PR por task** (comportamento histórico). Ver `references/parallel-build.md` §3.3.
 - Sem args → builda tudo começando pela Fase 1.
 
 ---
@@ -255,7 +256,7 @@ Calcule a ordem de implementação respeitando:
 3. **Prioridade** (P0 antes de P1 antes de P2)
 4. **Fase** (Fase 1 inteira antes da Fase 2)
 
-Tasks independentes dentro da mesma feature **podem ser paralelizadas** (múltiplos Agent calls na mesma mensagem).
+Tasks independentes dentro da mesma feature são **paralelizadas em ondas** (um teammate por task, cada um em seu worktree) — o modelo de execução está em B.4 e `references/parallel-build.md` §1.
 
 #### B.3 Checkpoint por feature (OBRIGATÓRIO)
 
@@ -272,27 +273,26 @@ Antes de iniciar cada feature:
 
 #### B.4 Implementar tasks da feature
 
-Para cada task, execute o fluxo completo do `/ksdd:build:feature`:
+A execução das tasks de cada feature **delega ao mesmo modelo do `/ksdd:build:feature`** — definido em `references/parallel-build.md` (fonte única; não duplique a prosa aqui). Aplicado por feature, o modelo é:
 
-1. **Valida dependências** — `depends_on` com `status: concluída`
-2. **Issue GitHub** (se `gh` disponível) — título, labels, checklist
-3. **Branch** — `feature/[slug]/NNN-[task-slug]`
-4. **Context.md** — compila todo o contexto da task
-5. **Execução via subagents** — roteamento por área
-6. **Quality gates** — build, testes, lint, type-check, E2E, code review
-7. **Validação de critérios** — cada critério demonstrado
-8. **Commit atômico** — `feat(task-NNN): <descrição>`
-9. **Atualiza status** — task → `em revisão`
+1. **Branch de build da feature** a partir do default branch — nela entram os commits atômicos de todas as tasks (parallel-build.md §3).
+2. **Ondas de execução:** as tasks `para implementar` são organizadas em ondas — dentro de uma onda, tasks **sem `depends_on` mútuo e sem overlap de arquivos previsto** rodam em paralelo (um **teammate** por task, todas na mesma mensagem); entre ondas, respeita-se a dependência (parallel-build.md §1). Teammates editam e retornam; **o orquestrador comita**.
+3. **Worktree isolado por teammate paralelo** (`git worktree add -b`, removido ao integrar; parallel-build.md §2).
+4. **Fallback seguro:** ambiente que **nega** worktree (sandbox) **ou** tasks da onda com overlap de arquivos ⇒ **execução sequencial in-place** na branch de build, com aviso amarelo — o resto do fluxo é preservado (parallel-build.md §4).
+5. **Por task:** valida `depends_on` (`status: concluída`) → issue GitHub (se `gh`) → context.md → execução via teammate → quality gates (build, testes, lint, type-check, E2E, code review; security se aplicável) → validação de critérios → **commit atômico** `feat(task-NNN): <descrição>` na branch de build → status da task → `em revisão`.
+6. **Sync pós-build da feature** (concluídas as ondas): a **sincronização pós-build** (parallel-build.md §5) atualiza só os **docs derivados** existentes e **sinaliza drift** dos read-only sem editá-los, com checkpoint de aprovação antes de comitar (ver "Artefatos são read-only").
+7. **PR da feature — default: 1 PR por feature** (agrega os commits atômicos das tasks + a sync). `--multi-pr` ⇒ **1 PR por task** (comportamento histórico), sync uma vez ao final. **Nunca faz merge** — aguarda review humano.
 
-**Entre tasks da mesma feature:** não precisa de checkpoint do usuário (exceto se uma task falha).
+**Entre tasks da mesma feature:** não há checkpoint do usuário (as ondas correm sozinhas); só pausa se uma task falha um gate, ou no checkpoint da sync pós-build.
 
 #### B.5 Checkpoint pós-feature
 
-Após todas as tasks de uma feature:
+Após todas as tasks de uma feature (ondas concluídas + sync pós-build):
 
 > Feature **[nome]** implementada:
-> - [N] tasks concluídas
-> - [N] PRs abertos (ou commits na branch)
+> - [N] tasks concluídas em [N] ondas (paralelo / sequencial in-place)
+> - **1 PR da feature** aberto: <URL> (ou N PRs com `--multi-pr`; ou commits na branch de build se sem `gh`)
+> - Sync pós-build: docs derivados atualizados ([README/CLAUDE/CHANGELOG]); drift sinalizado: [nenhum | lista]
 > - Critérios de aceite da feature: [N/N] atendidos
 >
 > Próxima feature: **[nome]** ([N] tasks)
@@ -321,6 +321,7 @@ Após todas as features de uma fase:
 Após cada feature/fase concluída, atualize o `.ksdd/build/BUILD-PLAN.md` (ou path legado raiz se a sessão de planejamento usou o legado):
 - Status das features e fases
 - Data de conclusão
+- PR da feature (**1 por feature** por default; N com `--multi-pr`) e resultado da **sync pós-build** que rodou por feature (B.4): docs derivados atualizados, drift sinalizado
 - Desvios do plano
 - Dívida técnica identificada
 
@@ -407,25 +408,28 @@ O build ainda funciona, mas com decisões adicionais:
 
 ## Paralelismo entre features
 
-Features sem dependência mútua podem ser buildadas em paralelo:
+**Onde mora o ganho da v1:** o paralelismo forte acontece **dentro de cada feature** — tasks independentes rodam em **ondas paralelas**, cada teammate em seu worktree (delegado ao modelo de `references/parallel-build.md`; ver B.4). É default e não pede aprovação task a task.
 
-- **Paralelo seguro:** `auth-flow` e `data-model` (se não se tocam)
-- **Sequencial obrigatório:** `data-model` → `core-api` (API depende do modelo)
+**Entre features inteiras**, a regra segue **conservadora**. Features da mesma fase sem dependência mútua *podem* rodar em paralelo — agora com worktrees disponíveis quando fizer sentido — mas só quando:
 
-Na prática, use paralelismo apenas quando:
-1. As features não tocam os mesmos arquivos
-2. O usuário aprovou o paralelismo
-3. Cada feature vai pra sua própria branch
+1. As features **não tocam os mesmos arquivos** (overlap ⇒ sequencial);
+2. O usuário **aprovou** o paralelismo entre features (no checkpoint por feature, B.3);
+3. Cada feature vai para sua **própria branch de build** e seu próprio PR.
 
-Se em dúvida, **vá sequencial** — é mais seguro e mais fácil de debugar.
+- **Paralelo seguro:** `auth-flow` e `data-model` (se não se tocam).
+- **Sequencial obrigatório:** `data-model` → `core-api` (API depende do modelo).
+
+**Se em dúvida, vá sequencial** entre features — é mais seguro e mais fácil de debugar. Paralelizar features inteiras de forma agressiva fica **fora da v1** (FEATURE §2.2); o ganho garantido é o paralelismo **de tasks dentro de cada feature**.
 
 ---
 
-## Artefatos são read-only
+## Artefatos são read-only (exceto docs derivados)
 
-**NUNCA** modifique `SPEC.md`, `architecture.md`, `DESIGN.md` (em `.ksdd/specs/` ou raiz legado) durante o build. `FEATURE-*.md` (em qualquer dos paths) pode ter status atualizado, mas conteúdo é read-only.
+Os **artefatos-contrato** — `SPEC.md`, `architecture.md`, `DESIGN.md`, `FEATURE-*.md` (em `.ksdd/specs/`, `.ksdd/features/`, raiz ou `docs/` legado) — permanecem **read-only** durante todo o build. Se a implementação sugerir que algum ficou desatualizado, a **sync pós-build sinaliza o drift** (aviso amarelo com o que revisar) — **nunca edita** (parallel-build.md §5.2).
 
-Se algo nos artefatos está errado, sinalize ao usuário. As únicas exceções: status de tasks e `BUILD-PLAN.md` (em `.ksdd/build/` ou raiz legado).
+**Exceção — docs derivados:** a sync pós-build de cada feature (B.4, parallel-build.md §5.1) *pode* atualizar, quando existirem, os docs derivados do projeto: `README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md`, e o `status`/`README.md` de tasks. Edição cirúrgica, não reescrita; doc ausente é pulado com aviso.
+
+Além desses, `.ksdd/build/BUILD-PLAN.md` (em `.ksdd/build/` ou raiz legado) continua editável pelo orquestrador (B.7), como hoje.
 
 ---
 

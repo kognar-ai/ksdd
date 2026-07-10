@@ -44,29 +44,32 @@ O `/ksdd:new:feature` tem **dois checkpoints internos**:
 
 ### Gate 6 — Durante `/ksdd:build:feature`
 
-O build tem **checkpoints por task**:
+Um **build completo** (`--all` ou o slug da feature) corre **autônomo em ondas paralelas** (teammates + worktrees — modelo canônico em `references/parallel-build.md`): **não** há checkpoint humano entre tasks bem-sucedidas. Os checkpoints obrigatórios são o **pre-flight** (início) e a **sync pós-build** (antes do PR); no meio, o build só para se um gate falhar. Um **build de task única** é uma onda de um teammate só.
 
 1. **Pre-flight:** Git limpo, dependências disponíveis. Falhou? STOP imediato.
-2. **Antes de cada task:** Mostra qual task será implementada, confirma com o usuário.
-3. **Quality gates por task:** Build, testes, lint, type-check, E2E (se UI), code review, security audit (se auth/PII). Tudo verde antes do PR.
+2. **Ondas autônomas:** as tasks `para implementar` são organizadas em ondas por dependência e overlap de arquivos; dentro de uma onda, tasks independentes rodam em paralelo (um teammate cada). Sem confirmação humana task a task — só pausa se um gate bloquear.
+3. **Quality gates por task:** Build, testes, lint, type-check, E2E (se UI), code review, security audit (se auth/PII). Rodam por task, antes de integrar cada uma na branch de build. O paralelismo **não afrouxa** nenhum gate.
 4. **Validação de critérios:** Cada critério de aceitação da task demonstrado com evidência.
-5. **PR aberto:** Não faz merge — aguarda review humano.
+5. **Checkpoint de sync pós-build (OBRIGATÓRIO):** Concluídas todas as tasks, antes do PR, a fase de sincronização apresenta o **diff dos docs derivados** (`README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md`, status/README de tasks) **+ a lista de drift sinalizado** e **exige aprovação humana antes de comitar** a sync. Nunca comita a sync sem o OK.
+6. **PR:** Não faz merge — aguarda review humano. **Build completo** (`--all` ou o slug) abre **exatamente 1 PR** por default, agregando os commits atômicos de todas as tasks + o commit de sync; **`--multi-pr`** ⇒ **1 PR por task**; **build de task única** (ID/slug isolado) ⇒ **1 PR daquela task**.
 
 **Pré-condição:** FEATURE deve existir e estar aprovada — procura em ordem: `.ksdd/features/FEATURE-[slug].md` → `docs/FEATURE-[slug].md` → raiz `FEATURE-[slug].md` (legados). Tasks devem existir em `.ksdd/tasks/feature-[slug]/` ou `docs/tasks/feature-[slug]/` (legado). `SPEC.md` obrigatório (`.ksdd/specs/` ou raiz). Dependencies (`depends_on`) da task devem ter `status: concluída`.
 
-**O build NUNCA modifica artefatos KSDD** (SPEC.md, architecture.md, DESIGN.md, FEATURE-*.md em qualquer dos paths suportados). Se durante a implementação ficar claro que algo está errado ou incompleto, sinalize ao usuário — não corrija automaticamente. A única exceção: status das tasks e o README de tasks podem ser atualizados (no path onde a task vive).
+**O build NUNCA modifica os artefatos-contrato** (SPEC.md, architecture.md, DESIGN.md, FEATURE-*.md em qualquer dos paths suportados). Se durante a implementação ficar claro que algo está errado ou incompleto, sinalize ao usuário — não corrija automaticamente. **A sync pós-build não afrouxa essa regra:** SPEC/architecture/DESIGN/FEATURE seguem **read-only** inclusive na sincronização — o drift é apenas **sinalizado**, nunca editado. As únicas escritas permitidas: os **docs derivados** (`README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md`) na fase de sync — sempre com o checkpoint de aprovação — e o `status`/README das tasks (no path onde a task vive).
 
 ### Gate 7 — Durante `/ksdd:build:all`
 
-O build completo tem **checkpoints em cascata**:
+O build completo tem **checkpoints em cascata** — preservados. O paralelismo autônomo mora **dentro** de cada feature (ondas de tasks) e **não** substitui os checkpoints entre features e fases:
 
 1. **Checkpoint do plano mestre:** Após gerar `.ksdd/build/BUILD-PLAN.md` (fallback raiz `BUILD-PLAN.md` legado) + todas as FEATURE specs + todas as tasks. O usuário aprova a decomposição, ordem de execução e estimativas. Se `--plan-only`, para aqui.
 2. **Checkpoint por feature:** Antes de iniciar cada feature, mostra tasks na fila e pede confirmação.
-3. **Checkpoints do `/ksdd:build:feature`:** Cada task segue o fluxo completo (pre-flight, issue, branch, context.md, quality gates, PR).
+3. **Execução da feature (delegada ao modelo de `/ksdd:build:feature`):** cada feature corre **autônoma em ondas paralelas** (teammates + worktrees; `references/parallel-build.md`) — **sem checkpoint humano entre tasks bem-sucedidas**, pausando só se um gate falhar. Concluídas as ondas, a **sync pós-build da feature** apresenta o diff dos **docs derivados** (`README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md`, status/README de tasks) + a lista de **drift sinalizado** e **exige aprovação antes de comitar**. Por default abre **1 PR por feature** (agregando os commits atômicos das tasks + a sync); **`--multi-pr`** ⇒ **1 PR por task**. Nunca faz merge — aguarda review humano.
 4. **Checkpoint pós-fase:** Após todas as features de uma fase, resumo consolidado. Recomenda testar antes de avançar pra próxima fase.
 5. **Checkpoint final:** Validação contra critérios do SPEC, cobertura agregada, pendências.
 
 **Pré-condição:** `.ksdd/specs/SPEC.md` (fallback raiz) deve existir e estar aprovado. `architecture.md` e `DESIGN.md` (em `.ksdd/specs/` ou raiz) são recomendados. Se não existem, o build faz uma rodada de perguntas de stack antes de prosseguir.
+
+**Read-only preservado na sync:** a sync por feature **nunca edita** SPEC/architecture/DESIGN/FEATURE — só **sinaliza drift**; escreve apenas nos **docs derivados** e no `status`/README de tasks, sempre com o checkpoint de aprovação.
 
 **`--resume`:** Detecta estado existente (features/tasks com status misto) e retoma da próxima task incompleta.
 

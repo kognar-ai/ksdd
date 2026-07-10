@@ -83,6 +83,17 @@ reverse-engineering de projeto existente; `archive` move features concluídas. C
 command para num **approval gate** — nunca encadeia sem aprovação humana
 (`references/approval-gates.md`, Gates 1–9).
 
+**Build paralelo (v0.12.0+):** `build:feature` e `build:all` executam as tasks
+independentes de uma feature em **ondas paralelas** — um teammate por task, cada um
+isolado em um **git worktree** (fallback seguro para sequencial in-place quando o
+ambiente nega worktree ou as tasks têm overlap de arquivos). Um build completo abre
+**1 PR único** ao final (`--multi-pr` volta a 1 PR por task) e, antes do PR, roda uma
+**sincronização pós-build** que atualiza **só os docs derivados** (`README.md`,
+`CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md` + `status`/README de tasks) com checkpoint — os
+artefatos-contrato (SPEC/architecture/DESIGN/FEATURE) seguem **read-only**, com drift
+apenas sinalizado. O modelo é canônico em `references/parallel-build.md` (fonte única
+referenciada pelos dois commands) e é **100% conteúdo Markdown** — não altera `bin/ksdd.js`.
+
 Tasks de feature e de fix compartilham **um único espaço global de IDs** (`NNN`): ao
 numerar, considere `.ksdd/tasks/feature-*/`, `.ksdd/tasks/fix-*/`, `docs/tasks/*` (legado)
 e `.ksdd/archive/raw/*/tasks/` — maior ID + 1.
