@@ -314,6 +314,11 @@ Não aplicável (CLI). Considerações equivalentes:
 - **`--project` grava em `.github/` do repo só com flag explícita** — o modo project-scoped (`.github/prompts/` + `.github/chatmodes/`) do diretório de trabalho atual só é ativado com `--copilot --project`; o default nunca escreve fora de `~/`.
 - **`uninstall` sem manifest** — modo fallback: tenta remover paths conhecidos por convenção. Mensagem amarela avisando.
 - **Approval gates obrigatórios** — slash commands param após gerar artefato; nunca encadeiam automaticamente. Mesmo se usuário disser "pula", o comando pede confirmação explícita (`references/approval-gates.md`).
+- **Paralelismo máximo com fallback seguro** — no build (`/ksdd:build:feature`, `/ksdd:build:all`), tasks independentes de uma feature rodam em **ondas paralelas** (um teammate por task); se o ambiente **nega** `git worktree` ou duas tasks da onda têm **overlap de arquivos**, cai para **execução sequencial in-place** (aviso amarelo), preservando gates por task, commits atômicos, sync e PR (`references/parallel-build.md` §1 e §4).
+- **Worktrees efêmeros por teammate** — cada teammate paralelo trabalha em um `git worktree` isolado, criado a partir da branch de build e **removido ao integrar** a task; nenhum worktree órfão sobra ao final do build (§2).
+- **PR único por default no build completo** — um build completo (feature via `--all`/slug; cada feature no `build:all`) abre **1 PR** ao final, agregando os commits atômicos das tasks + o commit de sincronização; `--multi-pr` reverte para **1 PR por task** (comportamento histórico). Build de task isolada = 1 PR daquela task (§3).
+- **Sincronização pós-build "só docs derivados"** — concluídas as ondas e **antes do PR**, uma fase sincroniza cirurgicamente apenas os docs derivados existentes (`README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md` + `status`/README das tasks), **com checkpoint de aprovação** antes de comitar; doc ausente é pulado com aviso (§5).
+- **Artefatos-contrato read-only inclusive na sync** — `SPEC.md`, `architecture.md`, `DESIGN.md` e `FEATURE-*.md` nunca são editados durante o build nem na sincronização pós-build; drift é apenas **sinalizado** (aviso amarelo), nunca corrigido automaticamente (§5.2).
 
 ---
 
@@ -360,7 +365,7 @@ Implicações práticas:
 3. Gera `docs/FEATURE-[slug].md` → Gate 5a (checkpoint do spec da feature)
 4. Aprovado → quebra em tasks em `docs/tasks/feature-[slug]/NNN-*.md` → Gate 5b (checkpoint das tasks)
 5. Aprovado → `/ksdd:build:feature [slug]` com `--all` ou task por task
-6. Para cada task: pre-flight → issue GitHub → branch → context.md → implementação via subagents → quality gates (build, testes, lint, E2E, code review, security audit) → commits atômicos → PR aberto (sem merge)
+6. Execução em **ondas paralelas**: as tasks independentes rodam concorrentes — um teammate por task, cada um em seu **git worktree efêmero** (fallback **sequencial in-place**, com aviso amarelo, se o ambiente nega worktree ou há overlap de arquivos entre tasks da onda). Por task: pre-flight → issue GitHub → context.md → implementação via teammate → quality gates (build, testes, lint, E2E, code review, security audit) → commit atômico na branch de build. Concluídas as ondas → **sincronização pós-build** dos docs derivados, com checkpoint de aprovação → **PR único ao final** do build completo, sem merge (múltiplos só com `--multi-pr`; build de task isolada = 1 PR daquela task)
 
 ### 13.4 Build completo do projeto
 
@@ -369,7 +374,7 @@ Implicações práticas:
 3. Quebra cada feature em tasks
 4. Gera `BUILD-PLAN.md` como mapa mestre → Gate 7 Checkpoint 1
 5. Aprovado → executa feature por feature em ordem de dependência (Checkpoint 7.2 por feature)
-6. Cada feature segue fluxo do 13.3 (`build:feature` interno)
+6. Cada feature segue o fluxo do 13.3 (`build:feature` interno): tasks em **ondas paralelas** (teammates + worktrees, com fallback sequencial in-place), **sincronização pós-build** dos docs derivados por feature (com checkpoint) e **1 PR por feature** por default (1 por task só com `--multi-pr`)
 7. Pós-fase: resumo consolidado, recomendação de teste manual
 8. Final: validação agregada contra critérios do SPEC
 

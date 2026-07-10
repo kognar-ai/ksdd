@@ -1,7 +1,7 @@
 ---
 id: 061
 title: SPEC.md — atualizar fluxos 13.3/13.4 e seção 11 (paralelismo, PR único, sync)
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P1
