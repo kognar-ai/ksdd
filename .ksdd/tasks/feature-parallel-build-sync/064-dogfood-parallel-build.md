@@ -1,7 +1,7 @@
 ---
 id: 064
 title: Dogfood — rodar o novo build:feature numa feature/task real do repo
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: qa
 priority: P1

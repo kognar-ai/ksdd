@@ -1,7 +1,7 @@
 ---
 id: 065
 title: QA end-to-end — paralelo, fallback, PR único vs --multi-pr, sync, drift, read-only, consistência
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: qa
 priority: P0
