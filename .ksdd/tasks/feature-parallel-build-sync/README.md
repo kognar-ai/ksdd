@@ -7,16 +7,16 @@
 
 | ID  | Título                                                                            | Área    | Prioridade | Estimativa | Status           | Depende de              |
 |-----|-----------------------------------------------------------------------------------|---------|------------|------------|------------------|-------------------------|
-| 056 | Criar `references/parallel-build.md` (estratégia canônica)                        | backend | P0         | M          | para implementar | —                       |
-| 057 | `build:feature` — paralelismo + worktrees + fallback seguro                       | backend | P0         | L          | para implementar | 056                     |
-| 058 | `build:feature` — PR único ao final + fase de sync pós-build                      | backend | P0         | L          | para implementar | 056, 057                |
-| 059 | `build:all` — alinhar ao novo modelo                                              | backend | P0         | L          | para implementar | 056, 057, 058           |
-| 060 | `approval-gates` — Gates 6 e 7 (sync + PR único)                                  | backend | P1         | S          | para implementar | 057, 058, 059           |
-| 061 | Dogfood `SPEC.md` — fluxos 13.3/13.4 + seção 11                                   | backend | P1         | M          | para implementar | 057, 058, 059           |
-| 062 | Dogfood `architecture.md` — ADR-014 + riscos                                      | backend | P1         | M          | para implementar | 057, 058, 059           |
-| 063 | README/INSTALL/CHANGELOG + bump `package.json` 0.12.0                             | backend | P0         | S          | para implementar | 056-062                 |
-| 064 | Dogfood — rodar o novo `build:feature` num alvo real                             | qa      | P1         | M          | para implementar | 063                     |
-| 065 | QA end-to-end — paralelo, fallback, PR único vs `--multi-pr`, sync, drift, read-only | qa   | P0         | M          | para implementar | 064                     |
+| 056 | Criar `references/parallel-build.md` (estratégia canônica)                        | backend | P0         | M          | em revisão      | —                       |
+| 057 | `build:feature` — paralelismo + worktrees + fallback seguro                       | backend | P0         | L          | em revisão      | 056                     |
+| 058 | `build:feature` — PR único ao final + fase de sync pós-build                      | backend | P0         | L          | em revisão      | 056, 057                |
+| 059 | `build:all` — alinhar ao novo modelo                                              | backend | P0         | L          | em revisão      | 056, 057, 058           |
+| 060 | `approval-gates` — Gates 6 e 7 (sync + PR único)                                  | backend | P1         | S          | em revisão      | 057, 058, 059           |
+| 061 | Dogfood `SPEC.md` — fluxos 13.3/13.4 + seção 11                                   | backend | P1         | M          | em revisão      | 057, 058, 059           |
+| 062 | Dogfood `architecture.md` — ADR-014 + riscos                                      | backend | P1         | M          | em revisão      | 057, 058, 059           |
+| 063 | README/INSTALL/CHANGELOG + bump `package.json` 0.12.0                             | backend | P0         | S          | em revisão      | 056-062                 |
+| 064 | Dogfood — rodar o novo `build:feature` num alvo real                             | qa      | P1         | M          | em revisão      | 063                     |
+| 065 | QA end-to-end — paralelo, fallback, PR único vs `--multi-pr`, sync, drift, read-only | qa   | P0         | M          | em revisão      | 064                     |
 
 ---
 
@@ -49,4 +49,4 @@
 - **Zero `bin/ksdd.js`:** só conteúdo Markdown; `references/parallel-build.md` é auto-bundlado pelo `copyDir` de `references/`.
 
 ---
-**Próximo passo:** `/ksdd:build:feature parallel-build-sync` para implementar task por task (ou `/ksdd:build:feature parallel-build-sync --all` para o build completo — que agora, uma vez implementado, roda em ondas paralelas com PR único).
+**Status:** feature **implementada** — as 10 tasks (056–065) estão em `em revisão` na branch `claude/ksdd-build-feature-enhance-4qq9kp`, agregadas num **PR único** aguardando review humano. Após o merge, mude os `status:` para `concluída` (e considere `/ksdd:archive parallel-build-sync`).
