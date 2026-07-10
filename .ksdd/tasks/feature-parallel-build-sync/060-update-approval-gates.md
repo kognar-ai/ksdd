@@ -1,7 +1,7 @@
 ---
 id: 060
 title: approval-gates — documentar checkpoint de sync pós-build e default de PR único (Gates 6 e 7)
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P1
