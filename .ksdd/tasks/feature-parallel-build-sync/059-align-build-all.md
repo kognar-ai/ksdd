@@ -1,7 +1,7 @@
 ---
 id: 059
 title: build:all — alinhar ao novo modelo (paralelismo, worktrees, PR único, sync)
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P0
