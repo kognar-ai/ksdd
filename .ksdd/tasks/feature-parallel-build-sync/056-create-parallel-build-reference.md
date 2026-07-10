@@ -1,7 +1,7 @@
 ---
 id: 056
 title: Criar references/parallel-build.md (estratégia canônica de build paralelo)
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P0
