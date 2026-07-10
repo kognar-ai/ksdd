@@ -4,6 +4,26 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.12.0] - 2026-07-10
+
+### Adicionado
+
+- **`references/parallel-build.md`** — documento canônico do modelo de build paralelo, **fonte única** referenciada por `/ksdd:build:feature` e `/ksdd:build:all` (em vez de duplicar a prosa). Cobre: ondas de paralelismo (um teammate por task independente, todas as chamadas na mesma mensagem — contrato do skill dispatching-parallel-agents), ciclo de vida do **git worktree** por teammate (detecção de isolamento, `git worktree add -b`, git-ignore, remoção ao integrar — contrato do skill using-git-worktrees), branch de build + **PR único**, **fallback seguro** (sequencial in-place) e **sincronização pós-build "só docs derivados"**. Auto-distribuído no bundle de skill dos 5 targets pelo `copyDir` de `references/` — **sem** alteração em `bin/ksdd.js`.
+- **`/ksdd:build:feature` — execução paralela em ondas com git worktrees.** Tasks independentes (sem `depends_on` mútuo e sem overlap de arquivos) rodam como **teammates concorrentes**, cada um isolado em um worktree efêmero; os teammates editam e retornam, o orquestrador comita atomicamente após a onda. **Fallback seguro:** ambiente que nega worktree (sandbox) ou tasks com overlap ⇒ execução **sequencial in-place**, com aviso amarelo. Quality gates continuam obrigatórios por task.
+- **`/ksdd:build:feature` — PR único ao final do build completo.** Um build completo (`--all` ou o slug) abre **1 PR** agregando os commits atômicos das tasks + o commit de sincronização; novo modificador **`--multi-pr`** reproduz o histórico (1 PR por task). Build de task isolada = 1 PR daquela task.
+- **`/ksdd:build:feature` — fase de sincronização pós-build (seção 8.5).** Concluídas as ondas e **antes do PR**, sincroniza cirurgicamente **só os docs derivados** existentes (`README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md` + `status`/README de tasks), com **checkpoint de aprovação** antes de comitar. Os artefatos-contrato (`SPEC.md`, `architecture.md`, `DESIGN.md`, `FEATURE-*.md`) permanecem **read-only** — drift é apenas **sinalizado**, nunca editado.
+
+### Alterado
+
+- **`/ksdd:build:all`** — alinhado ao mesmo modelo do `build:feature`: cada feature executa em **ondas paralelas** (teammates + worktrees, com fallback), roda a **sync pós-build por feature** e abre **1 PR por feature** por default (`--multi-pr` = 1 por task). Os checkpoints em cascata (plano mestre, por feature, por fase, final) são **preservados**; o paralelismo autônomo mora **dentro** de cada feature. Resolve a divergência histórica (o `build:all` replicava o fluxo antigo de PR-por-task sequencial).
+- **`references/approval-gates.md`** — Gate 6 (`build:feature`) documenta as ondas autônomas (sem checkpoint por task bem-sucedida), o **checkpoint obrigatório de sync pós-build** e o default de PR único; Gate 7 (`build:all`) documenta a sync por feature + 1 PR por feature, com os checkpoints em cascata preservados. Regra read-only reforçada nos dois.
+- **SPEC / architecture / README** — dogfood: fluxos 13.3/13.4 e seção 11 do SPEC, **ADR-014** + riscos no architecture, e o fluxo de build no README documentam paralelismo, worktrees, PR único e sync pós-build.
+- **`package.json`** — versão **0.12.0**.
+
+### Arquitetura
+
+- **ADR-014 registrado em `architecture.md`** — build paralelo (teammates + worktrees), PR único ao final e sync pós-build entregues como **conteúdo Markdown** (commands + `references/parallel-build.md`), **sem tocar `bin/ksdd.js`**. Fonte única (`references/parallel-build.md`) previne a divergência `build:feature`↔`build:all`. Decisões de produto registradas: sync **"só docs derivados"** (contratos read-only, drift sinalizado), **fallback seguro** e **PR único default** (`--multi-pr` opt-in). A contagem de funções `install*` permanece em **5** e a de slash commands em **11**; o gatilho do ADR-012 (refator `installTarget` antes do 6º target) permanece **intocado**.
+
 ## [0.11.0] - 2026-07-08
 
 ### Adicionado

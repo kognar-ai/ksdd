@@ -47,7 +47,7 @@ Restart your agent after installing. `CODEX_HOME` (default `~/.codex`) changes t
 /ksdd:design         →  .ksdd/specs/DESIGN.md             (spec → Stitch-compatible design system)
 /ksdd:new:feature    →  .ksdd/features/FEATURE-[slug].md  (new feature → spec + implementable tasks)
 /ksdd:new:fix        →  .ksdd/fixes/FIX-[slug].md         (reported bug → investigation + proposed fix + tasks)
-/ksdd:build:feature  →  task by task                       (feature → implementation with issue, branch, PR)
+/ksdd:build:feature  →  parallel waves + 1 PR              (feature → parallel teammates in git worktrees, docs sync, single PR)
 /ksdd:build:fix      →  task by task                       (fix → implementation, repro-first + mandatory regression test)
 /ksdd:build:all      →  .ksdd/build/BUILD-PLAN.md         (entire SPEC → features + tasks + full implementation)
 /ksdd:setup          →  .ksdd/specs/{brainstorm,SPEC,architecture,DESIGN}.md  (existing project → reverse-engineered artifacts)
@@ -231,6 +231,7 @@ ksdd/
 │   ├── architecture-template.md       ← template for architecture.md
 │   ├── feature-template.md            ← template for .ksdd/features/FEATURE-[slug].md
 │   ├── build-plan-template.md         ← task frontmatter format (build:feature / build:all)
+│   ├── parallel-build.md              ← parallel build model: waves, worktrees, single PR, post-build sync
 │   ├── codex-SKILL.md                 ← body of the Codex skill (~/.agents/skills/ksdd/SKILL.md)
 │   ├── design-md-spec.md              ← Google Stitch DESIGN.md specification
 │   ├── personas-guide.md              ← how to build useful personas
@@ -297,7 +298,7 @@ project/
 
 Ready to be consumed by design tools (Stitch, v0, Lovable, Pencil) and coding agents (Claude Code, Cursor) with persistent context.
 
-The full flow: `/ksdd:build:all` decomposes the SPEC into features and tasks, generates `.ksdd/build/BUILD-PLAN.md` as the execution map, and implements task by task with issues, branches, quality gates and PRs. For individual features outside the full flow, use `/ksdd:new:feature` + `/ksdd:build:feature`. For pre-existing projects, `/ksdd:setup` reverse-engineers the four canonical artifacts from your codebase and git history.
+The full flow: `/ksdd:build:all` decomposes the SPEC into features and tasks, generates `.ksdd/build/BUILD-PLAN.md` as the execution map, and implements each feature in **parallel waves** — independent tasks run as concurrent teammates isolated in git worktrees (with a safe sequential in-place fallback when worktrees are unavailable or tasks overlap files), quality-gated per task, then a **post-build sync** refreshes the project's derived docs (`README.md`, `CLAUDE.md`/`AGENTS.md`, `CHANGELOG.md`) before opening **a single PR** per feature (`--multi-pr` reverts to one PR per task). The parallel-build model is canonical in `references/parallel-build.md`. For individual features outside the full flow, use `/ksdd:new:feature` + `/ksdd:build:feature`. For pre-existing projects, `/ksdd:setup` reverse-engineers the four canonical artifacts from your codebase and git history.
 
 ## License and contributing
 

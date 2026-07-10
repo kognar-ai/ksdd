@@ -1,7 +1,7 @@
 ---
 id: 063
 title: README/INSTALL/CHANGELOG + bump package.json 0.12.0
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P0
