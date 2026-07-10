@@ -1,7 +1,7 @@
 ---
 id: 062
 title: architecture.md — ADR-014 (paralelismo/worktrees/PR único/sync) + riscos
-status: para implementar
+status: em revisão
 feature: parallel-build-sync
 area: backend
 priority: P1
