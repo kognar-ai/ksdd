@@ -200,6 +200,18 @@ components:
 - **Acessibilidade não negociável.** Pares `backgroundColor`/`textColor` em components devem passar WCAG AA (4.5:1 normal text, 3:1 large).
 - **Component variants** (hover, active, pressed) vão como entradas separadas, não objetos aninhados.
 
+### 5.5 (Opcional) Emitir `PRODUCT.md` para o impeccable
+
+**Só execute este passo se o usuário optar** — é opt-in e não roda por padrão. Se o usuário usa (ou quer usar) o impeccable para a camada de craft/QA da UI, além do `DESIGN.md` você pode emitir um rascunho de `.ksdd/specs/PRODUCT.md` a partir de SPEC/brainstorm/personas.
+
+Derive os campos conforme o mapeamento em `references/integrations/impeccable.md` (não duplique a tabela aqui):
+- **Users** ← Personas (SPEC seção 2)
+- **Mode** (`brand` | `product`) ← Modelo de Negócio + natureza do produto (SPEC seções 1 e 12)
+- **Brand voice** ← Identidade Visual / Personalidade da Marca (SPEC seção 3)
+- **Anti-references** ← Diferenciais / o que evitar (brainstorm + SPEC)
+
+Respeite `references/language-policy.md` (idioma da conversa). O esquema exato do `PRODUCT.md` é definido pelo impeccable e pode evoluir — trate o rascunho como ponto de partida e confirme com `/impeccable init` (o gerador autoritativo). Antes do `create_file`, garanta `mkdir -p .ksdd/specs/`.
+
 ### 6. Validação mental antes de entregar
 
 Antes de finalizar, verifique:
@@ -218,6 +230,11 @@ Antes de finalizar, verifique:
 > - Validar com `npx @google/design.md lint .ksdd/specs/DESIGN.md`
 > - Exportar pra Tailwind: `npx @google/design.md export --format css-tailwind .ksdd/specs/DESIGN.md > theme.css`
 > - Importar no Stitch, Cursor, v0, Lovable diretamente
+>
+> **Integração impeccable (opcional):** como o `DESIGN.md` já está no formato Google Stitch, o impeccable o consome sem conversão. Se você usa o impeccable para craft/QA no código:
+> - Exponha o artefato via path bridge: `ln -s .ksdd/specs/DESIGN.md DESIGN.md` (idem `PRODUCT.md`, se gerado) — a doc atual do impeccable não documenta flag de path.
+> - Comece o craft com `/impeccable craft|audit|polish|live`.
+> - Mapeamento SPEC→PRODUCT.md, garantia de compat e gate de slop: `references/integrations/impeccable.md`.
 >
 > Aprovado? Quer ajustar tokens específicos ou expandir alguma seção?
 
