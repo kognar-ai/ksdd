@@ -224,6 +224,18 @@ spacing:
 
 ---
 
+## Interop com impeccable
+
+O `DESIGN.md` gerado pelo `/ksdd:design` é **o mesmo formato Google Stitch** que o [impeccable](https://github.com/pbakaus/impeccable) (camada de craft/QA de UI, Apache-2.0) lê e escreve — não há formato intermediário nem exportador. O **teste objetivo de compat** é o próprio lint:
+
+```bash
+npx @google/design.md lint .ksdd/specs/DESIGN.md    # passar = compatível com o impeccable
+```
+
+O impeccable espera o `DESIGN.md` na raiz do projeto, enquanto o KSDD mantém a fonte da verdade em `.ksdd/specs/`. Ponte confiável: `ln -s .ksdd/specs/DESIGN.md DESIGN.md` (a doc atual do impeccable não documenta flag de path). Handoff completo — commands por fase, mapeamento SPEC→`PRODUCT.md` e slop detector como gate: `references/integrations/impeccable.md`.
+
+---
+
 ## Referências oficiais
 
 - Spec completa: https://github.com/google-labs-code/design.md/blob/main/docs/spec.md
