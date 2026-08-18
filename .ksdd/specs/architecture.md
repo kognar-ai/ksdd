@@ -426,6 +426,13 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 **Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (par de commands + namespace `.ksdd/fixes/` + bump minor 0.11.0).
 **Consequência:** o KSDD passa a cobrir o terceiro momento do ciclo de vida (manutenção reativa) sem tocar a arquitetura de instalação — a superfície de slash commands sobe de 9 para 11, mas a contagem de funções `install*` permanece em 5. A rastreabilidade de bug vira artefato versionável (`FIX-[slug].md`). Custo: `new:feature` e `new:fix` passam a varrer `.ksdd/tasks/fix-*/` além de `feature-*` para manter o espaço global de IDs; arquivar fixes via `/ksdd:archive` fica como item futuro (hoje o archive cobre só features).
 
+### ADR-014: Convenção de integrações (`references/integrations/`) — conteúdo-only, sem framework de plugins
+
+**Evidência:** feature impeccable-integration (v0.12.0) adiciona `references/integrations/README.md` (a convenção) e `references/integrations/impeccable.md` (1ª integração) como **conteúdo puro**, distribuído recursivamente por `copyDir(references, …)` para os 5 targets — **sem** entrada em `COMMAND_FILES`, **sem** função `install*` nova, **zero** mudança em `bin/ksdd.js`. As superfícies do fluxo que apontam para o doc (`commands/design.md` Step 7 + passo 5.5; `commands/build:feature.md` §4.5 + gate opcional §4.8/§6; nota "## Interop com impeccable" em `references/design-md-spec.md`) são edições de conteúdo. Decisão e trade-off em `.ksdd/features/FEATURE-impeccable-integration.md`.
+**Decisão:** integrações com ferramentas externas (impeccable, e no futuro Figma/v0/Pencil) são **handoff/opt-in documentado**, nunca dependência de código — o KSDD **nunca** faz `require(<tool>)`, não entra em `package.json` e não altera `engines.node` (requisitos de versão da ferramenta são do usuário dela). **Sem** framework/registry/detecção de plugins no CLI. **Sem** vendorizar conteúdo de terceiros (mantém a fronteira AGPL-3.0 × licença externa limpa — ex.: Apache-2.0 do impeccable).
+**Confiança:** alta — decisão explícita do mantenedor no checkpoint da feature (conteúdo-only + bump minor 0.12.0).
+**Consequência:** o KSDD ganha uma capacidade de integração extensível a custo de **conteúdo**; a superfície de slash commands (11) e a contagem de funções `install*` (5) permanecem inalteradas. Como uma integração **não** é novo target de instalação nem novo command, **não** incorre na dívida do ADR-010/011/012 e **não** dispara o refator `installTarget(targetConfig)` genérico — o gatilho do ADR-012 (refator inescapável antes do 6º target) permanece intocado. Mesmo espírito conteúdo-only do ADR-013. Custo: cada integração precisa de manutenção do doc conforme a ferramenta externa evolui (pontos sensíveis marcados `[verificar]`, ex.: flag de path do impeccable).
+
 ---
 
 ## 11. Riscos Técnicos
@@ -495,7 +502,8 @@ Stack sugerida (zero deps fica difícil; aceitável adicionar `node:test` nativo
 - [x] Superfície de slash commands 9 → 11; bump minor v0.11.0
 - [ ] **Futuro:** arquivar fixes via `/ksdd:archive` (hoje o archive cobre só `.ksdd/features/`)
 
-### Fase 6 — Integração design tools — **Roadmap confirmado**
+### Fase 6 — Integração design tools — **Em andamento (v0.12.0)**
+- [x] Convenção de integrações `references/integrations/` + 1ª integração: **impeccable** (craft/QA de UI), conteúdo-only, v0.12.0 (ADR-014)
 - [ ] Exportador `DESIGN.md` → Figma (via plugin ou JSON intermediário)
 - [ ] Exportador/importador Pencil
 - [ ] Validar export bidirecional com Google Stitch

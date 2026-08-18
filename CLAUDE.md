@@ -60,6 +60,10 @@ target hardcoded — faça o refator primeiro.
 - **Postinstall falha graciosamente** (warning amarelo, exit 0) para não travar `npm install`.
 - **Idioma:** os artefatos gerados pelos commands seguem `references/language-policy.md`
   (idioma da conversa, não fixo em pt-BR). A documentação do repo é pt-BR técnico.
+- **Integrações são conteúdo-only.** Docs em `references/integrations/*.md` são handoff/opt-in
+  (nunca dependência de código); distribuídos automaticamente por `copyDir` de `references/`
+  para os 5 targets — **não** tocam `bin/ksdd.js`, `COMMAND_FILES` nem disparam o refator
+  `installTarget` (ver `references/integrations/README.md` e ADR-014). A 1ª é o impeccable.
 
 ## Testes / validação (não há framework)
 
