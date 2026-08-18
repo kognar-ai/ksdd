@@ -1,7 +1,7 @@
 ---
 id: 056
 title: Criar references/integrations/README.md (convenção de integrações)
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P0

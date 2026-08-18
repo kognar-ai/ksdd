@@ -1,7 +1,7 @@
 ---
 id: 064
 title: QA end-to-end — CLI intacto + distribuição 5 targets + @google/design.md lint + dry-runs
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: qa
 priority: P0

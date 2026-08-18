@@ -1,7 +1,7 @@
 ---
 id: 059
 title: Atualizar commands/build:feature.md — §4.5 (craft) + §4.8/§6 (gate opcional slop detector)
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P0

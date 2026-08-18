@@ -7,15 +7,15 @@
 
 | ID  | Título                                                                          | Área    | Prioridade | Estimativa | Status           | Depende de                 |
 |-----|----------------------------------------------------------------------------------|---------|------------|------------|------------------|----------------------------|
-| 056 | `references/integrations/README.md` (convenção de integrações)                   | backend | P0         | S          | para implementar | —                          |
-| 057 | `references/integrations/impeccable.md` (1ª integração — doc canônico)            | backend | P0         | M          | para implementar | 056                        |
-| 058 | `commands/design.md` — Step 7 (bloco impeccable) + passo 5.5 (`PRODUCT.md`)       | backend | P0         | M          | para implementar | 057                        |
-| 059 | `commands/build:feature.md` — §4.5 (craft) + §4.8/§6 (gate opcional slop)         | backend | P0         | S          | para implementar | 057                        |
-| 060 | `references/design-md-spec.md` — nota "## Interop com impeccable"                 | backend | P1         | S          | para implementar | 057                        |
-| 061 | ADR-014 em `architecture.md` + nota em `CLAUDE.md`                                | backend | P1         | S          | para implementar | 056, 057                   |
-| 062 | README "## Integrações" + CHANGELOG + bump `package.json` 0.12.0                  | backend | P0         | S          | para implementar | 057, 058, 059, 060, 061    |
-| 063 | (Opcional) nota em `agents/critic.md` — regras de slop complementam o `DESIGN.md` | backend | P2         | S          | para implementar | 057                        |
-| 064 | QA end-to-end — CLI intacto + distribuição 5 targets + `@google/design.md lint`   | qa      | P0         | M          | para implementar | 062                        |
+| 056 | `references/integrations/README.md` (convenção de integrações)                   | backend | P0         | S          | em revisão      | —                          |
+| 057 | `references/integrations/impeccable.md` (1ª integração — doc canônico)            | backend | P0         | M          | em revisão      | 056                        |
+| 058 | `commands/design.md` — Step 7 (bloco impeccable) + passo 5.5 (`PRODUCT.md`)       | backend | P0         | M          | em revisão      | 057                        |
+| 059 | `commands/build:feature.md` — §4.5 (craft) + §4.8/§6 (gate opcional slop)         | backend | P0         | S          | em revisão      | 057                        |
+| 060 | `references/design-md-spec.md` — nota "## Interop com impeccable"                 | backend | P1         | S          | em revisão      | 057                        |
+| 061 | ADR-014 em `architecture.md` + nota em `CLAUDE.md`                                | backend | P1         | S          | em revisão      | 056, 057                   |
+| 062 | README "## Integrações" + CHANGELOG + bump `package.json` 0.12.0                  | backend | P0         | S          | em revisão      | 057, 058, 059, 060, 061    |
+| 063 | (Opcional) nota em `agents/critic.md` — regras de slop complementam o `DESIGN.md` | backend | P2         | S          | em revisão      | 057                        |
+| 064 | QA end-to-end — CLI intacto + distribuição 5 targets + `@google/design.md lint`   | qa      | P0         | M          | em revisão      | 062                        |
 
 ---
 
@@ -43,4 +43,4 @@
 
 ---
 
-**Próximo passo:** `/ksdd:build:feature impeccable-integration` para implementar task por task em ordem de dependência.
+**Status:** feature buildada em 2026-08-18 — as 9 tasks estão `em revisão` num **único PR** (branch `claude/ksdd-impeccable-integration-ug1zlr`). QA em `QA-REPORT.md` (todos os gates verdes). Marque as tasks como `concluída` após o merge do PR.

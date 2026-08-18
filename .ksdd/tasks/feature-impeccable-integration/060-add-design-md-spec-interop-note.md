@@ -1,7 +1,7 @@
 ---
 id: 060
 title: Adicionar nota "## Interop com impeccable" em references/design-md-spec.md
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P1

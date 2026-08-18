@@ -1,7 +1,7 @@
 ---
 id: 057
 title: Criar references/integrations/impeccable.md (1ª integração — doc canônico)
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P0

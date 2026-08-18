@@ -1,7 +1,7 @@
 ---
 id: 058
 title: Atualizar commands/design.md — Step 7 (bloco impeccable) + passo 5.5 (PRODUCT.md)
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P0

@@ -1,7 +1,7 @@
 ---
 id: 063
 title: (Opcional) Nota em agents/critic.md — regras de slop do impeccable complementam o checklist do DESIGN.md
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P2

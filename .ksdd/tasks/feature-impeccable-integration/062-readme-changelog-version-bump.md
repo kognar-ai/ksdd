@@ -1,7 +1,7 @@
 ---
 id: 062
 title: README "## Integrações" + CHANGELOG + bump package.json 0.11.0 → 0.12.0
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P0

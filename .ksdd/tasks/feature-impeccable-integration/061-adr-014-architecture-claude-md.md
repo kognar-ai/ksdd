@@ -1,7 +1,7 @@
 ---
 id: 061
 title: Registrar ADR-014 (convenção de integrações) em architecture.md + nota em CLAUDE.md
-status: para implementar
+status: em revisão
 feature: impeccable-integration
 area: backend
 priority: P1
