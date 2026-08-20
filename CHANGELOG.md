@@ -4,6 +4,30 @@ Todas as mudanças notáveis do projeto KSDD serão documentadas neste arquivo.
 
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.12.0] - 2026-08-18
+
+### Adicionado
+
+- **Convenção de integrações (`references/integrations/`)** — semente reaproveitável para plugar ferramentas externas ao fluxo spec-driven do KSDD. Integrações são **handoff/opt-in de conteúdo**, nunca dependência de código: distribuídas recursivamente por `copyDir` para os 5 targets, **sem** tocar `bin/ksdd.js`, `COMMAND_FILES` ou `engines.node`. Doc da convenção em `references/integrations/README.md` (inclui "como adicionar a próxima" — Figma/v0/Pencil).
+- **1ª integração: impeccable** (`references/integrations/impeccable.md`) — camada de craft/QA de UI (`pbakaus/impeccable`, Apache-2.0) que lê/escreve o mesmo `DESIGN.md` Google Stitch gerado pelo `/ksdd:design`. Doc canônico com: commands por fase (design vs build), garantia de compat via `npx @google/design.md lint`, path bridge (`.ksdd/specs/` ↔ raiz via symlink/`cp`; o impeccable não documenta flag de path), mapeamento SPEC → `PRODUCT.md` (Users, Mode `brand|product`, Brand voice, Anti-references) e o slop detector `npx impeccable detect` como gate opcional.
+- **Handoff no `/ksdd:design`** — bloco opt-in "Integração impeccable" no checkpoint (Step 7) + passo opcional 5.5 que emite um rascunho de `PRODUCT.md` a partir de SPEC/brainstorm/personas.
+- **Craft/QA no `/ksdd:build:feature`** — §4.5 sugere `/impeccable shape|critique` (antes) e `/impeccable audit|polish` (depois) em tasks de UI; novo gate opcional §6.6 `npx impeccable detect <ui-paths>` (não bloqueante).
+
+### Alterado
+
+- **`references/design-md-spec.md`** — nova nota "## Interop com impeccable" (mesmo formato Google Stitch; `@google/design.md lint` = contrato de compat; path bridge + pointer).
+- **`agents/critic.md`** — nota opcional de que as regras anti-slop do impeccable complementam o checklist de craft do `DESIGN.md`.
+- **`README.md` / `CLAUDE.md`** — seção "Integrations" (impeccable como a primeira) e nota da convenção `references/integrations/` para agentes futuros.
+- **`SPEC.md` / `architecture.md`** — Fase 6 do roadmap marcada como "Em andamento (v0.12.0)" com o impeccable entregue; versão do manifest de exemplo reconciliada para 0.12.0.
+
+### Arquitetura
+
+- **ADR-014 registrado em `architecture.md`** — convenção de integrações conteúdo-only, sem framework de plugins. Como uma integração não é novo target de instalação nem novo command, **não** dispara o refator `installTarget(targetConfig)` (gatilho do ADR-012 intocado) e mantém ADR-001 (zero-dep) e ADR-003 (conteúdo distribuído). Sem vendorização (fronteira AGPL-3.0 × Apache-2.0 limpa).
+
+### Distribuição
+
+- **Zero mudança em `bin/ksdd.js`.** `references/integrations/*.md` cai automaticamente no bundle de skill de todos os 5 targets (Claude, Codex, opencode, Antigravity, Copilot) via `copyDir`, e é removido no `uninstall` via manifest. Nenhuma dependência runtime nova (mantém ADR-001).
+
 ## [0.11.0] - 2026-07-08
 
 ### Adicionado

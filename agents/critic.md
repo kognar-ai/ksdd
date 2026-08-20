@@ -85,6 +85,8 @@ Exceção: se houver issues estruturais que exigem decisão humana (ex: spec do 
 - [ ] Cores em hex sRGB (não RGB/HSL)?
 - [ ] Dimensions com unidade (`px`, `em`, `rem`)?
 
+> **Nota opcional (impeccable):** se o projeto usa o impeccable, as regras de "anti-slop" dele complementam este checklist de craft do `DESIGN.md` (ver `references/integrations/impeccable.md`). É opt-in — o critic funciona idêntico para quem não usa o impeccable.
+
 ### 3. Correções automáticas
 
 Aplicar sem perguntar ao usuário:

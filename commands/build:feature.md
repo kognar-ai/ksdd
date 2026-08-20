@@ -167,6 +167,7 @@ Extraído das seções em `arch_refs`. Inclua ADRs citados (texto integral).
 - Tokens e componentes do DESIGN.md referenciados
 - Se disponível, use MCP Pencil para extrair guidelines e variáveis do design system
 - Se não houver design system, documente que decisões visuais serão tomadas na implementação
+- **Craft/QA com impeccable (opcional):** se o impeccable estiver disponível, registre no plano rodar `/impeccable shape|critique` **antes** de implementar a UI e `/impeccable audit|polish` **depois**. É opt-in — não bloqueia quem não o tem. Ver `references/integrations/impeccable.md`.
 
 ### 4.6 Bloco "Documentação oficial" (opcional)
 
@@ -198,6 +199,7 @@ Checklist dos comandos que serão rodados antes do commit:
 - [ ] E2E / Playwright (se UI tocada)
 - [ ] code-reviewer agent
 - [ ] security-auditor agent (se auth/PII/payment tocado)
+- [ ] Slop detector de UI (impeccable, opcional — só se disponível): npx impeccable detect <ui-paths>
 ```
 
 **Commit** do context.md como primeiro commit da branch:
@@ -275,6 +277,16 @@ Spawn em paralelo:
 - `Agent(subagent_type="security-auditor")` — **somente se** a task envolve auth, PII, billing, OAuth, uploads, SQL dinâmico
 
 Se algum revisor levantar issue **bloqueante**: corrija, recomite, re-rode os gates.
+
+### 6.6 Slop detector de UI (impeccable — opcional)
+
+**Opt-in, não bloqueante.** Só para tasks que tocam UI (`area: frontend`/`design`) e apenas se o impeccable estiver instalado:
+
+```bash
+npx impeccable detect <ui-paths>    # ex.: npx impeccable detect src/components
+```
+
+Se apontar slop, corrija com `/impeccable polish|audit` antes de fechar a task. Se o impeccable não está instalado, **pule** — os gates padrão (§6.1–§6.5) seguem valendo. O build permanece **read-only sobre `DESIGN.md`** (o impeccable atua no código, não nos artefatos KSDD). Ver `references/integrations/impeccable.md`.
 
 ---
 

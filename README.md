@@ -209,6 +209,21 @@ Claude : [pre-flight: detects KSDD artifacts in .ksdd/ or legacy locations]
          [STOPS — review checklist with priority]
 ```
 
+## Integrations
+
+KSDD ships **integration docs** under `references/integrations/` — one per external tool that plugs into the spec-driven flow. Integrations are **content-only, opt-in handoffs**: KSDD never depends on, bundles, or requires the tool (no `require()`, nothing in `package.json`, the Node engine stays `>=16`). They are distributed automatically to all 5 targets via `copyDir`, with **zero changes to `bin/ksdd.js`**. See `references/integrations/README.md` for the convention and how to add the next one (Figma / v0 / Pencil are on the roadmap).
+
+### impeccable (craft/QA of UI) — first integration
+
+[impeccable](https://github.com/pbakaus/impeccable) (Apache-2.0) reads and writes the **same Google Stitch `DESIGN.md`** that `/ksdd:design` already generates, and adds a craft/QA layer in code during the build — exactly where KSDD treats `DESIGN.md` as read-only. If you use it:
+
+- **Design phase:** at the `/ksdd:design` checkpoint, hand off with `/impeccable craft|audit|polish|live`.
+- **Build phase:** in UI tasks, run `/impeccable shape|critique` before and `/impeccable audit|polish` after; use `npx impeccable detect <ui-paths>` as an optional slop gate.
+- **Compat contract:** `npx @google/design.md lint .ksdd/specs/DESIGN.md` passing = impeccable-compatible (same format, no exporter needed).
+- **Path bridge:** impeccable expects `DESIGN.md`/`PRODUCT.md` at the project root; KSDD keeps the source of truth in `.ksdd/specs/`. Bridge with `ln -s .ksdd/specs/DESIGN.md DESIGN.md`.
+
+Everything is conditional — the KSDD flow runs end-to-end without impeccable installed. Full details: `references/integrations/impeccable.md`.
+
 ## System structure
 
 ```

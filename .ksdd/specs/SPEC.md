@@ -112,7 +112,7 @@ Persistido em `~/.claude/skills/ksdd/.ksdd-manifest.json`.
 
 ```json
 {
-  "version": "0.11.0",
+  "version": "0.12.0",
   "installedAt": "ISO-8601 timestamp",
   "pkgRoot": "/path/absoluto/do/pacote/npm",
   "targets": {
@@ -462,8 +462,9 @@ Implicações práticas:
 - Template `references/fix-template.md`; Gates 8 e 9 em `references/approval-gates.md`
 - Total de slash commands sobe de 9 para 11 (ADR-013 em `architecture.md`)
 
-### Fase 6 — Integração com design tools (confirmado no roadmap) — **Próximo**
+### Fase 6 — Integração com design tools (confirmado no roadmap) — **Em andamento (v0.12.0)**
 
+- Convenção de integrações `references/integrations/` + 1ª integração **impeccable** (craft/QA de UI, handoff no `/ksdd:design` e `/ksdd:build:feature`) — entregue v0.12.0, conteúdo-only (ADR-014)
 - Exportador para Figma (de `DESIGN.md` Google Stitch)
 - Exportador/importador para Pencil
 - Integração com Google Stitch (já compatível no formato, validar export bidirecional)
